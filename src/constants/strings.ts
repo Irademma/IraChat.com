@@ -1,0 +1,1 @@
+export const STRINGS = { loginTitle: 'Welcome to IraChat', logoutButton: 'Logout', sendMessagePlaceholder: 'Type a message...', };

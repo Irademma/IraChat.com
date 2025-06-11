@@ -4,7 +4,7 @@ import { db } from '../services/firebaseSimple';
 
 export const useTypingIndicator = (chatId: string, userId: string) => {
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(db, `chats/${chatId}/typing/${userId}`), (doc) => {

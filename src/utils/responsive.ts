@@ -63,6 +63,7 @@ export const fontSizes = {
   xxs: isVerySmallDevice() ? 8 : isSmallDevice() ? 9 : isCompactDevice() ? 10 : 11,
   xs: isVerySmallDevice() ? 10 : isSmallDevice() ? 11 : isCompactDevice() ? 12 : 13,
   sm: isVerySmallDevice() ? 12 : isSmallDevice() ? 13 : isCompactDevice() ? 14 : 15,
+  base: isVerySmallDevice() ? 14 : isSmallDevice() ? 15 : isCompactDevice() ? 16 : 17, // Add base property
   md: isVerySmallDevice() ? 14 : isSmallDevice() ? 15 : isCompactDevice() ? 16 : 17,
   lg: isVerySmallDevice() ? 16 : isSmallDevice() ? 17 : isCompactDevice() ? 18 : 19,
   xl: isVerySmallDevice() ? 18 : isSmallDevice() ? 19 : isCompactDevice() ? 20 : 21,

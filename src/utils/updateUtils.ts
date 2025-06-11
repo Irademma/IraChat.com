@@ -2,8 +2,8 @@
  * Update/Story utilities for IraChat
  */
 
-import { Update, Comment, UpdateDraft, ProcessedMedia, MediaProcessingOptions } from '../types/Update';
 import { User } from '../types';
+import { ProcessedMedia, Update, UpdateDraft } from '../types/Update';
 
 /**
  * Check if an update is expired
@@ -249,7 +249,11 @@ export const createUpdateFromDraft = (
     user,
     mediaUrl: processedMedia.uri,
     mediaType: processedMedia.type,
-    caption: draft.caption?.trim() || undefined
+    caption: draft.caption?.trim() || undefined,
+    createdAt: new Date(),
+    isLiked: false,
+    shareCount: 0,
+    isFollowing: false,
   };
 };
 
@@ -346,6 +350,22 @@ export const formatUpdateTimestamp = (timestamp: Date): string => {
   }
 };
 
+// Additional exports for UpdatesScreen compatibility
+export const handleMediaPress = (mediaUrl: string, mediaType: 'image' | 'video') => {
+  console.log('Media pressed:', { mediaUrl, mediaType });
+  // In a real implementation, this would open a media viewer
+};
+
+export const handleUpdateLongPress = (update: Update) => {
+  console.log('Update long pressed:', update.id);
+  // In a real implementation, this would show action sheet
+};
+
+export const handleUpdatePress = (update: Update) => {
+  console.log('Update pressed:', update.id);
+  // In a real implementation, this might navigate to update details
+};
+
 export default {
   isUpdateExpired,
   isUpdateVisible,
@@ -365,5 +385,8 @@ export default {
   canDeleteUpdate,
   canEditUpdate,
   getUpdateShareUrl,
-  formatUpdateTimestamp
+  formatUpdateTimestamp,
+  handleMediaPress,
+  handleUpdateLongPress,
+  handleUpdatePress
 };

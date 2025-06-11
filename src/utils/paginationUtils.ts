@@ -304,11 +304,44 @@ export const usePaginationHelpers = () => {
   };
 };
 
+// Additional exports for UpdatesScreen compatibility
+export const handleRefresh = async (
+  setRefreshing: (refreshing: boolean) => void,
+  loadData: () => Promise<void>
+): Promise<void> => {
+  try {
+    setRefreshing(true);
+    await loadData();
+  } catch (error) {
+    console.error('Error refreshing data:', error);
+  } finally {
+    setRefreshing(false);
+  }
+};
+
+export const loadMoreUpdates = async (
+  hasMore: boolean,
+  isLoading: boolean,
+  loadData: () => Promise<void>
+): Promise<void> => {
+  if (!hasMore || isLoading) {
+    return;
+  }
+
+  try {
+    await loadData();
+  } catch (error) {
+    console.error('Error loading more updates:', error);
+  }
+};
+
 export default {
   createPaginationParams,
   createPaginationResult,
   calculatePagination,
   getPageNumbers,
   InfiniteScrollManager,
-  usePaginationHelpers
+  usePaginationHelpers,
+  handleRefresh,
+  loadMoreUpdates
 };

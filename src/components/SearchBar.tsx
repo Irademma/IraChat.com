@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    ActivityIndicator,
-    Animated,
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Animated,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { colors } from '../theme/colors';
 
@@ -50,7 +50,7 @@ const getResultColor = (type: string) => {
     case 'message':
       return colors.primary;
     case 'member':
-      return colors.secondary;
+      return colors.textSecondary;
     case 'contact':
       return colors.accent;
     case 'username':
@@ -95,7 +95,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
     setIsLoading(true);
     try {
       const searchResults = await onSearch(text);
-      setResults(searchResults);
+      if (Array.isArray(searchResults)) {
+        setResults(searchResults);
+      }
     } catch (error) {
       console.error('Search error:', error);
     } finally {
@@ -146,7 +148,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <View style={styles.resultIconContainer}>
           <Ionicons name={icon} size={20} color={iconColor} />
         </View>
-        <View style={styles.resultContent}>
+        <View style={styles.resultContentContainer}>
           <Text style={styles.resultTitle} numberOfLines={1}>
             {item.title}
           </Text>
@@ -156,7 +158,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             </Text>
           )}
           {item.content && (
-            <Text style={styles.resultContent} numberOfLines={2}>
+            <Text style={styles.resultText} numberOfLines={2}>
               {item.content}
             </Text>
           )}
@@ -232,7 +234,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     margin: 12,
-    shadowColor: colors.shadow,
+    shadowColor: colors.border,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     paddingHorizontal: 12,
     height: 40,
@@ -267,7 +269,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surface,
     marginRight: 8,
   },
   filterButtonActive: {
@@ -278,7 +280,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   filterButtonTextActive: {
-    color: colors.white,
+    color: colors.background,
   },
   resultsList: {
     maxHeight: 300,
@@ -291,7 +293,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -304,7 +306,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 12,
   },
-  resultContent: {
+  resultContentContainer: {
     flex: 1,
   },
   resultTitle: {
@@ -318,7 +320,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 2,
   },
-  resultContent: {
+  resultText: {
     color: colors.textSecondary,
     fontSize: 14,
   },

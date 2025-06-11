@@ -1,15 +1,13 @@
-import React, { useEffect, useLayoutEffect, useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Animated, ActivityIndicator, Alert, Image, Dimensions, TextInput } from 'react-native';
-import { db, mockChatList } from '../services/firebaseSimple';
-import { collection, onSnapshot, query, orderBy, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { collection, deleteDoc, doc, getDocs, query } from 'firebase/firestore';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Animated, Dimensions, FlatList, Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { setChats } from '../redux/chatSlice';
+import { db, mockChatList } from '../services/firebaseSimple';
 import { Chat } from '../types';
-import { formatChatTime } from '../utils/dateUtils';
-import EmptyState from '../components/EmptyState';
 
 const { width } = Dimensions.get('window');
 
@@ -181,7 +179,7 @@ export default function ChatsListScreen({ navigation }: any) {
 
   // Auto-close FAB after 3 seconds of inactivity
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
+    let timeout: number;
     if (fabOpen) {
       timeout = setTimeout(() => {
         toggleFab();

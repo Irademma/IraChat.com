@@ -1,15 +1,15 @@
-import React, { useRef, useState, useEffect } from 'react';
-import {
-  View,
-  Animated,
-  Dimensions,
-  TouchableOpacity,
-  Text,
-  Platform,
-} from 'react-native';
-import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useSegments } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Animated,
+    Dimensions,
+    Platform,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -104,7 +104,7 @@ export default function AnimatedTabNavigator({ children, currentTab }: AnimatedT
       useNativeDriver: true,
     }).start(() => {
       // Navigate to new tab
-      router.push(tabs[tabIndex].route);
+      router.push(tabs[tabIndex].route as any);
       
       // Fade in animation
       Animated.timing(fadeAnim, {

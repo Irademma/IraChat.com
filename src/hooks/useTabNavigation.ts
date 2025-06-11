@@ -1,7 +1,7 @@
+import * as Haptics from 'expo-haptics';
 import { useRouter, useSegments } from 'expo-router';
 import { useRef } from 'react';
-import { Animated, Platform, Dimensions } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { Animated, Platform } from 'react-native';
 
 interface TabNavigationConfig {
   enableHaptics?: boolean;
@@ -64,10 +64,10 @@ export const useTabNavigation = (config: TabNavigationConfig = {}) => {
 
       // Navigate with slight delay for smooth animation
       setTimeout(() => {
-        router.push(tabRoutes[targetIndex].route);
+        router.push(tabRoutes[targetIndex].route as any);
       }, finalConfig.animationDuration! / 4);
     } else {
-      router.push(tabRoutes[targetIndex].route);
+      router.push(tabRoutes[targetIndex].route as any);
     }
 
     return true;

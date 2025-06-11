@@ -31,9 +31,9 @@ export const searchMessages = (
       id: message.id,
       type: 'message',
       title: message.sender.name,
-      subtitle: message.timestamp,
+      subtitle: message.timestamp?.toLocaleString() || '',
       content: message.content,
-      timestamp: message.timestamp,
+      timestamp: message.timestamp?.toLocaleString() || '',
       avatar: message.sender.avatar,
       username: message.sender.username,
     }));
@@ -49,16 +49,16 @@ export const searchMembers = (
   return members
     .filter((member) => {
       return (
-        searchRegex.test(member.name) ||
+        searchRegex.test(member.name || '') ||
         searchRegex.test(member.username) ||
         searchRegex.test(member.role) ||
         searchRegex.test(member.email || '')
       );
     })
     .map((member) => ({
-      id: member.id,
+      id: member.id || '',
       type: 'member',
-      title: member.name,
+      title: member.name || '',
       subtitle: member.role,
       content: member.username,
       avatar: member.avatar,
@@ -116,7 +116,7 @@ export const searchUsernames = (
 };
 
 export const debounce = (func: Function, wait: number) => {
-  let timeout: NodeJS.Timeout;
+  let timeout: number;
   return function executedFunction(...args: any[]) {
     const later = () => {
       clearTimeout(timeout);

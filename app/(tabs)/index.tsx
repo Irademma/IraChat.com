@@ -137,13 +137,47 @@ const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({ onStartMessaging }) => 
   );
 };
 
+// Sample chats for demonstration
+const sampleChats: Chat[] = [
+  {
+    id: 'chat_1',
+    name: 'John Doe',
+    lastMessage: 'Hey! How are you doing?',
+    lastMessageAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    isGroup: false,
+    participants: ['+256701234567'],
+    unreadCount: 2
+  },
+  {
+    id: 'chat_2',
+    name: 'Family Group',
+    lastMessage: 'Mom: Dinner is ready!',
+    lastMessageAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // 1 hour ago
+    timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+    isGroup: true,
+    participants: ['+256701234568', '+256701234569'],
+    unreadCount: 0
+  },
+  {
+    id: 'chat_3',
+    name: 'Sarah Johnson',
+    lastMessage: 'Thanks for the help!',
+    lastMessageAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    isGroup: false,
+    participants: ['+256701234568'],
+    unreadCount: 0
+  }
+];
+
 export default function ChatsListScreen() {
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [filteredChats, setFilteredChats] = useState<Chat[]>([]);
+  const [chats, setChats] = useState<Chat[]>(sampleChats);
+  const [filteredChats, setFilteredChats] = useState<Chat[]>(sampleChats);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [isLoadingChats, setIsLoadingChats] = useState(true);
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [isLoadingChats, setIsLoadingChats] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(true);
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -157,8 +191,14 @@ export default function ChatsListScreen() {
   //   animationDuration: 300,
   // });
 
-  // No mock contacts - will use actual contact data from Firebase
-  const mockContacts: { phoneNumber: string; name: string }[] = [];
+  // Sample contacts for demonstration
+  const mockContacts: { phoneNumber: string; name: string }[] = [
+    { phoneNumber: '+256701234567', name: 'John Doe' },
+    { phoneNumber: '+256701234568', name: 'Sarah Johnson' },
+    { phoneNumber: '+256701234569', name: 'Mike Wilson' },
+    { phoneNumber: '+256701234570', name: 'Emily Davis' },
+    { phoneNumber: '+256701234571', name: 'David Brown' }
+  ];
 
   // Removed FAB animation functions - using other buttons for contact/group actions
 
@@ -414,7 +454,15 @@ export default function ChatsListScreen() {
           data={filteredChats}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
+          getItemLayout={(_data, index) => ({
+            length: 80, // Approximate height of each chat item
+            offset: 80 * index,
+            index,
+          })}
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          windowSize={10}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -432,6 +480,24 @@ export default function ChatsListScreen() {
         />
       )}
 
+      {/* Floating Action Button for New Chat */}
+      <TouchableOpacity
+        onPress={() => router.push('/new-chat')}
+        className="absolute bottom-6 right-6 w-14 h-14 bg-blue-500 rounded-full items-center justify-center shadow-lg"
+        style={{
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+        }}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Start new chat"
+        accessibilityHint="Tap to start a new conversation"
+      >
+        <Ionicons name="add" size={24} color="white" />
+      </TouchableOpacity>
 
     </View>
   );

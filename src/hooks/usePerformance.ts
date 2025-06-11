@@ -68,7 +68,7 @@ export const usePerformance = ({ currentUserId, onError }: UsePerformanceProps) 
 
   const measureMemoryUsage = useCallback(async () => {
     if (Platform.OS === 'web') {
-      if ('performance' in window && 'memory' in performance) {
+      if (typeof global !== 'undefined' && global.performance && 'memory' in global.performance) {
         const { usedJSHeapSize, totalJSHeapSize } = (performance as any).memory;
         memoryUsage.current = usedJSHeapSize;
         const metric: PerformanceMetric = {

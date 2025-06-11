@@ -129,6 +129,7 @@ export const colors = {
   // Additional colors for compatibility
   white: '#ffffff',
   black: '#000000',
+  dark: '#000000', // Simple dark color
   inputBackground: '#f8fafc',
 
   // Skeleton loading
@@ -139,7 +140,7 @@ export const colors = {
   ripple: 'rgba(102, 126, 234, 0.2)',
 
   // Dark mode colors (for future use)
-  dark: {
+  darkMode: {
     background: '#1a202c',
     surface: '#2d3748',
     text: '#f7fafc',

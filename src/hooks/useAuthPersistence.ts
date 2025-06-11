@@ -1,16 +1,16 @@
 // Custom hook for authentication persistence
 import { useRouter } from 'expo-router';
-import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
+import { User as FirebaseUser, getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { logout, setLoading, setUser } from '../redux/userSlice';
 import {
-    clearAuthData,
-    createAuthData,
-    getStoredAuthData,
-    storeAuthData
+  clearAuthData,
+  createAuthData,
+  getStoredAuthData,
+  storeAuthData
 } from '../services/authStorageSimple';
 import { db, waitForAuth } from '../services/firebaseSimple';
 import { User } from '../types';
@@ -224,7 +224,7 @@ export const useLogout = () => {
       dispatch(logout());
 
       // Get the auth instance safely
-      const authInstance = getAuthInstance();
+      const authInstance = getAuth(); // Use the auth instance directly
 
       // Sign out from Firebase if auth instance is available
       if (authInstance && authInstance.signOut) {

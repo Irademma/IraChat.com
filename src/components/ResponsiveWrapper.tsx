@@ -267,7 +267,6 @@ export function ResponsiveButton({
   const buttonStyle: ViewStyle = {
     height: buttonSize.height,
     paddingHorizontal: buttonSize.paddingHorizontal,
-    backgroundColor: buttonVariant.backgroundColor,
     borderRadius: borderRadius.md,
     flexDirection: 'row',
     alignItems: 'center',

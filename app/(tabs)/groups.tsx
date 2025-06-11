@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     Animated,
     FlatList,
@@ -18,10 +19,13 @@ import { useTabNavigation } from '../../src/hooks/useTabNavigation';
 interface Group {
   id: string;
   name: string;
-  logo: string;
+  description?: string; // Add description property
+  logo?: string;
+  avatar?: string; // Add avatar property for compatibility
   memberCount: number;
   lastMessage: string;
-  lastMessageTime: string;
+  lastMessageTime?: string;
+  lastMessageAt?: Date; // Add for compatibility
   lastMessageBy: string;
   usageFrequency: number; // Higher number = more frequently used
   isActive: boolean;
@@ -42,8 +46,51 @@ export default function GroupsScreen() {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  // No mock groups data - groups will be loaded from Firebase only
-  const mockGroups: Group[] = [];
+  // Sample groups for demonstration
+  const mockGroups: Group[] = [
+    {
+      id: 'group_1',
+      name: 'Family Group',
+      description: 'Our lovely family chat',
+      memberCount: 5,
+      lastMessage: 'Dinner is ready!',
+      lastMessageBy: 'Mom',
+      lastMessageTime: '30m ago',
+      lastMessageAt: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+      logo: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=150',
+      avatar: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=150',
+      isActive: true,
+      usageFrequency: 10
+    },
+    {
+      id: 'group_2',
+      name: 'Work Team',
+      description: 'Project discussions and updates',
+      memberCount: 8,
+      lastMessage: 'Meeting at 3 PM',
+      lastMessageBy: 'John',
+      lastMessageTime: '1h ago',
+      lastMessageAt: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
+      logo: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150',
+      avatar: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150',
+      isActive: true,
+      usageFrequency: 8
+    },
+    {
+      id: 'group_3',
+      name: 'Friends Forever',
+      description: 'Best friends group chat',
+      memberCount: 6,
+      lastMessage: 'Let\'s meet this weekend!',
+      lastMessageBy: 'Sarah',
+      lastMessageTime: '2h ago',
+      lastMessageAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+      logo: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=150',
+      avatar: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=150',
+      isActive: true,
+      usageFrequency: 7
+    }
+  ];
 
   useEffect(() => {
     loadGroups();
@@ -277,11 +324,17 @@ export default function GroupsScreen() {
       </View>
 
       {/* Groups List */}
-      <FlatList
-        data={filteredGroups}
-        keyExtractor={(item) => item.id}
-        renderItem={renderGroupItem}
-        ListEmptyComponent={renderEmptyState}
+      {isLoading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#667eea" />
+          <Text className="text-gray-500 mt-4">Loading groups...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredGroups}
+          keyExtractor={(item) => item.id}
+          renderItem={renderGroupItem}
+          ListEmptyComponent={renderEmptyState}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -296,6 +349,7 @@ export default function GroupsScreen() {
         overScrollMode="never"
         scrollEventThrottle={16}
       />
+      )}
 
       {/* Enhanced Animated Floating Action Button */}
       <Animated.View

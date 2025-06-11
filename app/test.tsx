@@ -142,7 +142,7 @@ export default function TestScreen() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push('/login')}
+        onPress={() => router.push('/auth' as any)}
       >
         <Text style={styles.buttonText}>Go to Login</Text>
       </TouchableOpacity>

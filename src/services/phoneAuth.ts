@@ -1,13 +1,11 @@
 // Phone Authentication Service
-import { 
-  signInWithPhoneNumber, 
-  RecaptchaVerifier, 
-  ConfirmationResult,
-  PhoneAuthProvider,
-  signInWithCredential,
-  updateProfile
+import {
+    ConfirmationResult,
+    RecaptchaVerifier,
+    signInWithPhoneNumber,
+    updateProfile
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from './firebaseSimple';
 
 // Global variables for reCAPTCHA
@@ -24,13 +22,10 @@ export const initializeRecaptcha = (): Promise<RecaptchaVerifier> => {
       }
 
       // Create reCAPTCHA container if it doesn't exist
-      let recaptchaContainer = document.getElementById('recaptcha-container');
-      if (!recaptchaContainer) {
-        recaptchaContainer = document.createElement('div');
-        recaptchaContainer.id = 'recaptcha-container';
-        recaptchaContainer.style.display = 'none';
-        document.body.appendChild(recaptchaContainer);
-      }
+      // Note: document is not available in React Native
+      // This would need to be implemented differently for mobile
+      console.log('Setting up reCAPTCHA for mobile environment');
+      let recaptchaContainer: any = null;
 
       recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible',

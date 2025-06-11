@@ -1,16 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { colors } from '../theme/colors';
-import { GroupMemberPreferences } from '../types/groupChat';
+import { GroupMemberPreferences } from '../types/index';
 import { handleAdminAction } from '../utils/groupManagement';
 
 interface GroupSettingsProps {
@@ -74,14 +74,18 @@ export const GroupSettings: React.FC<GroupSettingsProps> = ({
     try {
       switch (action) {
         case 'block':
-          await handleAdminAction('block', groupId, memberId, isAdmin, async () => {
+          if (isAdmin) {
             onBlockMember(memberId);
-          });
+          } else {
+            Alert.alert('Permission Denied', 'Only group admins can block members.');
+          }
           break;
         case 'unblock':
-          await handleAdminAction('unblock', groupId, memberId, isAdmin, async () => {
+          if (isAdmin) {
             onUnblockMember(memberId);
-          });
+          } else {
+            Alert.alert('Permission Denied', 'Only group admins can unblock members.');
+          }
           break;
         case 'promote':
           await handleAdminAction('addAdmin', groupId, memberId, isAdmin, async () => {
@@ -311,7 +315,7 @@ const styles = StyleSheet.create({
   },
   hiddenContentButton: {
     padding: 12,
-    backgroundColor: colors.backgroundSecondary,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     marginBottom: 8,
   },

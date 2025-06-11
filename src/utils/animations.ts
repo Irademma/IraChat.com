@@ -112,7 +112,7 @@ export const slideOut = (value: Animated.Value, duration: number = 300) => {
 export const scaleIn = (value: Animated.Value, duration: number = 300) => {
   return Animated.spring(value, {
     toValue: 1,
-    duration,
+    // duration, // Remove unsupported property for spring animation
     useNativeDriver: true,
     friction: 8,
     tension: 40,
@@ -122,7 +122,7 @@ export const scaleIn = (value: Animated.Value, duration: number = 300) => {
 export const scaleOut = (value: Animated.Value, duration: number = 300) => {
   return Animated.spring(value, {
     toValue: 0,
-    duration,
+    // duration, // Remove unsupported property for spring animation
     useNativeDriver: true,
     friction: 8,
     tension: 40,

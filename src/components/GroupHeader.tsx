@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    AccessibilityInfo,
-    Animated,
-    Image,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  AccessibilityInfo,
+  Animated,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { colors } from '../theme/colors';
 import { Group } from '../types/groupChat';
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     ...Platform.select({
       ios: {
-        shadowColor: colors.shadow,
+        shadowColor: colors.border,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(4),
   },
   groupInitials: {
-    color: colors.white,
+    color: colors.background,
     fontSize: fontSize.lg,
     fontWeight: 'bold',
   },
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(2),
   },
   unreadCount: {
-    color: colors.white,
+    color: colors.background,
     fontSize: fontSize.xs,
     fontWeight: 'bold',
   },

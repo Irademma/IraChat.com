@@ -45,7 +45,7 @@ export const useMentionNotifications = ({
 
           // Track the mention engagement
           if (currentUserId) {
-            trackEngagement({ type: 'mention', contentId });
+            trackEngagement({ type: 'mention', contentId, contentType: 'message' });
           }
         });
 

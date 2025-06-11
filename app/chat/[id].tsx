@@ -16,6 +16,7 @@ import {
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Keyboard,
   KeyboardAvoidingView,
@@ -48,8 +49,9 @@ type Message = {
 };
 
 export default function ChatRoomScreen() {
-  const { id: chatId, name: chatName } = useLocalSearchParams();
+  const { id: chatId, name: chatName, isGroup } = useLocalSearchParams();
   const navigation = useNavigation();
+  const isGroupChat = isGroup === 'true';
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -57,6 +59,18 @@ export default function ChatRoomScreen() {
   const [firebaseUser, setFirebaseUser] = useState<{uid: string; email: string | null} | null>(null);
   const [isInitializingUser, setIsInitializingUser] = useState(true);
   const flatListRef = useRef<FlatList>(null);
+
+  // Group members and participants
+  const [participants, setParticipants] = useState<string[]>(
+    isGroupChat ? ['+256701234567', '+256701234568', '+256701234569'] : []
+  );
+  const [members, setMembers] = useState<Array<{id: string; name: string; avatar: string}>>(
+    isGroupChat ? [
+      { id: '1', name: 'John Doe', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150' },
+      { id: '2', name: 'Sarah Johnson', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150' },
+      { id: '3', name: 'Mike Wilson', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' }
+    ] : []
+  );
   
   // Get current user from Redux store
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
@@ -137,16 +151,34 @@ export default function ChatRoomScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: chatName || 'Chat',
+      title: isGroupChat ? `👥 ${chatName || 'Group Chat'}` : (chatName || 'Chat'),
       headerStyle: {
-        backgroundColor: '#667eea',
+        backgroundColor: isGroupChat ? '#059669' : '#667eea',
       },
       headerTintColor: '#fff',
       headerTitleStyle: {
         fontWeight: 'bold',
       },
+      headerRight: isGroupChat ? () => (
+        <TouchableOpacity
+          onPress={() => {
+            // Show group info with members
+            Alert.alert(
+              'Group Info',
+              `${chatName}\n\nMembers (${members.length}):\n${members.map(m => m.name).join('\n')}`,
+              [{ text: 'OK' }]
+            );
+          }}
+          style={{ marginRight: 15 }}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Group information"
+        >
+          <Ionicons name="information-circle-outline" size={24} color="#fff" />
+        </TouchableOpacity>
+      ) : undefined,
     });
-  }, [navigation, chatName]);
+  }, [navigation, chatName, isGroupChat]);
 
   // Keyboard event listeners
   useEffect(() => {
@@ -280,12 +312,13 @@ export default function ChatRoomScreen() {
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
         }}
       >
-        {!isMyMessage && (
+        {!isMyMessage && isGroupChat && (
           <Text style={{
             fontSize: fontSizes.xs,
-            color: '#6B7280',
+            color: '#059669',
             marginBottom: 4,
-            marginLeft: 8
+            marginLeft: 8,
+            fontWeight: '600'
           }}>
             {item.senderName || item.senderPhoneNumber || 'Unknown'}
           </Text>
@@ -359,7 +392,15 @@ export default function ChatRoomScreen() {
               data={messages}
               keyExtractor={(item) => item.id}
               renderItem={renderItem}
+              getItemLayout={(_data, index) => ({
+                length: 60, // Approximate height of each message
+                offset: 60 * index,
+                index,
+              })}
               showsVerticalScrollIndicator={false}
+              removeClippedSubviews={true}
+              maxToRenderPerBatch={20}
+              windowSize={10}
               contentContainerStyle={{
                 paddingVertical: 16,
                 paddingBottom: 20,

@@ -1,15 +1,15 @@
-import React, { useRef, useEffect } from 'react';
-import {
-  View,
-  TouchableOpacity,
-  Text,
-  Animated,
-  Dimensions,
-  Platform,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useSegments } from 'expo-router';
 import { BlurView } from 'expo-blur';
+import { useRouter, useSegments } from 'expo-router';
+import { useEffect, useRef } from 'react';
+import {
+    Animated,
+    Dimensions,
+    Platform,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -104,7 +104,7 @@ export default function AnimatedTabBar() {
     ]).start();
 
     // Navigate to tab
-    router.push(tabs[index].route);
+    router.push(tabs[index].route as any);
   };
 
   const tabWidth = screenWidth / tabs.length;

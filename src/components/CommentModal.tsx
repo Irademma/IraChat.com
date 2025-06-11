@@ -1,19 +1,19 @@
 // Comment modal for vertical media updates
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  FlatList,
-  TextInput,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  SafeAreaView,
+    ActivityIndicator,
+    FlatList,
+    Image,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    SafeAreaView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { Comment } from '../types';
 
 interface CommentModalProps {
@@ -139,7 +139,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
               color: '#666666',
               marginLeft: 4,
             }}>
-              {item.likes > 0 ? item.likes : ''}
+              {(item.likes || 0) > 0 ? (item.likes || 0) : ''}
             </Text>
           </TouchableOpacity>
           

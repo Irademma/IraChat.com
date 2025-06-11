@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
 import Slider from '@react-native-community/slider';
+import { Audio } from 'expo-av';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Text, TouchableOpacity, View } from 'react-native';
 
 interface VoiceMessagePlayerProps {
   uri: string;
@@ -17,7 +17,7 @@ export default function VoiceMessagePlayer({ uri, duration, isOwnMessage = false
   const [isLoading, setIsLoading] = useState(false);
   
   const waveformAnim = useRef(new Animated.Value(0)).current;
-  const positionInterval = useRef<NodeJS.Timeout | null>(null);
+  const positionInterval = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
@@ -246,7 +246,7 @@ export default function VoiceMessagePlayer({ uri, duration, isOwnMessage = false
           onValueChange={seekTo}
           minimumTrackTintColor={isOwnMessage ? 'white' : '#3B82F6'}
           maximumTrackTintColor={isOwnMessage ? 'rgba(255,255,255,0.3)' : '#E5E7EB'}
-          thumbStyle={{ width: 0, height: 0 }}
+          // thumbStyle={{ width: 0, height: 0 }} // Remove unsupported property
         />
       </View>
     </View>

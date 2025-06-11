@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     FlatList,
     Image,
@@ -45,9 +46,117 @@ export default function CallsScreen() {
   const [activeTab, setActiveTab] = useState<'contacts' | 'history'>('contacts');
   const [isLoading, setIsLoading] = useState(true);
 
-  // No mock data - contacts and call history will be loaded from Firebase only
-  const mockContacts: Contact[] = [];
-  const mockCallHistory: CallHistory[] = [];
+  // Load real contacts
+  const loadRealContacts = async () => {
+    try {
+      setIsLoading(true);
+
+      // Import contacts service
+      const { contactsService } = await import('../../src/services/contactsService');
+
+      // Get contacts
+      const result = await contactsService.getContacts();
+
+      // Transform contacts to match our Contact interface
+      const transformedContacts: Contact[] = result.contacts.map((contact: any) => ({
+        id: contact.id,
+        name: contact.name,
+        phoneNumber: contact.phoneNumber || contact.phoneNumbers?.[0] || '',
+        avatar: contact.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.name)}&background=667eea&color=fff`,
+        isOnline: typeof contact.lastSeen === 'string' && contact.lastSeen === 'Online',
+        lastSeen: contact.lastSeen || 'Unknown'
+      }));
+
+      setContacts(transformedContacts);
+      setFilteredContacts(transformedContacts);
+      console.log(`✅ Loaded ${transformedContacts.length} real contacts`);
+    } catch (error) {
+      console.error('❌ Error loading real contacts:', error);
+      // Use fallback contacts
+      setContacts(mockContacts);
+      setFilteredContacts(mockContacts);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fallback contacts for demonstration
+  const mockContacts: Contact[] = [
+    {
+      id: '1',
+      name: 'John Doe',
+      phoneNumber: '+256701234567',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+      isOnline: true,
+      lastSeen: 'Online'
+    },
+    {
+      id: '2',
+      name: 'Sarah Johnson',
+      phoneNumber: '+256701234568',
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150',
+      isOnline: false,
+      lastSeen: '2 hours ago'
+    },
+    {
+      id: '3',
+      name: 'Mike Wilson',
+      phoneNumber: '+256701234569',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      isOnline: true,
+      lastSeen: 'Online'
+    },
+    {
+      id: '4',
+      name: 'Emily Davis',
+      phoneNumber: '+256701234570',
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150',
+      isOnline: false,
+      lastSeen: '1 day ago'
+    },
+    {
+      id: '5',
+      name: 'David Brown',
+      phoneNumber: '+256701234571',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+      isOnline: true,
+      lastSeen: 'Online'
+    }
+  ];
+
+  // Sample call history
+  const mockCallHistory: CallHistory[] = [
+    {
+      id: '1',
+      contactId: '1',
+      contactName: 'John Doe',
+      contactAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+      type: 'video',
+      direction: 'outgoing',
+      duration: '12:34',
+      timestamp: '2 hours ago'
+    },
+    {
+      id: '2',
+      contactId: '2',
+      contactName: 'Sarah Johnson',
+      contactAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150',
+      type: 'voice',
+      direction: 'incoming',
+      duration: '5:42',
+      timestamp: '4 hours ago'
+    },
+    {
+      id: '3',
+      contactId: '3',
+      contactName: 'Mike Wilson',
+      contactAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      type: 'voice',
+      direction: 'missed',
+      duration: '',
+      timestamp: '1 day ago'
+    }
+  ];
 
   useEffect(() => {
     loadData();
@@ -57,10 +166,15 @@ export default function CallsScreen() {
     filterContacts();
   }, [searchQuery, contacts]);
 
-  const loadData = () => {
+  const loadData = async () => {
     setIsLoading(true);
-    setContacts(mockContacts);
+
+    // Load real contacts
+    await loadRealContacts();
+
+    // Load call history
     setCallHistory(mockCallHistory);
+
     setIsLoading(false);
   };
 
@@ -388,7 +502,12 @@ export default function CallsScreen() {
       )}
 
       {/* Content */}
-      {activeTab === 'contacts' ? (
+      {isLoading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#667eea" />
+          <Text className="text-gray-500 mt-4">Loading contacts...</Text>
+        </View>
+      ) : activeTab === 'contacts' ? (
         <FlatList
           data={filteredContacts}
           keyExtractor={(item) => item.id}

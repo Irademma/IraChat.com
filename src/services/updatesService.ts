@@ -2,24 +2,24 @@
  * Updates Service - Handle updates/stories functionality
  */
 
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  getDocs, 
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
   getDoc,
-  query, 
-  where, 
-  orderBy, 
+  getDocs,
   limit,
   onSnapshot,
+  orderBy,
+  query,
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  updateDoc,
+  where
 } from 'firebase/firestore';
+import { Comment, Update } from '../types';
 import { db } from './firebase';
-import { Update, Comment } from '../types';
 
 /**
  * Create a new update/story
@@ -130,10 +130,10 @@ export const getUserUpdates = async (userId: string): Promise<Update[]> => {
 export const likeUpdate = async (updateId: string, userId: string): Promise<void> => {
   try {
     const updateRef = doc(db, 'updates', updateId);
-    const updateDoc = await getDoc(updateRef);
-    
-    if (updateDoc.exists()) {
-      const currentLikes = updateDoc.data().likeCount || 0;
+    const updateSnapshot = await getDoc(updateRef);
+
+    if (updateSnapshot.exists()) {
+      const currentLikes = updateSnapshot.data().likeCount || 0;
       await updateDoc(updateRef, {
         likeCount: currentLikes + 1
       });
@@ -167,9 +167,9 @@ export const addComment = async (updateId: string, comment: Omit<Comment, 'id' |
     
     // Update comment count
     const updateRef = doc(db, 'updates', updateId);
-    const updateDoc = await getDoc(updateRef);
-    if (updateDoc.exists()) {
-      const currentComments = updateDoc.data().commentCount || 0;
+    const updateSnapshot = await getDoc(updateRef);
+    if (updateSnapshot.exists()) {
+      const currentComments = updateSnapshot.data().commentCount || 0;
       await updateDoc(updateRef, {
         commentCount: currentComments + 1
       });
@@ -278,6 +278,55 @@ export const cleanupExpiredUpdates = async (): Promise<void> => {
     console.log(`✅ Cleaned up ${deletePromises.length} expired updates`);
   } catch (error) {
     console.error('❌ Error cleaning up expired updates:', error);
+  }
+};
+
+// Additional exports for UpdatesScreen compatibility
+export const deleteMedia = async (updateId: string, mediaId: string): Promise<void> => {
+  try {
+    console.log('🗑️ Deleting media from update...', { updateId, mediaId });
+
+    // Get the update document
+    const updateRef = doc(db, 'updates', updateId);
+    const updateSnapshot = await getDoc(updateRef);
+
+    if (!updateSnapshot.exists()) {
+      throw new Error('Update not found');
+    }
+
+    const updateData = updateSnapshot.data();
+    const media = updateData.media || [];
+
+    // Remove the specific media item
+    const updatedMedia = media.filter((m: any) => m.id !== mediaId);
+
+    // Update the document
+    await updateDoc(updateRef, {
+      media: updatedMedia,
+      updatedAt: serverTimestamp()
+    });
+
+    console.log('✅ Media deleted successfully');
+  } catch (error) {
+    console.error('❌ Error deleting media:', error);
+    throw error;
+  }
+};
+
+export const updateUpdateMedia = async (updateId: string, mediaUpdates: any): Promise<void> => {
+  try {
+    console.log('📝 Updating update media...', { updateId, mediaUpdates });
+
+    const updateRef = doc(db, 'updates', updateId);
+    await updateDoc(updateRef, {
+      ...mediaUpdates,
+      updatedAt: serverTimestamp()
+    });
+
+    console.log('✅ Update media updated successfully');
+  } catch (error) {
+    console.error('❌ Error updating update media:', error);
+    throw error;
   }
 };
 

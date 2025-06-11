@@ -1,12 +1,13 @@
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 import ErrorBoundary from '../src/components/ErrorBoundary';
 import { ThemeProvider } from '../src/components/ThemeProvider';
-import { store } from '../src/redux/store';
+import { persistor, store } from '../src/redux/store';
 import { waitForAuth } from '../src/services/firebaseSimple';
 
 // Keep the splash screen visible while we fetch resources
@@ -54,14 +55,23 @@ export default function RootLayout() {
         accessibilityLabel="IraChat application root"
       >
         <Provider store={store}>
-          <ThemeProvider>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                animation: 'slide_from_right',
-              }}
-            />
-          </ThemeProvider>
+          <PersistGate
+            loading={
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#667eea' }}>
+                <Text style={{ color: 'white', fontSize: 18, fontWeight: '600' }}>Loading IraChat...</Text>
+              </View>
+            }
+            persistor={persistor}
+          >
+            <ThemeProvider>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  animation: 'slide_from_right',
+                }}
+              />
+            </ThemeProvider>
+          </PersistGate>
         </Provider>
       </GestureHandlerRootView>
     </ErrorBoundary>

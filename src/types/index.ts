@@ -57,6 +57,7 @@ export interface Chat {
   avatar?: string;
   description?: string;
   createdBy?: string;
+  unreadCount?: number; // Add unreadCount property
 }
 
 export interface AuthState {
@@ -84,7 +85,7 @@ export interface Update {
   user: User;
   mediaUrl: string;
   mediaType: 'video' | 'image';
-  caption: string;
+  caption?: string; // Make caption optional to match other definitions
   musicTitle?: string;
   musicAuthor?: string;
   location?: string;
@@ -98,6 +99,15 @@ export interface Update {
   hashtags?: string[];
   mentions?: string[];
   comments?: Comment[];
+  // Additional properties for compatibility
+  timestamp?: any; // Firebase timestamp
+  expiresAt?: any; // Firebase timestamp
+  isVisible?: boolean;
+  media?: Array<{
+    id: string;
+    url: string;
+    type: 'image' | 'video';
+  }>;
 }
 
 export interface Comment {
@@ -167,4 +177,78 @@ export type NavigationParamList = {
   Profile: undefined;
   Settings: undefined;
 };
+
+// Additional types for missing interfaces
+export interface SearchResult {
+  id: string;
+  type: 'message' | 'member' | 'contact' | 'user';
+  title: string;
+  subtitle: string;
+  content: string;
+  timestamp?: Date;
+  avatar?: string;
+  username?: string;
+}
+
+export interface GroupMember {
+  id: string; // Add id property for compatibility
+  userId: string;
+  username?: string;
+  name?: string; // Add name property for compatibility
+  profilePic?: string;
+  role: 'admin' | 'member';
+  joinedAt: Date;
+  lastSeen?: Date;
+  isOnline?: boolean;
+  permissions?: string[];
+  isAdmin?: boolean; // Add isAdmin property for compatibility
+  isBlocked?: boolean; // Add isBlocked property for compatibility
+}
+
+export interface GroupMemberPreferences {
+  notifications: {
+    messages: boolean;
+    mentions: boolean;
+    reactions: boolean;
+  };
+  privacy: {
+    readReceipts: boolean;
+    lastSeen: boolean;
+    profilePhoto: boolean;
+  };
+  media: {
+    autoDownload: boolean;
+    quality: 'low' | 'medium' | 'high';
+  };
+  // Additional properties for compatibility
+  isMuted: boolean;
+  isArchived: boolean;
+  isLocked: boolean;
+  hiddenMessages: string[];
+  hiddenUpdates: string[];
+}
+
+export interface GroupChat {
+  id: string;
+  name: string;
+  description?: string;
+  avatar?: string;
+  members: GroupMember[];
+  admins: string[];
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  settings: {
+    allowMemberInvites: boolean;
+    allowMemberMessages: boolean;
+    allowMediaSharing: boolean;
+  };
+}
+
+export interface UpdatesScreenProps {
+  navigation: any;
+  route: any;
+}
+
+export type GroupRole = 'admin' | 'member';
 

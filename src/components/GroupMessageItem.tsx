@@ -86,7 +86,7 @@ export const GroupMessageItem: React.FC<GroupMessageItemProps> = ({
       type: 'media',
       onDelete: async () => {
         // Implement media deletion logic
-        const updatedMedia = message.media.filter(m => m.id !== mediaId);
+        const updatedMedia = message.media?.filter(m => m.id !== mediaId) || [];
         // Update the message with new media array
         await onDelete(message.id);
       },

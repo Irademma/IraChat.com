@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { colors } from '../theme/colors';
 import { GroupChat } from '../types/groupChat';
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   quickAction: {
     alignItems: 'center',
     padding: 16,
-    backgroundColor: colors.backgroundSecondary,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     width: '45%',
   },

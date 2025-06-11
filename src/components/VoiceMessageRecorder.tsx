@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Animated, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, Animated, Text, TouchableOpacity, View } from 'react-native';
 
 interface VoiceMessageRecorderProps {
   onSendVoiceMessage: (uri: string, duration: number) => void;
@@ -15,7 +15,7 @@ export default function VoiceMessageRecorder({ onSendVoiceMessage, onCancel }: V
   const [permissionGranted, setPermissionGranted] = useState(false);
   
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const durationInterval = useRef<NodeJS.Timeout | null>(null);
+  const durationInterval = useRef<number | null>(null);
 
   useEffect(() => {
     requestPermission();

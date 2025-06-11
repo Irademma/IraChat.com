@@ -15,7 +15,7 @@ export const gradients = {
 export const shadows = {
   small: Platform.select({
     ios: {
-      shadowColor: colors.shadow,
+      shadowColor: colors.border,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 3,
@@ -26,7 +26,7 @@ export const shadows = {
   }),
   medium: Platform.select({
     ios: {
-      shadowColor: colors.shadow,
+      shadowColor: colors.border,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.15,
       shadowRadius: 6,
@@ -37,7 +37,7 @@ export const shadows = {
   }),
   large: Platform.select({
     ios: {
-      shadowColor: colors.shadow,
+      shadowColor: colors.border,
       shadowOffset: { width: 0, height: 6 },
       shadowOpacity: 0.2,
       shadowRadius: 8,
@@ -146,8 +146,8 @@ export const loadingConfig = {
     color: colors.primary,
   },
   skeleton: {
-    backgroundColor: colors.skeleton,
-    highlightColor: colors.skeletonHighlight,
+    backgroundColor: colors.border,
+    highlightColor: colors.surface,
   },
 };
 
@@ -155,22 +155,22 @@ export const loadingConfig = {
 export const toastConfig = {
   success: {
     backgroundColor: colors.success,
-    textColor: colors.white,
+    textColor: colors.background,
     duration: 2000,
   },
   error: {
     backgroundColor: colors.error,
-    textColor: colors.white,
+    textColor: colors.background,
     duration: 3000,
   },
   warning: {
     backgroundColor: colors.warning,
-    textColor: colors.dark,
+    textColor: colors.text,
     duration: 2500,
   },
   info: {
     backgroundColor: colors.info,
-    textColor: colors.white,
+    textColor: colors.background,
     duration: 2000,
   },
 };
@@ -212,7 +212,7 @@ export const gestureConfig = {
 
 // Ripple configurations
 export const rippleConfig = {
-  color: colors.ripple,
+  color: colors.primary,
   borderless: false,
   radius: 20,
 };

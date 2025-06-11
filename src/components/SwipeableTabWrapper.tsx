@@ -1,12 +1,10 @@
-import React, { useRef, useEffect } from 'react';
+import { useRouter, useSegments } from 'expo-router';
+import React, { useEffect, useRef } from 'react';
 import {
-  View,
-  Animated,
-  Dimensions,
-  Platform,
+    Animated,
+    Dimensions
 } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
-import { useRouter, useSegments } from 'expo-router';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -90,7 +88,7 @@ export default function SwipeableTabWrapper({ children }: SwipeableTabWrapperPro
 
       // Navigate to new tab if changed
       if (newTabIndex !== currentTabIndex) {
-        router.push(tabRoutes[newTabIndex]);
+        router.push(tabRoutes[newTabIndex] as any);
       }
     }
   };
@@ -118,8 +116,8 @@ export default function SwipeableTabWrapper({ children }: SwipeableTabWrapperPro
     <PanGestureHandler
       onGestureEvent={onGestureEvent}
       onHandlerStateChange={onHandlerStateChange}
-      activeOffsetX={gestureConfig.activeOffsetX}
-      failOffsetY={gestureConfig.failOffsetY}
+      activeOffsetX={gestureConfig.activeOffsetX as any}
+      failOffsetY={gestureConfig.failOffsetY as any}
       shouldCancelWhenOutside={gestureConfig.shouldCancelWhenOutside}
       maxPointers={gestureConfig.maxPointers}
     >
@@ -161,7 +159,7 @@ export const useTabTransition = () => {
     }
 
     if (targetIndex !== currentIndex) {
-      router.push(tabRoutes[targetIndex]);
+      router.push(tabRoutes[targetIndex] as any);
     }
   };
 

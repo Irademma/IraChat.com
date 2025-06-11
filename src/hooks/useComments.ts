@@ -87,12 +87,12 @@ export const useComments = ({ updateId, onError }: UseCommentsProps) => {
         likesCount: 0,
         repliesCount: 0,
         createdAt: Date.now(),
-        timestamp: Date.now(),
+        timestamp: new Date(),
         isLiked: false,
         isVisible: true,
       };
 
-      await updateDoc(commentRef, newComment);
+      await updateDoc(commentRef, newComment as any);
       await updateDoc(updateRef, {
         commentCount: increment(1),
         comments: arrayUnion(commentRef.id),

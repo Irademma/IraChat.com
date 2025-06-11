@@ -1,4 +1,4 @@
-import { arrayRemove, arrayUnion, doc, increment, updateDoc } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, doc, increment, setDoc, updateDoc } from 'firebase/firestore';
 import { useCallback, useState } from 'react';
 import { collection, db } from '../services/firebase';
 
@@ -105,7 +105,7 @@ export const useUserInteractions = ({ currentUserId, onError }: UseUserInteracti
       setIsLoading(true);
 
       const reportRef = doc(collection(db, 'reports'));
-      await reportRef.set({
+      await setDoc(reportRef, {
         reporterId: currentUserId,
         reportedUserId: userId,
         reason,
@@ -125,7 +125,7 @@ export const useUserInteractions = ({ currentUserId, onError }: UseUserInteracti
       setIsLoading(true);
 
       const reportRef = doc(collection(db, 'reports'));
-      await reportRef.set({
+      await setDoc(reportRef, {
         reporterId: currentUserId,
         contentId,
         contentType,

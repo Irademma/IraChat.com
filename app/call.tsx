@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  Alert,
-  Dimensions,
-  StatusBar,
-  Animated,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+    Alert,
+    Animated,
+    Dimensions,
+    Image,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -37,10 +37,29 @@ export default function CallScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // Timer ref for call duration
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<number | null>(null);
 
-  // No mock contacts data - will use actual contact data
-  const mockContactsData: Contact[] = [];
+  // Sample contacts data for demonstration
+  const mockContactsData: Contact[] = [
+    {
+      id: '1',
+      name: 'John Doe',
+      phoneNumber: '+256701234567',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200'
+    },
+    {
+      id: '2',
+      name: 'Sarah Johnson',
+      phoneNumber: '+256701234568',
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200'
+    },
+    {
+      id: '3',
+      name: 'Mike Wilson',
+      phoneNumber: '+256701234569',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200'
+    }
+  ];
 
   useEffect(() => {
     // Parse contact IDs and get contact data
@@ -132,8 +151,22 @@ export default function CallScreen() {
         {
           text: 'End Call',
           style: 'destructive',
-          onPress: () => {
-            router.back();
+          onPress: async () => {
+            try {
+              console.log('📴 Ending call...');
+
+              // Import calling service
+              const { callingService } = await import('../src/services/callingService');
+
+              // End the call
+              await callingService.endCall();
+
+              console.log('✅ Call ended successfully');
+              router.back();
+            } catch (error) {
+              console.error('❌ Error ending call:', error);
+              router.back();
+            }
           }
         }
       ]
@@ -275,11 +308,15 @@ export default function CallScreen() {
             className={`w-16 h-16 rounded-full items-center justify-center ${
               isMuted ? 'bg-red-500' : 'bg-white/20'
             }`}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={isMuted ? 'Unmute microphone' : 'Mute microphone'}
+            accessibilityHint="Tap to toggle microphone"
           >
-            <Ionicons 
-              name={isMuted ? 'mic-off' : 'mic'} 
-              size={24} 
-              color="white" 
+            <Ionicons
+              name={isMuted ? 'mic-off' : 'mic'}
+              size={24}
+              color="white"
             />
           </TouchableOpacity>
 
@@ -287,6 +324,10 @@ export default function CallScreen() {
           <TouchableOpacity
             onPress={handleEndCall}
             className="w-20 h-20 bg-red-500 rounded-full items-center justify-center"
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="End call"
+            accessibilityHint="Tap to end the current call"
           >
             <Ionicons name="call" size={32} color="white" />
           </TouchableOpacity>

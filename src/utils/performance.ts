@@ -78,7 +78,7 @@ export const useMemoryOptimization = () => {
 // Batch updates for better performance
 export const useBatchUpdates = () => {
   const batchRef = useRef<any[]>([]);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<number | null>(null);
 
   const addToBatch = useCallback((update: any) => {
     batchRef.current.push(update);

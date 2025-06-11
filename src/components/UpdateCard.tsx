@@ -68,22 +68,17 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
   const {
     videoRef,
     status,
-    isLoading,
     isMuted,
     isPlaying,
     isBuffering,
-    isBackground,
-    togglePlayPause,
+    playVideo,
+    pauseVideo,
     toggleMute,
+    handlePlaybackStatusUpdate,
+    handleError,
   } = useVideoPlayer({
     isActive,
-    currentUserId,
-    onPlaybackStatusUpdate: (status) => {
-      if (status.isLoaded && status.didJustFinish) {
-        videoRef.current?.setPositionAsync(0);
-        videoRef.current?.playAsync();
-      }
-    },
+    videoUri: update.mediaUrl,
   });
 
   const handleDoubleTap = useDoubleTap(() => {
@@ -107,8 +102,8 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
   );
 
   const processedCaption = useMemo(() => {
-    const mentions = parseMentions(update.caption);
-    return replaceMentionsWithLinks(update.caption, mentions, handleMentionPress);
+    const mentions = parseMentions(update.caption || '');
+    return replaceMentionsWithLinks(update.caption || '', mentions, handleMentionPress);
   }, [update.caption, handleMentionPress]);
 
   useEffect(() => {
@@ -128,7 +123,9 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
       if (Platform.OS === 'android') {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
           if (isActive) {
-            togglePlayPause();
+            if (isPlaying) {
+              pauseVideo();
+            }
             return true;
           }
           return false;
@@ -143,11 +140,15 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
         useNativeDriver: true,
       }).start();
     }
-  }, [isActive, update.id, trackView, togglePlayPause]);
+  }, [isActive, update.id, trackView, isPlaying, pauseVideo]);
 
   const handleMediaPress = () => {
     if (!settings.autoplayVideos) {
-      togglePlayPause();
+      if (isPlaying) {
+        pauseVideo();
+      } else {
+        playVideo();
+      }
     }
   };
 
@@ -155,7 +156,6 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
     <View style={styles.container}>
       <TouchableOpacity
         activeOpacity={1}
-        onPress={handleMediaPress}
         onLongPress={() => onReport(update.id)}
         {...handleDoubleTap}
         style={styles.mediaContainer}
@@ -165,21 +165,12 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
           style={styles.media}
           resizeMode={'cover' as any}
           isLooping
-          shouldPlay={isActive && settings.autoplayVideos && !isBackground}
+          shouldPlay={isActive && settings.autoplayVideos}
           isMuted={isMuted}
-          onPlaybackStatusUpdate={status => {
-            if (status.isLoaded && status.didJustFinish) {
-              videoRef.current?.setPositionAsync(0);
-              videoRef.current?.playAsync();
-            }
-          }}
+          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
         />
 
-        {isLoading && (
-          <View style={styles.loadingContainer}>
-            <Ionicons name="sync" size={styles.loadingIcon.width} color="white" />
-          </View>
-        )}
+        {/* Loading state removed since useVideoPlayer.ts doesn't provide isLoading */}
 
         {isBuffering && (
           <View style={styles.bufferingContainer}>
@@ -195,13 +186,13 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
         <View style={styles.contentContainer}>
           <TouchableOpacity
             style={styles.userInfo}
-            onPress={() => onProfilePress(update.user?.id || update.userId)}
+            onPress={() => onProfilePress(update.user?.id || '')}
           >
             <Image
-              source={{ uri: update.user?.avatar || update.userProfilePic }}
+              source={{ uri: update.user?.avatar || '' }}
               style={styles.profilePic}
             />
-            <Text style={styles.username}>{update.user?.username || update.username}</Text>
+            <Text style={styles.username}>{update.user?.name || ''}</Text>
           </TouchableOpacity>
 
           <Markdown
@@ -232,7 +223,7 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
                 color={update.isLiked ? '#ff2d55' : 'white'}
               />
               <Text style={styles.actionText}>
-                {formatNumber(update.likeCount || update.likesCount)}
+                {formatNumber(update.likeCount || 0)}
               </Text>
             </TouchableOpacity>
 
@@ -242,7 +233,7 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
             >
               <Ionicons name="chatbubble-outline" size={24} color="white" />
               <Text style={styles.actionText}>
-                {formatNumber(update.commentCount || update.commentsCount)}
+                {formatNumber(update.commentCount || 0)}
               </Text>
             </TouchableOpacity>
 

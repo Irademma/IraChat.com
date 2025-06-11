@@ -68,7 +68,7 @@ export default function TabLayout() {
           fontSize: headerFontSize,
         },
         tabBarAccessibilityLabel: 'Main navigation tabs',
-        tabBarAccessibilityRole: 'tablist',
+        // tabBarAccessibilityRole: 'tablist', // Remove unsupported property
       }}
     >
       {/* Chats Tab */}
@@ -85,7 +85,7 @@ export default function TabLayout() {
             />
           ),
           tabBarAccessibilityLabel: 'Chats tab',
-          tabBarAccessibilityRole: 'tab',
+          // tabBarAccessibilityRole: 'tab', // Remove unsupported property
           headerTitle: 'IraChat',
           headerLeft: () => (
             <Image
@@ -117,7 +117,7 @@ export default function TabLayout() {
             />
           ),
           tabBarAccessibilityLabel: 'Groups tab',
-          tabBarAccessibilityRole: 'tab',
+          // tabBarAccessibilityRole: 'tab', // Remove unsupported property
           headerTitle: 'Groups',
           // Clean header - no icons, create group functionality is in the floating action button
         }}
@@ -137,7 +137,7 @@ export default function TabLayout() {
             />
           ),
           tabBarAccessibilityLabel: 'Updates tab',
-          tabBarAccessibilityRole: 'tab',
+          // tabBarAccessibilityRole: 'tab', // Remove unsupported property
           headerTitle: 'Updates',
           // NO headerRight - no search icon in updates topbar as per requirements
         }}
@@ -157,9 +157,27 @@ export default function TabLayout() {
             />
           ),
           tabBarAccessibilityLabel: 'Calls tab',
-          tabBarAccessibilityRole: 'tab',
+          // tabBarAccessibilityRole: 'tab', // Remove unsupported property
           headerTitle: 'Calls',
 
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <Ionicons
+              name="person"
+              size={tabIconSize}
+              color={color}
+              accessibilityLabel="Profile tab icon"
+            />
+          ),
+          tabBarAccessibilityLabel: 'Profile tab',
+          // tabBarAccessibilityRole: 'tab', // Remove unsupported property
+          headerTitle: 'Profile',
         }}
       />
     </Tabs>

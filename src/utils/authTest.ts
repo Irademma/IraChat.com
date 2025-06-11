@@ -1,10 +1,10 @@
 // Authentication Test Utilities
 import {
-  storeAuthData,
-  getStoredAuthData,
-  clearAuthData,
-  isAuthenticated,
-  createAuthData
+    clearAuthData,
+    createAuthData,
+    getStoredAuthData,
+    isAuthenticated,
+    storeAuthData
 } from '../services/authStorageSimple';
 import { User } from '../types';
 
@@ -29,9 +29,13 @@ export const testAuthPersistence = async (): Promise<void> => {
       phoneNumber: '+256700000000',
       displayName: 'Test User',
       name: 'Test User',
+      username: 'testuser',
       avatar: 'https://i.pravatar.cc/150?u=testuser',
       status: 'Testing IraChat persistence!',
       isOnline: true,
+      followersCount: 0,
+      followingCount: 0,
+      likesCount: 0,
     };
 
     const authData = createAuthData(testUser);
@@ -81,10 +85,14 @@ export const testUserRegistration = async (): Promise<void> => {
       phoneNumber: '+256701234567',
       displayName: 'John Doe',
       name: 'John Doe',
+      username: 'johndoe',
       avatar: 'https://i.pravatar.cc/150?u=johndoe',
       status: 'I Love IraChat',
       bio: 'I Love IraChat',
       isOnline: true,
+      followersCount: 0,
+      followingCount: 0,
+      likesCount: 0,
     };
 
     console.log('1️⃣ Registering new user:', newUser.name);
@@ -133,9 +141,13 @@ export const testAppLaunchScenarios = async (): Promise<void> => {
       phoneNumber: '+256702345678',
       displayName: 'Jane Smith',
       name: 'Jane Smith',
+      username: 'janesmith',
       avatar: 'https://i.pravatar.cc/150?u=janesmith',
       status: 'Back on IraChat!',
       isOnline: true,
+      followersCount: 0,
+      followingCount: 0,
+      likesCount: 0,
     };
 
     const authData = createAuthData(returningUser);

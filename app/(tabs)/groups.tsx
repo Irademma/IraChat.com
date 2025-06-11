@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  TextInput,
-  Alert,
-  RefreshControl,
-  Animated,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+    Alert,
+    Animated,
+    FlatList,
+    Image,
+    RefreshControl,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import { useTabNavigation } from '../../src/hooks/useTabNavigation';
 
 
@@ -33,6 +33,7 @@ export default function GroupsScreen() {
   const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Tab navigation with smooth animations
   const { handleSwipeGesture } = useTabNavigation();
@@ -53,9 +54,11 @@ export default function GroupsScreen() {
   }, [searchQuery, groups]);
 
   const loadGroups = () => {
+    setIsLoading(true);
     // Sort groups by usage frequency (most used first)
     const sortedGroups = mockGroups.sort((a, b) => b.usageFrequency - a.usageFrequency);
     setGroups(sortedGroups);
+    setIsLoading(false);
   };
 
   const filterGroups = () => {
@@ -233,20 +236,40 @@ export default function GroupsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-white">
+    <View
+      className="flex-1 bg-white"
+      accessible={true}
+      accessibilityLabel="Groups screen"
+    >
       {/* Search Bar */}
       <View className="px-4 py-3 bg-gray-50 border-b border-gray-200">
         <View className="flex-row items-center bg-white rounded-full px-4 py-2 shadow-sm">
-          <Ionicons name="search" size={20} color="#9CA3AF" />
+          <Ionicons
+            name="search"
+            size={20}
+            color="#9CA3AF"
+            accessible={true}
+            accessibilityLabel="Search icon"
+          />
           <TextInput
             placeholder="Search groups..."
             value={searchQuery}
             onChangeText={setSearchQuery}
             className="flex-1 ml-3 text-gray-700"
             placeholderTextColor="#9CA3AF"
+            accessible={true}
+            accessibilityLabel="Search groups input"
+            accessibilityHint="Type to search for groups"
+            accessibilityRole="search"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity
+              onPress={() => setSearchQuery('')}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Clear search"
+              accessibilityHint="Tap to clear search text"
+            >
               <Ionicons name="close-circle" size={20} color="#9CA3AF" />
             </TouchableOpacity>
           )}
@@ -297,6 +320,10 @@ export default function GroupsScreen() {
             shadowOpacity: 0.4,
             shadowRadius: 12,
           }}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Create new group"
+          accessibilityHint="Tap to create a new group chat"
         >
           {/* Gradient-like inner circle for depth */}
           <View

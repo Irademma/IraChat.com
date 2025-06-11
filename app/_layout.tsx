@@ -48,7 +48,11 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView
+        style={{ flex: 1 }}
+        accessible={true}
+        accessibilityLabel="IraChat application root"
+      >
         <Provider store={store}>
           <ThemeProvider>
             <Stack

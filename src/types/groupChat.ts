@@ -13,6 +13,14 @@ export interface GroupMember {
     allMessages: boolean;
     media: boolean;
   };
+
+  // Additional properties for compatibility
+  id?: string;
+  name?: string;
+  email?: string;
+  avatar?: string;
+  isAdmin?: boolean;
+  isBlocked?: boolean;
 }
 
 export interface GroupMessage {
@@ -43,6 +51,11 @@ export interface GroupMessage {
   timestamp: Date;
   isEdited: boolean;
   isDeleted: boolean;
+
+  // Additional properties for compatibility
+  media?: any[];
+  sender?: any;
+  type?: string;
 }
 
 export interface GroupChat {
@@ -50,6 +63,7 @@ export interface GroupChat {
   name: string;
   description: string;
   groupPhoto: string;
+  photo?: string; // Alias for groupPhoto
   createdAt: Date;
   createdBy: string;
   admins: string[];
@@ -84,4 +98,24 @@ export interface TemporaryCallGroup {
     leftAt?: Date;
     duration?: number;
   }[];
-} 
+}
+
+// Additional exports for compatibility
+export interface Group extends GroupChat {}
+
+export interface GroupMemberPreferences {
+  notifications: {
+    mentions: boolean;
+    allMessages: boolean;
+    media: boolean;
+  };
+  privacy: {
+    readReceipts: boolean;
+    lastSeen: boolean;
+    profilePhoto: boolean;
+  };
+  media: {
+    autoDownload: boolean;
+    quality: 'low' | 'medium' | 'high';
+  };
+}

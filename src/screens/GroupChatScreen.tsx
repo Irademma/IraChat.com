@@ -18,12 +18,13 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GroupDetails } from '../components/GroupDetails';
-import { GroupHeader } from '../components/GroupHeader';
+import GroupHeader from '../components/GroupHeader';
 import { GroupSettings } from '../components/GroupSettings';
 import { useGroupChat } from '../hooks/useGroupChat';
 import { useMediaUpload } from '../hooks/useMediaUpload';
 import { useMentionNotifications } from '../hooks/useMentionNotifications';
 import { useResponsive } from '../hooks/useResponsive';
+import { colors } from '../styles/colors';
 import { GroupMessage } from '../types/groupChat';
 import { handleError, validateGroupAction, validateMessage } from '../utils/errorHandler';
 import { GroupMemberPreferences } from '../utils/groupManagement';

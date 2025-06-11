@@ -1,15 +1,14 @@
 import React from 'react';
-import { View, ViewStyle, ScrollView, SafeAreaView } from 'react-native';
-import { 
-  isTablet, 
-  isSmallDevice, 
-  isLargeDevice, 
-  wp, 
-  hp, 
-  spacing, 
-  fontSizes,
-  borderRadius,
-  getGridColumns 
+import { SafeAreaView, ScrollView, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import {
+    borderRadius,
+    fontSizes,
+    getGridColumns,
+    isLargeDevice,
+    isSmallDevice,
+    isTablet,
+    spacing,
+    wp
 } from '../utils/responsive';
 
 interface ResponsiveWrapperProps {

@@ -6,8 +6,9 @@ import {
     isLargeDevice,
     isMediumDevice,
     isSmallDevice,
+    isTablet,
     spacing,
-    wp,
+    wp
 } from '../utils/responsive';
 
 interface ResponsiveState {
@@ -17,6 +18,7 @@ interface ResponsiveState {
   isSmall: boolean;
   isMedium: boolean;
   isLarge: boolean;
+  isTablet: boolean;
   wp: (percentage: number) => number;
   hp: (percentage: number) => number;
   fontSize: typeof fontSize;
@@ -40,9 +42,10 @@ export const useResponsive = (): ResponsiveState => {
     width: dimensions.width,
     height: dimensions.height,
     isLandscape,
-    isSmall: isSmallDevice,
-    isMedium: isMediumDevice,
-    isLarge: isLargeDevice,
+    isSmall: isSmallDevice(),
+    isMedium: isMediumDevice(),
+    isLarge: isLargeDevice(),
+    isTablet: isTablet(),
     wp,
     hp,
     fontSize,

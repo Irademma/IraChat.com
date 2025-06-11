@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import {
-  storeAuthData,
-  getStoredAuthData,
-  clearAuthData,
-  isAuthenticated,
-  createAuthData
-} from '../src/services/authStorageSimple';
+import { useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { createUserAccount, getCurrentUser, signOutUser } from '../src/services/authService';
+import {
+    clearAuthData,
+    createAuthData,
+    getStoredAuthData,
+    isAuthenticated,
+    storeAuthData
+} from '../src/services/authStorageSimple';
 
 export default function TestScreen() {
   const router = useRouter();
@@ -34,9 +34,13 @@ export default function TestScreen() {
         phoneNumber: '+256700000000',
         displayName: 'Test User',
         name: 'Test User',
+        username: 'testuser',
         avatar: 'https://i.pravatar.cc/150?u=test',
         status: 'Testing!',
         isOnline: true,
+        followersCount: 0,
+        followingCount: 0,
+        likesCount: 0,
       };
 
       const authData = createAuthData(testUser);

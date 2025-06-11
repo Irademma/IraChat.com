@@ -77,7 +77,6 @@ const initializeFirebase = () => {
 // Initialize Firebase and export instances
 console.log('Starting Firebase service initialization...');
 let firebaseApp: FirebaseApp;
-let authInstance: any;
 let firestore: any;
 
 try {

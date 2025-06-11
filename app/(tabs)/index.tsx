@@ -10,8 +10,6 @@ import EmptyState from '../../src/components/EmptyState';
 import { Chat } from '../../src/types';
 import { formatChatTime } from '../../src/utils/dateUtils';
 
-
-
 // New User Welcome Component
 interface NewUserWelcomeProps {
   onStartMessaging: () => void;
@@ -150,6 +148,9 @@ export default function ChatsListScreen() {
   const router = useRouter();
   const dispatch = useDispatch();
 
+  // Responsive design hooks
+  const { isXSmall, isSmall } = { isXSmall: false, isSmall: false }; // Placeholder for responsive hooks
+
   // Tab navigation with animations (currently unused but available for future features)
   // const { navigateNext, navigatePrevious, currentTabIndex, getTabInfo } = useTabNavigation({
   //   enableHaptics: true,
@@ -282,6 +283,10 @@ export default function ChatsListScreen() {
         }}
         className="flex-row items-center px-4 py-3 bg-white active:bg-gray-50"
         activeOpacity={0.7}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel={`Chat with ${displayName}${isGroup ? ' group' : ''}${hasUnread ? `, ${unreadCount} unread messages` : ''}`}
+        accessibilityHint="Tap to open this chat conversation"
       >
         <View className="relative">
           {item.avatar ? (
@@ -346,19 +351,39 @@ export default function ChatsListScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View
+      className="flex-1 bg-gray-50"
+      accessible={true}
+      accessibilityLabel="Chats list screen"
+    >
       <View className="px-4 py-3 bg-white border-b border-gray-200">
         <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2">
-          <Ionicons name="search" size={20} color="#9CA3AF" />
+          <Ionicons
+            name="search"
+            size={20}
+            color="#9CA3AF"
+            accessible={true}
+            accessibilityLabel="Search icon"
+          />
           <TextInput
             placeholder="Search chats, messages..."
             value={searchQuery}
             onChangeText={setSearchQuery}
             className="flex-1 ml-3 text-gray-700"
             placeholderTextColor="#9CA3AF"
+            accessible={true}
+            accessibilityLabel="Search chats input"
+            accessibilityHint="Type to search through your chats and messages"
+            accessibilityRole="search"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity
+              onPress={() => setSearchQuery('')}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Clear search"
+              accessibilityHint="Tap to clear search text"
+            >
               <Ionicons name="close-circle" size={20} color="#9CA3AF" />
             </TouchableOpacity>
           )}

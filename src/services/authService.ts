@@ -1,23 +1,22 @@
 // Cross-Platform Authentication Service
 import { signOut } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Platform } from 'react-native';
-import {
-  db,
-  getAuthInstance,
-  isAuthReady,
-  getCurrentUserSafely,
-  waitForAuth,
-  getPlatformInfo
-} from './firebaseSimple';
-import {
-  storeAuthData,
-  getStoredAuthData,
-  clearAuthData,
-  createAuthData,
-  isAuthenticated as checkStoredAuth
-} from './authStorageSimple';
 import { User } from '../types';
+import {
+    isAuthenticated as checkStoredAuth,
+    clearAuthData,
+    createAuthData,
+    getStoredAuthData,
+    storeAuthData
+} from './authStorageSimple';
+import {
+    db,
+    getAuthInstance,
+    getCurrentUserSafely,
+    getPlatformInfo,
+    isAuthReady
+} from './firebaseSimple';
 
 console.log('🔐 Cross-Platform Auth Service initialized for:', Platform.OS);
 
@@ -95,6 +94,9 @@ export const getCurrentUser = async (): Promise<User | null> => {
           avatar: userData.avatar || '',
           status: userData.status || userData.bio || 'I Love IraChat',
           isOnline: true,
+          followersCount: userData.followersCount || 0,
+          followingCount: userData.followingCount || 0,
+          likesCount: userData.likesCount || 0,
         };
 
         // Store this user data for future use
@@ -115,6 +117,9 @@ export const getCurrentUser = async (): Promise<User | null> => {
           status: 'I Love IraChat',
           bio: 'I Love IraChat',
           isOnline: true,
+          followersCount: 0,
+          followingCount: 0,
+          likesCount: 0,
         };
         return user;
       }
@@ -172,6 +177,9 @@ export const createUserAccount = async (userData: {
       status: userData.bio?.trim() || 'I Love IraChat',
       bio: userData.bio?.trim() || 'I Love IraChat',
       isOnline: true,
+      followersCount: 0,
+      followingCount: 0,
+      likesCount: 0,
     };
 
     // Debug the username after creating user object
@@ -225,6 +233,9 @@ export const signInUser = async (firebaseUser: any): Promise<AuthResult> => {
       status: userData.status || userData.bio || 'I Love IraChat',
       bio: userData.bio || 'I Love IraChat',
       isOnline: true,
+      followersCount: userData.followersCount || 0,
+      followingCount: userData.followingCount || 0,
+      likesCount: userData.likesCount || 0,
     };
 
     // Update user's last login in Firestore

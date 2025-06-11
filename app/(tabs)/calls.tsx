@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  TextInput,
-  Alert,
-  RefreshControl,
-  Modal,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+    Alert,
+    FlatList,
+    Image,
+    RefreshControl,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
 interface Contact {
   id: string;
@@ -44,6 +43,7 @@ export default function CallsScreen() {
   const [selectedContacts, setSelectedContacts] = useState<Contact[]>([]);
   const [showCallModal, setShowCallModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'contacts' | 'history'>('contacts');
+  const [isLoading, setIsLoading] = useState(true);
 
   // No mock data - contacts and call history will be loaded from Firebase only
   const mockContacts: Contact[] = [];
@@ -58,8 +58,10 @@ export default function CallsScreen() {
   }, [searchQuery, contacts]);
 
   const loadData = () => {
+    setIsLoading(true);
     setContacts(mockContacts);
     setCallHistory(mockCallHistory);
+    setIsLoading(false);
   };
 
   const filterContacts = () => {
@@ -138,6 +140,11 @@ export default function CallsScreen() {
         onPress={() => handleContactSelect(item)}
         className={`flex-row items-center px-4 py-3 ${isSelected ? 'bg-blue-50' : 'bg-white'}`}
         activeOpacity={0.7}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel={`${item.name}${isSelected ? ', selected' : ''}${item.isOnline ? ', online' : ''}`}
+        accessibilityHint={`Tap to ${isSelected ? 'deselect' : 'select'} ${item.name} for calling`}
+        accessibilityState={{ selected: isSelected }}
       >
         {/* Avatar */}
         <View className="relative">
@@ -182,6 +189,10 @@ export default function CallsScreen() {
             className="p-3 mr-3 rounded-full"
             style={{ backgroundColor: '#F0F4FF' }}
             activeOpacity={0.7}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Voice call ${item.name}`}
+            accessibilityHint="Tap to start a voice call"
           >
             <Ionicons name="call" size={20} color="#667eea" />
           </TouchableOpacity>
@@ -196,6 +207,10 @@ export default function CallsScreen() {
             }}
             className="p-3 bg-blue-100 rounded-full"
             activeOpacity={0.7}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Video call ${item.name}`}
+            accessibilityHint="Tap to start a video call"
           >
             <Ionicons name="videocam" size={20} color="#3B82F6" />
           </TouchableOpacity>
@@ -255,20 +270,40 @@ export default function CallsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View
+      className="flex-1 bg-gray-50"
+      accessible={true}
+      accessibilityLabel="Calls screen"
+    >
       {/* Search Bar */}
       <View className="px-4 py-3 bg-white border-b border-gray-200">
         <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2">
-          <Ionicons name="search" size={20} color="#9CA3AF" />
+          <Ionicons
+            name="search"
+            size={20}
+            color="#9CA3AF"
+            accessible={true}
+            accessibilityLabel="Search icon"
+          />
           <TextInput
             placeholder="Search contacts..."
             value={searchQuery}
             onChangeText={setSearchQuery}
             className="flex-1 ml-3 text-gray-700"
             placeholderTextColor="#9CA3AF"
+            accessible={true}
+            accessibilityLabel="Search contacts input"
+            accessibilityHint="Type to search for contacts to call"
+            accessibilityRole="search"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity
+              onPress={() => setSearchQuery('')}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Clear search"
+              accessibilityHint="Tap to clear search text"
+            >
               <Ionicons name="close-circle" size={20} color="#9CA3AF" />
             </TouchableOpacity>
           )}
@@ -281,6 +316,11 @@ export default function CallsScreen() {
           onPress={() => setActiveTab('contacts')}
           className={`flex-1 py-3 items-center ${activeTab === 'contacts' ? 'border-b-2' : ''}`}
           style={activeTab === 'contacts' ? { borderBottomColor: '#667eea' } : {}}
+          accessible={true}
+          accessibilityRole="tab"
+          accessibilityLabel="Contacts tab"
+          accessibilityHint="View your contacts for calling"
+          accessibilityState={{ selected: activeTab === 'contacts' }}
         >
           <Text
             className={activeTab === 'contacts' ? '' : 'text-gray-500'}
@@ -293,6 +333,11 @@ export default function CallsScreen() {
           onPress={() => setActiveTab('history')}
           className={`flex-1 py-3 items-center ${activeTab === 'history' ? 'border-b-2' : ''}`}
           style={activeTab === 'history' ? { borderBottomColor: '#667eea' } : {}}
+          accessible={true}
+          accessibilityRole="tab"
+          accessibilityLabel="Recent calls tab"
+          accessibilityHint="View your recent call history"
+          accessibilityState={{ selected: activeTab === 'history' }}
         >
           <Text
             className={activeTab === 'history' ? '' : 'text-gray-500'}

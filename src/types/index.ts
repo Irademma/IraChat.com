@@ -2,12 +2,17 @@ export interface User {
   id: string;
   username: string;
   displayName: string;
+  name: string;
+  phoneNumber: string;
+  email?: string;
   avatar: string;
   bio?: string;
+  status?: string;
   followersCount: number;
   followingCount: number;
   likesCount: number;
   isVerified?: boolean;
+  isOnline?: boolean;
 }
 
 export interface Message {
@@ -104,6 +109,13 @@ export interface Comment {
   repliesCount: number;
   createdAt: number;
   isLiked: boolean;
+
+  // Additional properties for compatibility
+  timestamp: Date;
+  isVisible: boolean;
+  userAvatar?: string;
+  username?: string;
+  likes?: number;
 }
 
 export interface Like {

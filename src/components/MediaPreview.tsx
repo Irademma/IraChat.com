@@ -118,7 +118,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
               ref={videoRef}
               source={{ uri: media.url }}
               style={styles.mediaContent}
-              resizeMode="cover"
+              resizeMode={'cover' as any}
               isLooping
               shouldPlay={isPlaying}
               isMuted={!isPlaying}

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
     Animated,
     Image,
@@ -8,10 +8,26 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { colors } from '../styles/colors';
 import { GroupMessage } from '../types/groupChat';
 import { formatTimeAgo } from '../utils/dateUtils';
 import { handleDelete } from '../utils/deleteHandler';
 import { fontSize, spacing, wp } from '../utils/responsive';
+
+// Define Media type for compatibility
+interface Media {
+  id: string;
+  type: 'image' | 'video' | 'document';
+  url: string;
+  caption?: string;
+}
+
+// Define MediaPreview component for compatibility
+const MediaPreview: React.FC<{ media: Media; onPress: () => void; onLongPress: () => void }> = ({ media, onPress, onLongPress }) => (
+  <TouchableOpacity onPress={onPress} onLongPress={onLongPress}>
+    <Image source={{ uri: media.url }} style={{ width: wp(50), height: wp(50), borderRadius: 8 }} />
+  </TouchableOpacity>
+);
 
 interface GroupMessageItemProps {
   message: GroupMessage;
@@ -78,24 +94,31 @@ export const GroupMessageItem: React.FC<GroupMessageItemProps> = ({
   };
 
   const renderMedia = () => {
-    if (!message.media?.length) return null;
+    const mediaUrls = message.mediaUrls || message.media || [];
+    if (!mediaUrls?.length) return null;
 
     return (
       <View style={styles.mediaContainer}>
-        {message.media.map((media, index) => (
-          <TouchableOpacity
-            key={media.id}
-            style={styles.mediaItem}
-            onPress={() => onMediaPress?.(media)}
-            onLongPress={() => handleDeleteMedia(media.id)}
-          >
-            <MediaPreview
-              media={media}
-              onPress={() => onMediaPress?.(media)}
-              onLongPress={() => handleDeleteMedia(media.id)}
-            />
-          </TouchableOpacity>
-        ))}
+        {mediaUrls.map((media, index) => {
+          const mediaItem = typeof media === 'string'
+            ? { id: `media_${index}`, type: 'image' as const, url: media }
+            : media;
+
+          return (
+            <TouchableOpacity
+              key={mediaItem.id || `media_${index}`}
+              style={styles.mediaItem}
+              onPress={() => onMediaPress?.(mediaItem)}
+              onLongPress={() => handleDeleteMedia(mediaItem.id || `media_${index}`)}
+            >
+              <MediaPreview
+                media={mediaItem}
+                onPress={() => onMediaPress?.(mediaItem)}
+                onLongPress={() => handleDeleteMedia(mediaItem.id || `media_${index}`)}
+              />
+            </TouchableOpacity>
+          );
+        })}
       </View>
     );
   };

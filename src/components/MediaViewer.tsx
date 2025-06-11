@@ -73,14 +73,20 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
             Animated.spring(pan, {
               toValue: { x: 0, y: 0 },
               useNativeDriver: true,
+              tension: 100,
+              friction: 8,
             }),
             Animated.spring(scale, {
               toValue: 1,
               useNativeDriver: true,
+              tension: 100,
+              friction: 8,
             }),
             Animated.spring(opacity, {
               toValue: 1,
               useNativeDriver: true,
+              tension: 100,
+              friction: 8,
             }),
           ]).start();
         }
@@ -139,7 +145,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
               ref={videoRef}
               source={{ uri: currentMedia.url }}
               style={styles.mediaContent}
-              resizeMode="contain"
+              resizeMode={'contain' as any}
               isLooping
               shouldPlay={isPlaying}
               isMuted={!isPlaying}

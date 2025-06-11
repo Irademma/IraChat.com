@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Alert, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import PhoneNumberInput from '../src/components/ui/PhoneNumberInput';
 import ProfilePicturePicker from '../src/components/ui/ProfilePicturePicker';
-import { Ionicons } from '@expo/vector-icons';
-import { createUserAccount } from '../src/services/authService';
 import { setUser } from '../src/redux/userSlice';
-import { User } from '../src/types';
+import { createUserAccount } from '../src/services/authService';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -137,11 +135,15 @@ export default function RegisterScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-white"
+      accessible={true}
+      accessibilityLabel="Create account screen"
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        accessible={true}
+        accessibilityLabel="Registration form"
       >
         <View className="flex-1 justify-center px-6 py-8 min-h-screen">
           {/* Header */}
@@ -149,10 +151,17 @@ export default function RegisterScreen() {
             <Text
               className="text-2xl text-gray-800 mb-2"
               style={{ fontWeight: '700' }}
+              accessible={true}
+              accessibilityRole="header"
+              accessibilityLabel="Create Account heading"
             >
               Create Account
             </Text>
-            <Text className="text-gray-600 text-center">
+            <Text
+              className="text-gray-600 text-center"
+              accessible={true}
+              accessibilityLabel="Enter your details to get started with IraChat"
+            >
               Enter your details to get started with IraChat
             </Text>
           </View>
@@ -204,6 +213,10 @@ export default function RegisterScreen() {
                 style={{
                   borderColor: error && !name.trim() ? '#EF4444' : '#D1D5DB',
                 }}
+                accessible={true}
+                accessibilityLabel="Full name input field"
+                accessibilityHint="Enter your full name"
+                accessibilityRole="text"
               />
             </View>
 
@@ -319,6 +332,11 @@ export default function RegisterScreen() {
             style={{
               backgroundColor: loading ? '#9CA3AF' : '#3B82F6',
             }}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Create Account button"
+            accessibilityHint="Tap to create your account"
+            accessibilityState={{ disabled: loading }}
           >
             <Text
               className="text-white text-center text-base"

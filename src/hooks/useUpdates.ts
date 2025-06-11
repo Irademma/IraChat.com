@@ -13,6 +13,8 @@ const mockUpdates: Update[] = [
     id: '1',
     user: {
       id: 'user1',
+      name: 'John Doe',
+      phoneNumber: '+256700000001',
       username: 'john_doe',
       displayName: 'John Doe',
       avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
@@ -35,6 +37,8 @@ const mockUpdates: Update[] = [
     id: '2',
     user: {
       id: 'user2',
+      name: 'Jane Smith',
+      phoneNumber: '+256700000002',
       username: 'jane_smith',
       displayName: 'Jane Smith',
       avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',

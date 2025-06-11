@@ -1,4 +1,4 @@
-import { arrayRemove, arrayUnion, collection, doc, getDocs, increment, limit, onSnapshot, orderBy, query, startAfter, updateDoc } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, collection, doc, getDocs, increment, limit, onSnapshot, orderBy, query, startAfter, updateDoc, where } from 'firebase/firestore';
 import { useCallback, useEffect, useState } from 'react';
 import { db } from '../services/firebase';
 import { Comment } from '../types';
@@ -74,6 +74,8 @@ export const useComments = ({ updateId, onError }: UseCommentsProps) => {
         userId: user.id,
         user: {
           id: user.id,
+          name: user.displayName || user.username,
+          phoneNumber: user.phoneNumber || '',
           username: user.username,
           displayName: user.displayName,
           avatar: user.avatar,
@@ -85,10 +87,12 @@ export const useComments = ({ updateId, onError }: UseCommentsProps) => {
         likesCount: 0,
         repliesCount: 0,
         createdAt: Date.now(),
+        timestamp: Date.now(),
         isLiked: false,
+        isVisible: true,
       };
 
-      await commentRef.set(newComment);
+      await updateDoc(commentRef, newComment);
       await updateDoc(updateRef, {
         commentCount: increment(1),
         comments: arrayUnion(commentRef.id),
@@ -132,7 +136,7 @@ export const useComments = ({ updateId, onError }: UseCommentsProps) => {
       const commentRef = doc(db, 'updates', updateId, 'comments', commentId);
       const updateRef = doc(db, 'updates', updateId);
 
-      await commentRef.delete();
+      await updateDoc(commentRef, { deleted: true });
       await updateDoc(updateRef, {
         commentCount: increment(-1),
         comments: arrayRemove(commentId),

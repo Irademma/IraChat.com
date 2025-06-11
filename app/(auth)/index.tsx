@@ -33,9 +33,20 @@ export default function AuthScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{isSignUp ? 'Create Account' : 'Welcome Back'}</Text>
-      
+    <View
+      style={styles.container}
+      accessible={true}
+      accessibilityLabel={`${isSignUp ? 'Create Account' : 'Sign In'} screen`}
+    >
+      <Text
+        style={styles.title}
+        accessible={true}
+        accessibilityRole="header"
+        accessibilityLabel={isSignUp ? 'Create Account heading' : 'Welcome Back heading'}
+      >
+        {isSignUp ? 'Create Account' : 'Welcome Back'}
+      </Text>
+
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -43,23 +54,40 @@ export default function AuthScreen() {
         onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
+        accessible={true}
+        accessibilityLabel="Email input field"
+        accessibilityHint="Enter your email address"
+        accessibilityRole="text"
       />
-      
+
       <TextInput
         style={styles.input}
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        accessible={true}
+        accessibilityLabel="Password input field"
+        accessibilityHint="Enter your password"
+        accessibilityRole="text"
       />
       
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.button}
         onPress={handleAuth}
         disabled={isLoading}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel={`${isSignUp ? 'Create Account' : 'Sign In'} button`}
+        accessibilityHint={`Tap to ${isSignUp ? 'create a new account' : 'sign in to your account'}`}
+        accessibilityState={{ disabled: isLoading }}
       >
         {isLoading ? (
-          <ActivityIndicator color="#FFFFFF" />
+          <ActivityIndicator
+            color="#FFFFFF"
+            accessible={true}
+            accessibilityLabel="Loading"
+          />
         ) : (
           <Text style={styles.buttonText}>
             {isSignUp ? 'Sign Up' : 'Sign In'}
@@ -67,9 +95,13 @@ export default function AuthScreen() {
         )}
       </TouchableOpacity>
       
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.switchButton}
         onPress={() => setIsSignUp(!isSignUp)}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel={isSignUp ? 'Switch to Sign In' : 'Switch to Create Account'}
+        accessibilityHint={isSignUp ? 'Tap to go to sign in screen' : 'Tap to go to create account screen'}
       >
         <Text style={styles.switchButtonText}>
           {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}

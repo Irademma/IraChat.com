@@ -1,6 +1,6 @@
 import { arrayRemove, arrayUnion, doc, increment, updateDoc } from 'firebase/firestore';
 import { useCallback, useState } from 'react';
-import { db } from '../services/firebase';
+import { collection, db } from '../services/firebase';
 
 interface UseUserInteractionsProps {
   currentUserId: string;

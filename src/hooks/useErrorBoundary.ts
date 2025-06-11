@@ -39,28 +39,10 @@ export const useErrorBoundary = ({ currentUserId, onError, fallback }: UseErrorB
     setErrorInfo(null);
   }, []);
 
+  // Mobile-only error handling - no web platform support needed
   useEffect(() => {
-    // Only set up global error handlers on web platform
-    if (typeof window !== 'undefined') {
-      const handleGlobalError = (event: ErrorEvent) => {
-        handleError(event.error, event.error?.stack || '');
-      };
-
-      const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-        handleError(
-          event.reason instanceof Error ? event.reason : new Error(String(event.reason)),
-          event.reason?.stack || ''
-        );
-      };
-
-      window.addEventListener('error', handleGlobalError);
-      window.addEventListener('unhandledrejection', handleUnhandledRejection);
-
-      return () => {
-        window.removeEventListener('error', handleGlobalError);
-        window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-      };
-    }
+    // Mobile error handling is managed by React Native's built-in error boundaries
+    // and the ErrorBoundary component. No additional global handlers needed.
   }, [handleError]);
 
   return {

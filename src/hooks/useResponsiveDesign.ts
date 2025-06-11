@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Dimensions, Platform } from 'react-native';
 
 export interface ScreenDimensions {

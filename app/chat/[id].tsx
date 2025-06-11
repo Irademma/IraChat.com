@@ -3,41 +3,58 @@ import { useNavigation } from '@react-navigation/native';
 import { useLocalSearchParams } from 'expo-router';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import {
-    addDoc,
-    collection,
-    doc,
-    onSnapshot,
-    orderBy,
-    query,
-    serverTimestamp,
-    setDoc,
-    updateDoc,
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
 } from 'firebase/firestore';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
-    FlatList,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  FlatList,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import EmptyState from '../../src/components/EmptyState';
 import { RootState } from '../../src/redux/store';
 import { db, getAuthInstance } from '../../src/services/firebaseSimple';
 import { formatMessageTime } from '../../src/utils/dateUtils';
+import {
+  fontSizes,
+  inputSizes,
+  isCompactDevice,
+  isVerySmallDevice
+} from '../../src/utils/responsive';
+
+// Message type definition
+type Message = {
+  id: string;
+  text: string;
+  senderId: string;
+  senderName?: string;
+  senderPhoneNumber?: string;
+  timestamp: any;
+};
 
 export default function ChatRoomScreen() {
   const { id: chatId, name: chatName } = useLocalSearchParams();
   const navigation = useNavigation();
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-  const [firebaseUser, setFirebaseUser] = useState<any>(null);
+  const [firebaseUser, setFirebaseUser] = useState<{uid: string; email: string | null} | null>(null);
   const [isInitializingUser, setIsInitializingUser] = useState(true);
   const flatListRef = useRef<FlatList>(null);
   
@@ -66,7 +83,7 @@ export default function ChatRoomScreen() {
 
         // Check if user is already signed in
         if (auth.currentUser) {
-          console.log('✅ Firebase user already exists:', auth.currentUser.uid);
+          console.log('✅ Firebase user already exists');
           setFirebaseUser(auth.currentUser);
           setIsInitializingUser(false);
           return;
@@ -74,18 +91,20 @@ export default function ChatRoomScreen() {
 
         // Create Firebase user with email/password (using phone as email)
         const email = `${currentUser.phoneNumber.replace('+', '')}@irachat.app`;
-        const password = `irachat_${currentUser.id}`;
+        // Generate secure random password
+        const password = `${Math.random().toString(36).substring(2)}${Date.now().toString(36)}${Math.random().toString(36).substring(2)}`;
 
         try {
           // Try to sign in first
           const signInResult = await signInWithEmailAndPassword(auth, email, password);
-          console.log('✅ Firebase user signed in:', signInResult.user.uid);
+          console.log('✅ Firebase user signed in successfully');
           setFirebaseUser(signInResult.user);
-        } catch (signInError: any) {
-          if (signInError.code === 'auth/user-not-found') {
+        } catch (signInError: unknown) {
+          const error = signInError as {code?: string; message?: string};
+          if (error.code === 'auth/user-not-found') {
             // Create new user
             const createResult = await createUserWithEmailAndPassword(auth, email, password);
-            console.log('✅ Firebase user created:', createResult.user.uid);
+            console.log('✅ Firebase user created successfully');
             
             // Store user data in Firestore
             await setDoc(doc(db, 'users', createResult.user.uid), {
@@ -103,7 +122,7 @@ export default function ChatRoomScreen() {
             
             setFirebaseUser(createResult.user);
           } else {
-            throw signInError;
+            throw error;
           }
         }
       } catch (error) {
@@ -131,7 +150,7 @@ export default function ChatRoomScreen() {
 
   // Keyboard event listeners
   useEffect(() => {
-    const keyboardWillShow = (event: any) => {
+    const keyboardWillShow = (event: {endCoordinates: {height: number}}) => {
       console.log('🎹 Keyboard will show:', event.endCoordinates.height);
       setKeyboardHeight(event.endCoordinates.height);
       setIsKeyboardVisible(true);
@@ -143,7 +162,7 @@ export default function ChatRoomScreen() {
       setIsKeyboardVisible(false);
     };
 
-    const keyboardDidShow = (event: any) => {
+    const keyboardDidShow = (event: {endCoordinates: {height: number}}) => {
       console.log('🎹 Keyboard did show:', event.endCoordinates.height);
       setKeyboardHeight(event.endCoordinates.height);
       setIsKeyboardVisible(true);
@@ -182,10 +201,17 @@ export default function ChatRoomScreen() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const messagesData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const messagesData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          text: data.text || '',
+          senderId: data.senderId || '',
+          senderName: data.senderName,
+          senderPhoneNumber: data.senderPhoneNumber,
+          timestamp: data.timestamp
+        } as Message;
+      });
       setMessages(messagesData);
 
       // Auto-scroll to bottom when new messages arrive
@@ -208,11 +234,8 @@ export default function ChatRoomScreen() {
     }
 
     try {
-      console.log('📤 Sending message with Firebase user:', {
-        senderId: firebaseUser.uid,
-        senderEmail: firebaseUser.email,
-        text: input
-      });
+      // Sending message (sensitive data removed from logs)
+      console.log('📤 Sending message...');
 
       await addDoc(collection(db, 'chats', chatId as string, 'messages'), {
         text: input,
@@ -241,37 +264,47 @@ export default function ChatRoomScreen() {
     }
   };
 
-  const renderItem = ({ item }: { item: any }) => {
+  const renderItem = ({ item }: { item: Message }) => {
     const isMyMessage = item.senderId === firebaseUser?.uid;
+    const horizontalMargin = isVerySmallDevice() ? 12 : 16;
+    const verticalMargin = isVerySmallDevice() ? 6 : 8;
+    const bubblePadding = isVerySmallDevice() ? 12 : 16;
+    const borderRadius = isVerySmallDevice() ? 12 : 16;
 
     return (
       <View
         style={{
-          marginHorizontal: 16,
-          marginVertical: 8,
-          maxWidth: '80%',
+          marginHorizontal: horizontalMargin,
+          marginVertical: verticalMargin,
+          maxWidth: isVerySmallDevice() ? '85%' : '80%',
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
         }}
       >
         {!isMyMessage && (
-          <Text style={{ fontSize: 12, color: '#6B7280', marginBottom: 4, marginLeft: 8 }}>
+          <Text style={{
+            fontSize: fontSizes.xs,
+            color: '#6B7280',
+            marginBottom: 4,
+            marginLeft: 8
+          }}>
             {item.senderName || item.senderPhoneNumber || 'Unknown'}
           </Text>
         )}
         <View
           style={{
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-            borderRadius: 16,
+            paddingHorizontal: bubblePadding,
+            paddingVertical: isVerySmallDevice() ? 10 : 12,
+            borderRadius: borderRadius,
             backgroundColor: isMyMessage ? '#667eea' : '#f3f4f6',
-            borderBottomRightRadius: isMyMessage ? 4 : 16,
-            borderBottomLeftRadius: isMyMessage ? 16 : 4,
+            borderBottomRightRadius: isMyMessage ? 4 : borderRadius,
+            borderBottomLeftRadius: isMyMessage ? borderRadius : 4,
           }}
         >
           <Text
             style={{
-              fontSize: 16,
+              fontSize: fontSizes.md,
               color: isMyMessage ? '#ffffff' : '#1f2937',
+              lineHeight: fontSizes.md * 1.4,
             }}
           >
             {item.text}
@@ -279,7 +312,7 @@ export default function ChatRoomScreen() {
         </View>
         <Text
           style={{
-            fontSize: 12,
+            fontSize: fontSizes.xs,
             color: '#9CA3AF',
             marginTop: 4,
             textAlign: isMyMessage ? 'right' : 'left',
@@ -297,8 +330,14 @@ export default function ChatRoomScreen() {
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      accessible={true}
+      accessibilityLabel={`Chat room with ${chatName || 'contact'}`}
     >
-      <View style={{ flex: 1, backgroundColor: '#f1f5f9' }}>
+      <View
+        style={{ flex: 1, backgroundColor: '#f1f5f9' }}
+        accessible={true}
+        accessibilityLabel="Chat messages area"
+      >
         {/* Messages Container */}
         <View style={{ flex: 1 }}>
           {isInitializingUser ? (
@@ -332,6 +371,10 @@ export default function ChatRoomScreen() {
               }}
               keyboardShouldPersistTaps="handled"
               bounces={false}
+              accessible={true}
+              accessibilityRole="list"
+              accessibilityLabel="Chat messages"
+              accessibilityHint="Scroll to view more messages"
               overScrollMode="never"
               scrollEventThrottle={16}
             />
@@ -344,9 +387,9 @@ export default function ChatRoomScreen() {
             backgroundColor: '#f8fafc',
             borderTopWidth: 1,
             borderTopColor: '#e2e8f0',
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-            paddingBottom: Platform.OS === 'ios' ? 12 : 12,
+            paddingHorizontal: isVerySmallDevice() ? 12 : isCompactDevice() ? 14 : 16,
+            paddingVertical: isVerySmallDevice() ? 8 : 12,
+            paddingBottom: Platform.OS === 'ios' ? (isVerySmallDevice() ? 8 : 12) : 12,
           }}
         >
           <View
@@ -354,7 +397,7 @@ export default function ChatRoomScreen() {
               flexDirection: 'row',
               alignItems: 'flex-end',
               backgroundColor: '#f8fafc',
-              minHeight: 48,
+              minHeight: inputSizes.height,
             }}
           >
             {/* Text Input */}
@@ -362,10 +405,10 @@ export default function ChatRoomScreen() {
               style={{
                 flex: 1,
                 backgroundColor: '#ffffff',
-                borderRadius: 24,
+                borderRadius: inputSizes.borderRadius,
                 borderWidth: 1,
                 borderColor: '#cbd5e1',
-                marginRight: 12,
+                marginRight: isVerySmallDevice() ? 8 : 12,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 1 },
                 shadowOpacity: 0.1,
@@ -378,12 +421,12 @@ export default function ChatRoomScreen() {
                 value={input}
                 onChangeText={setInput}
                 style={{
-                  paddingHorizontal: 20,
-                  paddingVertical: 16,
-                  fontSize: 16,
-                  lineHeight: 22,
-                  maxHeight: 120,
-                  minHeight: 48,
+                  paddingHorizontal: inputSizes.padding,
+                  paddingVertical: inputSizes.padding,
+                  fontSize: inputSizes.fontSize,
+                  lineHeight: inputSizes.fontSize * 1.4,
+                  maxHeight: isVerySmallDevice() ? 100 : 120,
+                  minHeight: inputSizes.height,
                   color: '#1e293b',
                   textAlignVertical: 'center',
                 }}
@@ -406,9 +449,9 @@ export default function ChatRoomScreen() {
               onPress={sendMessage}
               disabled={!input.trim() || !firebaseUser}
               style={{
-                width: 48,
-                height: 48,
-                borderRadius: 24,
+                width: inputSizes.height,
+                height: inputSizes.height,
+                borderRadius: inputSizes.height / 2,
                 backgroundColor: (input.trim() && firebaseUser) ? '#667eea' : '#cbd5e1',
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -423,7 +466,7 @@ export default function ChatRoomScreen() {
             >
               <Ionicons
                 name="send"
-                size={20}
+                size={isVerySmallDevice() ? 16 : 20}
                 color={(input.trim() && firebaseUser) ? '#ffffff' : '#64748b'}
               />
             </TouchableOpacity>

@@ -1,11 +1,30 @@
 
-import { Tabs } from 'expo-router';
-import { Image, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
+import { Image, Platform, View } from 'react-native';
 import TabBarBackground from '../../src/components/ui/TabBarBackground';
+import {
+    headerSizes,
+    isVerySmallDevice,
+    tabBarSizes
+} from '../../src/utils/responsive';
+
 export default function TabLayout() {
+  // Get responsive sizes
+  const tabHeight = tabBarSizes.height;
+  const tabFontSize = tabBarSizes.fontSize;
+  const tabIconSize = tabBarSizes.iconSize;
+  const headerHeight = headerSizes.height;
+  const headerFontSize = headerSizes.fontSize;
+  const headerIconSize = headerSizes.iconSize;
 
   return (
+    <View
+      style={{ flex: 1 }}
+      accessible={true}
+      accessibilityRole="tablist"
+      accessibilityLabel="Main navigation"
+    >
       <Tabs
       screenOptions={{
         // DISABLE ALL ANIMATIONS AND BOUNCE EFFECTS
@@ -15,34 +34,41 @@ export default function TabLayout() {
           ios: {
             backgroundColor: 'transparent',
             borderTopWidth: 0,
-            paddingBottom: 20,
-            height: 85,
+            paddingBottom: tabBarSizes.paddingBottom,
+            height: tabHeight + (Platform.OS === 'ios' ? tabBarSizes.paddingBottom : 0),
             position: 'absolute',
           },
           default: {
             backgroundColor: '#FFFFFF',
             borderTopWidth: 1,
             borderTopColor: '#E5E7EB',
-            paddingBottom: 5,
-            height: 65,
+            paddingBottom: tabBarSizes.paddingBottom,
+            height: tabHeight,
           },
         }),
         tabBarBackground: () => <TabBarBackground />,
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: tabFontSize,
           fontWeight: '600',
+          marginBottom: isVerySmallDevice() ? 2 : 4,
+        },
+        tabBarIconStyle: {
+          marginTop: isVerySmallDevice() ? 2 : 4,
         },
         // Enhanced animations handled by SwipeableTabWrapper
         headerStyle: {
           backgroundColor: '#667eea', // Sky blue from welcome page
           elevation: 4,
           shadowOpacity: 0.3,
+          height: headerHeight,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
-          fontSize: 20,
+          fontSize: headerFontSize,
         },
+        tabBarAccessibilityLabel: 'Main navigation tabs',
+        tabBarAccessibilityRole: 'tablist',
       }}
     >
       {/* Chats Tab */}
@@ -50,18 +76,25 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Chats',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubbles" size={size} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons
+              name="chatbubbles"
+              size={tabIconSize}
+              color={color}
+              accessibilityLabel="Chats tab icon"
+            />
           ),
+          tabBarAccessibilityLabel: 'Chats tab',
+          tabBarAccessibilityRole: 'tab',
           headerTitle: 'IraChat',
           headerLeft: () => (
             <Image
               source={require('../../assets/images/LOGO.png')}
               style={{
-                width: 32,
-                height: 32,
-                marginLeft: 15,
-                borderRadius: 16
+                width: headerIconSize,
+                height: headerIconSize,
+                marginLeft: headerSizes.paddingHorizontal,
+                borderRadius: headerIconSize / 2
               }}
               resizeMode="cover"
             />
@@ -75,9 +108,16 @@ export default function TabLayout() {
         name="groups"
         options={{
           title: 'Groups',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons
+              name="people"
+              size={tabIconSize}
+              color={color}
+              accessibilityLabel="Groups tab icon"
+            />
           ),
+          tabBarAccessibilityLabel: 'Groups tab',
+          tabBarAccessibilityRole: 'tab',
           headerTitle: 'Groups',
           // Clean header - no icons, create group functionality is in the floating action button
         }}
@@ -88,9 +128,16 @@ export default function TabLayout() {
         name="updates"
         options={{
           title: 'Updates',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="radio-button-on" size={size} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons
+              name="radio-button-on"
+              size={tabIconSize}
+              color={color}
+              accessibilityLabel="Updates tab icon"
+            />
           ),
+          tabBarAccessibilityLabel: 'Updates tab',
+          tabBarAccessibilityRole: 'tab',
           headerTitle: 'Updates',
           // NO headerRight - no search icon in updates topbar as per requirements
         }}
@@ -101,13 +148,21 @@ export default function TabLayout() {
         name="calls"
         options={{
           title: 'Calls',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="call" size={size} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons
+              name="call"
+              size={tabIconSize}
+              color={color}
+              accessibilityLabel="Calls tab icon"
+            />
           ),
+          tabBarAccessibilityLabel: 'Calls tab',
+          tabBarAccessibilityRole: 'tab',
           headerTitle: 'Calls',
 
         }}
       />
     </Tabs>
+    </View>
   );
 }

@@ -72,7 +72,7 @@ export const useAnalytics = ({ currentUserId, onError }: UseAnalyticsProps) => {
   }) => {
     try {
       const sessionRef = doc(collection(db, 'sessions'));
-      await sessionRef.set({
+      await updateDoc(sessionRef, {
         userId: currentUserId,
         ...sessionData,
         createdAt: Date.now(),
@@ -86,7 +86,7 @@ export const useAnalytics = ({ currentUserId, onError }: UseAnalyticsProps) => {
   const trackError = useCallback(async (error: Error, context: string) => {
     try {
       const errorRef = doc(collection(db, 'errors'));
-      await errorRef.set({
+      await updateDoc(errorRef, {
         userId: currentUserId,
         message: error.message,
         stack: error.stack,
@@ -107,7 +107,7 @@ export const useAnalytics = ({ currentUserId, onError }: UseAnalyticsProps) => {
   }) => {
     try {
       const performanceRef = doc(collection(db, 'performance'));
-      await performanceRef.set({
+      await updateDoc(performanceRef, {
         userId: currentUserId,
         ...metric,
         createdAt: Date.now(),

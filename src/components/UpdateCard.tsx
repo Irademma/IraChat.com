@@ -70,12 +70,12 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
     status,
     isLoading,
     isMuted,
+    isPlaying,
     isBuffering,
     isBackground,
     togglePlayPause,
     toggleMute,
   } = useVideoPlayer({
-    uri: update.mediaUrl,
     isActive,
     currentUserId,
     onPlaybackStatusUpdate: (status) => {
@@ -163,7 +163,7 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
         <Video
           ref={videoRef}
           style={styles.media}
-          resizeMode="cover"
+          resizeMode={'cover' as any}
           isLooping
           shouldPlay={isActive && settings.autoplayVideos && !isBackground}
           isMuted={isMuted}
@@ -195,13 +195,13 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
         <View style={styles.contentContainer}>
           <TouchableOpacity
             style={styles.userInfo}
-            onPress={() => onProfilePress(update.userId)}
+            onPress={() => onProfilePress(update.user?.id || update.userId)}
           >
             <Image
-              source={{ uri: update.userProfilePic }}
+              source={{ uri: update.user?.avatar || update.userProfilePic }}
               style={styles.profilePic}
             />
-            <Text style={styles.username}>{update.username}</Text>
+            <Text style={styles.username}>{update.user?.username || update.username}</Text>
           </TouchableOpacity>
 
           <Markdown
@@ -232,7 +232,7 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
                 color={update.isLiked ? '#ff2d55' : 'white'}
               />
               <Text style={styles.actionText}>
-                {formatNumber(update.likesCount)}
+                {formatNumber(update.likeCount || update.likesCount)}
               </Text>
             </TouchableOpacity>
 
@@ -242,7 +242,7 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
             >
               <Ionicons name="chatbubble-outline" size={24} color="white" />
               <Text style={styles.actionText}>
-                {formatNumber(update.commentsCount)}
+                {formatNumber(update.commentCount || update.commentsCount)}
               </Text>
             </TouchableOpacity>
 
@@ -321,9 +321,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   profilePic: {
-    width: isSmallDevice ? wp(10) : isMediumDevice ? wp(8) : wp(7),
-    height: isSmallDevice ? wp(10) : isMediumDevice ? wp(8) : wp(7),
-    borderRadius: isSmallDevice ? wp(5) : isMediumDevice ? wp(4) : wp(3.5),
+    width: isSmallDevice() ? wp(10) : isMediumDevice() ? wp(8) : wp(7),
+    height: isSmallDevice() ? wp(10) : isMediumDevice() ? wp(8) : wp(7),
+    borderRadius: isSmallDevice() ? wp(5) : isMediumDevice() ? wp(4) : wp(3.5),
     marginRight: spacing.sm,
   },
   username: {
@@ -358,11 +358,11 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   loadingIcon: {
-    width: isSmallDevice ? wp(6) : wp(5),
-    height: isSmallDevice ? wp(6) : wp(5),
+    width: isSmallDevice() ? wp(6) : wp(5),
+    height: isSmallDevice() ? wp(6) : wp(5),
   },
   bufferingIcon: {
-    width: isSmallDevice ? wp(6) : wp(5),
-    height: isSmallDevice ? wp(6) : wp(5),
+    width: isSmallDevice() ? wp(6) : wp(5),
+    height: isSmallDevice() ? wp(6) : wp(5),
   },
 });

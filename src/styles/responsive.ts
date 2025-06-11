@@ -1,14 +1,14 @@
 // Responsive styles for IraChat
 // Comprehensive responsive utility classes and helpers
 
-import { Dimensions, Platform } from 'react-native';
-import { 
-  isTablet, 
-  isSmallDevice, 
-  isLargeDevice, 
-  spacing, 
-  fontSizes, 
-  borderRadius 
+import { Dimensions } from 'react-native';
+import {
+    borderRadius,
+    fontSizes,
+    isLargeDevice,
+    isSmallDevice,
+    isTablet,
+    spacing
 } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -61,66 +61,66 @@ export const responsiveTextStyles = {
   // Headings
   h1: {
     fontSize: fontSizes.xxl,
-    fontWeight: '700',
+    fontWeight: '700' as const,
     color: '#111827',
     marginBottom: spacing.sm,
   },
-  
+
   h2: {
     fontSize: fontSizes.xl,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: '#111827',
     marginBottom: spacing.sm,
   },
-  
+
   h3: {
     fontSize: fontSizes.lg,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: '#374151',
     marginBottom: spacing.xs,
   },
-  
+
   h4: {
     fontSize: fontSizes.md,
-    fontWeight: '500',
+    fontWeight: '500' as const,
     color: '#374151',
     marginBottom: spacing.xs,
   },
-  
+
   // Body text
   body1: {
     fontSize: fontSizes.md,
-    fontWeight: '400',
+    fontWeight: '400' as const,
     color: '#374151',
     lineHeight: fontSizes.md * 1.5,
   },
-  
+
   body2: {
     fontSize: fontSizes.sm,
-    fontWeight: '400',
+    fontWeight: '400' as const,
     color: '#6B7280',
     lineHeight: fontSizes.sm * 1.5,
   },
-  
+
   // Special text
   caption: {
     fontSize: fontSizes.xs,
-    fontWeight: '400',
+    fontWeight: '400' as const,
     color: '#9CA3AF',
     lineHeight: fontSizes.xs * 1.4,
   },
-  
+
   button: {
     fontSize: fontSizes.md,
-    fontWeight: '500',
-    textAlign: 'center',
+    fontWeight: '500' as const,
+    textAlign: 'center' as const,
   },
-  
+
   link: {
     fontSize: fontSizes.md,
-    fontWeight: '500',
+    fontWeight: '500' as const,
     color: '#3B82F6',
-    textDecorationLine: 'underline',
+    textDecorationLine: 'underline' as const,
   },
 };
 
@@ -133,10 +133,10 @@ export const responsiveButtonStyles = {
     paddingVertical: isSmallDevice() ? spacing.sm : spacing.md,
     borderRadius: borderRadius.md,
     minHeight: isSmallDevice() ? 44 : 48,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
   },
-  
+
   // Secondary buttons
   secondary: {
     backgroundColor: '#6B7280',
@@ -144,10 +144,10 @@ export const responsiveButtonStyles = {
     paddingVertical: isSmallDevice() ? spacing.sm : spacing.md,
     borderRadius: borderRadius.md,
     minHeight: isSmallDevice() ? 44 : 48,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
   },
-  
+
   // Outline buttons
   outline: {
     backgroundColor: 'transparent',
@@ -157,10 +157,10 @@ export const responsiveButtonStyles = {
     paddingVertical: isSmallDevice() ? spacing.sm : spacing.md,
     borderRadius: borderRadius.md,
     minHeight: isSmallDevice() ? 44 : 48,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
   },
-  
+
   // Ghost buttons
   ghost: {
     backgroundColor: 'transparent',
@@ -168,17 +168,17 @@ export const responsiveButtonStyles = {
     paddingVertical: isSmallDevice() ? spacing.xs : spacing.sm,
     borderRadius: borderRadius.sm,
     minHeight: isSmallDevice() ? 36 : 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
   },
-  
+
   // Icon buttons
   icon: {
     width: isSmallDevice() ? 40 : 44,
     height: isSmallDevice() ? 40 : 44,
     borderRadius: isSmallDevice() ? 20 : 22,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
   },
 };
 

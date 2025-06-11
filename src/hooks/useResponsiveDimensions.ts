@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Dimensions, Platform } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Dimensions } from 'react-native';
 
 export interface ResponsiveDimensions {
   width: number;

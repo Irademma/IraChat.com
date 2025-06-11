@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 
 /**
- * Final Comprehensive Test Suite for IraChat
- * Ultimate verification that everything is perfect
+ * Final Comprehensive Mobile-Only Test Suite for IraChat
+ * Ultimate verification for Android and iOS platforms only
+ * Web platform support has been completely removed
  */
 
 const fs = require('fs');
 const path = require('path');
 
-console.log('🎯 FINAL COMPREHENSIVE IRACHAT TEST SUITE');
-console.log('=' .repeat(50));
-console.log('🔍 Verifying PERFECT functionality...\n');
+console.log('🎯 FINAL COMPREHENSIVE IRACHAT MOBILE-ONLY TEST SUITE');
+console.log('=' .repeat(60));
+console.log('📱 Verifying PERFECT mobile functionality...');
+console.log('🚫 Web platform support has been completely removed');
+console.log('🎯 Focus: Android & iOS platforms only');
+console.log('=' .repeat(60));
 
 const testSuite = {
   core: { passed: 0, total: 0, tests: [] },
@@ -19,6 +23,8 @@ const testSuite = {
   performance: { passed: 0, total: 0, tests: [] },
   security: { passed: 0, total: 0, tests: [] },
   ux: { passed: 0, total: 0, tests: [] },
+  android: { passed: 0, total: 0, tests: [] },
+  ios: { passed: 0, total: 0, tests: [] },
   mobile: { passed: 0, total: 0, tests: [] },
   production: { passed: 0, total: 0, tests: [] }
 };
@@ -189,8 +195,51 @@ runTest('ux', 'Accessibility Support', () => {
   return fs.existsSync('src/hooks/useAccessibility.ts');
 });
 
+// ANDROID PLATFORM TESTS
+console.log('\n🤖 ANDROID PLATFORM TESTS...');
+
+runTest('android', 'Android Configuration', () => {
+  const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+  return appJson.expo.android && appJson.expo.android.package;
+});
+
+runTest('android', 'Android Permissions', () => {
+  const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+  return appJson.expo.android && appJson.expo.android.permissions &&
+         appJson.expo.android.permissions.length > 0;
+});
+
+runTest('android', 'Android Adaptive Icon', () => {
+  const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+  return appJson.expo.android && appJson.expo.android.adaptiveIcon;
+});
+
+// IOS PLATFORM TESTS
+console.log('\n🍎 iOS PLATFORM TESTS...');
+
+runTest('ios', 'iOS Configuration', () => {
+  const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+  return appJson.expo.ios && appJson.expo.ios.bundleIdentifier;
+});
+
+runTest('ios', 'iOS Info.plist Permissions', () => {
+  const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+  return appJson.expo.ios && appJson.expo.ios.infoPlist;
+});
+
+runTest('ios', 'iOS Tablet Support', () => {
+  const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+  return appJson.expo.ios && appJson.expo.ios.supportsTablet !== undefined;
+});
+
 // MOBILE OPTIMIZATION TESTS
 console.log('\n📱 MOBILE OPTIMIZATION TESTS...');
+
+runTest('mobile', 'Mobile-Only Platform Setup', () => {
+  const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+  const platforms = appJson.expo.platforms || [];
+  return platforms.includes('android') && platforms.includes('ios') && !platforms.includes('web');
+});
 
 runTest('mobile', 'Responsive Typography', () => {
   const responsive = fs.readFileSync('src/utils/responsive.ts', 'utf8');
@@ -199,13 +248,17 @@ runTest('mobile', 'Responsive Typography', () => {
 
 runTest('mobile', 'Touch Optimizations', () => {
   const chatScreen = fs.readFileSync('app/chat/[id].tsx', 'utf8');
-  return chatScreen.includes('TouchableOpacity') && 
+  return chatScreen.includes('TouchableOpacity') &&
          chatScreen.includes('accessibilityLabel');
 });
 
 runTest('mobile', 'Platform Specific Code', () => {
   const chatScreen = fs.readFileSync('app/chat/[id].tsx', 'utf8');
   return chatScreen.includes('Platform.OS');
+});
+
+runTest('mobile', 'Mobile Navigation', () => {
+  return fs.existsSync('app/(tabs)/_layout.tsx') && fs.existsSync('app/_layout.tsx');
 });
 
 // PRODUCTION READINESS TESTS

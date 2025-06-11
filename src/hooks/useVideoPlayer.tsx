@@ -148,11 +148,13 @@ export const useVideoPlayer = ({
     status,
     isLoading,
     isMuted,
+    isPlaying: status?.isPlaying || false,
     isBuffering,
     isBackground,
     togglePlayPause,
     toggleMute,
     seekTo,
     loadVideo,
+    handleError: onError,
   };
 }; 

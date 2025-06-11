@@ -1,9 +1,8 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { ResponsiveContainer, ResponsiveSpacer, SafeResponsiveLayout } from '../src/components/layout/SafeResponsiveLayout';
 import AnimatedLogo from '../src/components/ui/AnimatedLogo';
-import { SafeResponsiveLayout, ResponsiveContainer, ResponsiveSpacer } from '../src/components/layout/SafeResponsiveLayout';
-import { useResponsiveDimensions, useResponsiveSpacing, useResponsiveFontSizes, useResponsiveLayout } from '../src/hooks/useResponsiveDimensions';
+import { useResponsiveDimensions, useResponsiveFontSizes, useResponsiveLayout, useResponsiveSpacing } from '../src/hooks/useResponsiveDimensions';
 import { markAppLaunched } from '../src/services/authStorageSimple';
 
 export default function WelcomeScreen() {
@@ -76,7 +75,8 @@ export default function WelcomeScreen() {
             }}
             selectable={false}
             accessible={true}
-            accessibilityRole="text"
+            accessibilityRole="header"
+            accessibilityLabel="Welcome to IraChat heading"
           >
             Welcome to IraChat
           </Text>
@@ -95,6 +95,7 @@ export default function WelcomeScreen() {
             }}
             selectable={false}
             accessible={true}
+            accessibilityLabel="Connect with friends and family through secure messaging"
           >
             Connect with friends and family through secure messaging
           </Text>
@@ -131,8 +132,11 @@ export default function WelcomeScreen() {
               borderRadius: 8,
               width: '100%',
               cursor: 'pointer',
-
             }}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Create Account button"
+            accessibilityHint="Tap to start creating your account"
           >
             <Text
               style={{

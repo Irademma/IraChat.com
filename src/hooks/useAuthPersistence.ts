@@ -111,6 +111,9 @@ export const useAuthPersistence = (): AuthPersistenceState => {
                 status: userData.status || userData.bio || 'I Love IraChat',
                 bio: userData.bio || 'I Love IraChat',
                 isOnline: true,
+                followersCount: userData.followersCount || 0,
+                followingCount: userData.followingCount || 0,
+                likesCount: userData.likesCount || 0,
               };
 
               // Store auth data securely

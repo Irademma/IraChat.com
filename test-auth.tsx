@@ -1,20 +1,19 @@
 // Authentication Testing Screen
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { 
-  runAllAuthTests,
-  testAuthPersistence,
-  testUserRegistration,
-  testAppLaunchScenarios
-} from './src/utils/authTest';
-import {
-  storeAuthData,
-  getStoredAuthData,
-  clearAuthData,
-  isAuthenticated,
-  createAuthData
-} from './src/services/authStorageSimple';
+import { useState } from 'react';
+import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { createUserAccount, getCurrentUser, signOutUser } from './src/services/authService';
+import {
+    clearAuthData,
+    createAuthData,
+    getStoredAuthData,
+    isAuthenticated,
+    storeAuthData
+} from './src/services/authStorageSimple';
+import {
+    testAppLaunchScenarios,
+    testAuthPersistence,
+    testUserRegistration
+} from './src/utils/authTest';
 
 export default function AuthTestScreen() {
   const [testResults, setTestResults] = useState<string[]>([]);
@@ -51,9 +50,13 @@ export default function AuthTestScreen() {
       phoneNumber: '+256700000000',
       displayName: 'Test User',
       name: 'Test User',
+      username: 'testuser',
       avatar: 'https://i.pravatar.cc/150?u=test',
       status: 'Testing!',
       isOnline: true,
+      followersCount: 0,
+      followingCount: 0,
+      likesCount: 0,
     };
 
     const authData = createAuthData(testUser);
@@ -101,9 +104,13 @@ export default function AuthTestScreen() {
       phoneNumber: '+256700000001',
       displayName: 'Expired User',
       name: 'Expired User',
+      username: 'expireduser',
       avatar: 'https://i.pravatar.cc/150?u=expired',
       status: 'Will expire',
       isOnline: true,
+      followersCount: 0,
+      followingCount: 0,
+      likesCount: 0,
     };
 
     // Create expired token (1 second ago)

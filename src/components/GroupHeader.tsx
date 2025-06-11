@@ -95,12 +95,12 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
         <View style={styles.statusContainer}>
           <Ionicons 
             name="mic" 
-            size={isTablet ? 20 : 16} 
+            size={isTablet() ? 20 : 16}
             color={colors.error} 
             accessibilityLabel="Recording indicator"
           />
           <Text 
-            style={[styles.statusText, isSmallDevice && styles.statusTextSmall]}
+            style={[styles.statusText, isSmallDevice() && styles.statusTextSmall]}
             numberOfLines={1}
           >
             {recordingMembers.length === 1
@@ -122,10 +122,10 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
               },
             ]}
           >
-            <Text style={[styles.typingDots, isSmallDevice && styles.typingDotsSmall]}>...</Text>
+            <Text style={[styles.typingDots, isSmallDevice() && styles.typingDotsSmall]}>...</Text>
           </Animated.View>
           <Text 
-            style={[styles.statusText, isSmallDevice && styles.statusTextSmall]}
+            style={[styles.statusText, isSmallDevice() && styles.statusTextSmall]}
             numberOfLines={1}
           >
             {typingMembers.length === 1
@@ -139,9 +139,9 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
     if (onlineMembers.length > 0) {
       return (
         <View style={styles.statusContainer}>
-          <View style={[styles.onlineIndicator, isSmallDevice && styles.onlineIndicatorSmall]} />
-          <Text 
-            style={[styles.statusText, isSmallDevice && styles.statusTextSmall]}
+          <View style={[styles.onlineIndicator, isSmallDevice() && styles.onlineIndicatorSmall]} />
+          <Text
+            style={[styles.statusText, isSmallDevice() && styles.statusTextSmall]}
             numberOfLines={1}
           >
             {onlineMembers.length} {onlineMembers.length === 1 ? 'member' : 'members'} online
@@ -188,7 +188,7 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
         >
           <Ionicons 
             name="arrow-back" 
-            size={isTablet ? 28 : 24} 
+            size={isTablet() ? 28 : 24}
             color={colors.text} 
           />
         </TouchableOpacity>
@@ -204,20 +204,20 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
               source={{ uri: group.photo }} 
               style={[
                 styles.groupPhoto,
-                isTablet && styles.groupPhotoTablet,
-                isSmallDevice && styles.groupPhotoSmall
-              ]} 
+                isTablet() && styles.groupPhotoTablet,
+                isSmallDevice() && styles.groupPhotoSmall
+              ]}
             />
           ) : (
             <View style={[
               styles.groupPhotoPlaceholder,
-              isTablet && styles.groupPhotoTablet,
-              isSmallDevice && styles.groupPhotoSmall
+              isTablet() && styles.groupPhotoTablet,
+              isSmallDevice() && styles.groupPhotoSmall
             ]}>
               <Text style={[
                 styles.groupInitials,
-                isTablet && styles.groupInitialsTablet,
-                isSmallDevice && styles.groupInitialsSmall
+                isTablet() && styles.groupInitialsTablet,
+                isSmallDevice() && styles.groupInitialsSmall
               ]}>
                 {group.name.substring(0, 2).toUpperCase()}
               </Text>
@@ -227,9 +227,9 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
             <Text 
               style={[
                 styles.groupName,
-                isTablet && styles.groupNameTablet,
-                isSmallDevice && styles.groupNameSmall
-              ]} 
+                isTablet() && styles.groupNameTablet,
+                isSmallDevice() && styles.groupNameSmall
+              ]}
               numberOfLines={1}
             >
               {group.name}
@@ -237,8 +237,8 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
             <View style={styles.groupStatus}>
               <Text style={[
                 styles.memberCount,
-                isTablet && styles.memberCountTablet,
-                isSmallDevice && styles.memberCountSmall
+                isTablet() && styles.memberCountTablet,
+                isSmallDevice() && styles.memberCountSmall
               ]}>
                 {group.members.length} {group.members.length === 1 ? 'member' : 'members'}
               </Text>
@@ -253,8 +253,8 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
           <Animated.View
             style={[
               styles.unreadBadge,
-              isTablet && styles.unreadBadgeTablet,
-              isSmallDevice && styles.unreadBadgeSmall,
+              isTablet() && styles.unreadBadgeTablet,
+              isSmallDevice() && styles.unreadBadgeSmall,
               {
                 transform: [{ scale: pulseAnim }],
               },
@@ -262,8 +262,8 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
           >
             <Text style={[
               styles.unreadCount,
-              isTablet && styles.unreadCountTablet,
-              isSmallDevice && styles.unreadCountSmall
+              isTablet() && styles.unreadCountTablet,
+              isSmallDevice() && styles.unreadCountSmall
             ]}>
               {unreadCount > 99 ? '99+' : unreadCount}
             </Text>
@@ -277,7 +277,7 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
         >
           <Ionicons 
             name="ellipsis-vertical" 
-            size={isTablet ? 28 : 24} 
+            size={isTablet() ? 28 : 24}
             color={colors.text} 
           />
         </TouchableOpacity>

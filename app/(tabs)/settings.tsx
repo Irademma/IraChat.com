@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
 import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,6 +8,7 @@ import { auth } from '../../src/services/firebaseSimple';
 
 export default function SettingsScreen() {
   const dispatch = useDispatch();
+  const router = useRouter();
 
   // Get current user from Redux store
   const currentUser = useSelector((state: RootState) => state.user.currentUser);

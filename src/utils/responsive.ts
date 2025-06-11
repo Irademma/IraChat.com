@@ -10,19 +10,43 @@ const getActualHeight = () => {
   return SCREEN_HEIGHT - (StatusBar.currentHeight || 0);
 };
 
-// Device type detection
+// Enhanced device type detection for all mobile devices
 export const isTablet = () => {
   const { width, height } = Dimensions.get('window');
   const aspectRatio = height / width;
-  return aspectRatio <= 1.6;
+  const minDimension = Math.min(width, height);
+  // More accurate tablet detection
+  return minDimension >= 768 || aspectRatio <= 1.6;
+};
+
+// Comprehensive mobile device detection
+export const isVerySmallDevice = () => {
+  return SCREEN_WIDTH < 320; // iPhone SE 1st gen and smaller
 };
 
 export const isSmallDevice = () => {
-  return SCREEN_WIDTH < 375;
+  return SCREEN_WIDTH >= 320 && SCREEN_WIDTH < 375; // iPhone SE 2nd gen, small Android
+};
+
+export const isMediumDevice = () => {
+  return SCREEN_WIDTH >= 375 && SCREEN_WIDTH < 414; // iPhone 8, iPhone X/11/12/13 mini
 };
 
 export const isLargeDevice = () => {
-  return SCREEN_WIDTH > 768;
+  return SCREEN_WIDTH >= 414 && SCREEN_WIDTH < 768; // iPhone Plus, Pro, large Android phones
+};
+
+export const isExtraLargeDevice = () => {
+  return SCREEN_WIDTH >= 768; // Tablets and larger
+};
+
+// Device category helpers
+export const isMobilePhone = () => {
+  return SCREEN_WIDTH < 768;
+};
+
+export const isCompactDevice = () => {
+  return SCREEN_WIDTH < 414; // Small to medium phones
 };
 
 // Responsive dimensions
@@ -34,17 +58,19 @@ export const hp = (percentage: number) => {
   return (SCREEN_HEIGHT * percentage) / 100;
 };
 
-// Responsive font sizes
+// Enhanced responsive font sizes for all mobile devices
 export const fontSizes = {
-  xs: isSmallDevice() ? 10 : 12,
-  sm: isSmallDevice() ? 12 : 14,
-  md: isSmallDevice() ? 14 : 16,
-  lg: isSmallDevice() ? 16 : 18,
-  xl: isSmallDevice() ? 18 : 20,
-  xxl: isSmallDevice() ? 20 : 24,
+  xxs: isVerySmallDevice() ? 8 : isSmallDevice() ? 9 : isCompactDevice() ? 10 : 11,
+  xs: isVerySmallDevice() ? 10 : isSmallDevice() ? 11 : isCompactDevice() ? 12 : 13,
+  sm: isVerySmallDevice() ? 12 : isSmallDevice() ? 13 : isCompactDevice() ? 14 : 15,
+  md: isVerySmallDevice() ? 14 : isSmallDevice() ? 15 : isCompactDevice() ? 16 : 17,
+  lg: isVerySmallDevice() ? 16 : isSmallDevice() ? 17 : isCompactDevice() ? 18 : 19,
+  xl: isVerySmallDevice() ? 18 : isSmallDevice() ? 19 : isCompactDevice() ? 20 : 21,
+  xxl: isVerySmallDevice() ? 20 : isSmallDevice() ? 22 : isCompactDevice() ? 24 : 26,
+  xxxl: isVerySmallDevice() ? 24 : isSmallDevice() ? 26 : isCompactDevice() ? 28 : 30,
 };
 
-// Export individual fontSize object for UpdateCard compatibility
+// Export fontSize as alias for compatibility
 export const fontSize = fontSizes;
 
 // Responsive spacing
@@ -103,61 +129,69 @@ export const getGridColumns = () => {
   return 1;
 };
 
-// Responsive image sizes
+// Enhanced responsive image sizes for all mobile devices
 export const imageSizes = {
-  thumbnail: isSmallDevice() ? 40 : 50,
-  avatar: isSmallDevice() ? 32 : 40,
-  messageImage: isSmallDevice() ? 200 : 250,
-  groupImage: isSmallDevice() ? 60 : 80,
+  thumbnail: isVerySmallDevice() ? 36 : isSmallDevice() ? 40 : isCompactDevice() ? 44 : 50,
+  avatar: isVerySmallDevice() ? 28 : isSmallDevice() ? 32 : isCompactDevice() ? 36 : 40,
+  messageImage: isVerySmallDevice() ? 180 : isSmallDevice() ? 200 : isCompactDevice() ? 220 : 250,
+  groupImage: isVerySmallDevice() ? 56 : isSmallDevice() ? 60 : isCompactDevice() ? 68 : 80,
+  profileImage: isVerySmallDevice() ? 80 : isSmallDevice() ? 90 : isCompactDevice() ? 100 : 120,
 };
 
-// Responsive modal sizes
+// Enhanced responsive modal sizes
 export const modalSizes = {
-  width: isTablet() ? '80%' : '90%',
-  maxHeight: isTablet() ? '80%' : '90%',
+  width: isTablet() ? '80%' : isLargeDevice() ? '85%' : '90%',
+  maxHeight: isTablet() ? '80%' : isLargeDevice() ? '85%' : '90%',
+  borderRadius: isVerySmallDevice() ? 12 : isCompactDevice() ? 16 : 20,
 };
 
-// Responsive list item heights
+// Enhanced responsive list item heights
 export const listItemHeights = {
-  message: isSmallDevice() ? 60 : 70,
-  group: isSmallDevice() ? 70 : 80,
-  member: isSmallDevice() ? 50 : 60,
+  message: isVerySmallDevice() ? 56 : isSmallDevice() ? 60 : isCompactDevice() ? 64 : 70,
+  group: isVerySmallDevice() ? 66 : isSmallDevice() ? 70 : isCompactDevice() ? 74 : 80,
+  member: isVerySmallDevice() ? 46 : isSmallDevice() ? 50 : isCompactDevice() ? 54 : 60,
+  contact: isVerySmallDevice() ? 52 : isSmallDevice() ? 56 : isCompactDevice() ? 60 : 64,
 };
 
-// Responsive input sizes
+// Enhanced responsive input sizes
 export const inputSizes = {
-  height: isSmallDevice() ? 40 : 48,
-  fontSize: isSmallDevice() ? 14 : 16,
-  padding: isSmallDevice() ? 8 : 12,
+  height: isVerySmallDevice() ? 36 : isSmallDevice() ? 40 : isCompactDevice() ? 44 : 48,
+  fontSize: isVerySmallDevice() ? 13 : isSmallDevice() ? 14 : isCompactDevice() ? 15 : 16,
+  padding: isVerySmallDevice() ? 6 : isSmallDevice() ? 8 : isCompactDevice() ? 10 : 12,
+  borderRadius: isVerySmallDevice() ? 8 : isCompactDevice() ? 10 : 12,
 };
 
-// Responsive button sizes
+// Enhanced responsive button sizes
 export const buttonSizes = {
-  height: isSmallDevice() ? 40 : 48,
-  fontSize: isSmallDevice() ? 14 : 16,
-  padding: isSmallDevice() ? 8 : 12,
-  borderRadius: isSmallDevice() ? 20 : 24,
+  height: isVerySmallDevice() ? 36 : isSmallDevice() ? 40 : isCompactDevice() ? 44 : 48,
+  fontSize: isVerySmallDevice() ? 13 : isSmallDevice() ? 14 : isCompactDevice() ? 15 : 16,
+  padding: isVerySmallDevice() ? 6 : isSmallDevice() ? 8 : isCompactDevice() ? 10 : 12,
+  borderRadius: isVerySmallDevice() ? 18 : isSmallDevice() ? 20 : isCompactDevice() ? 22 : 24,
+  iconSize: isVerySmallDevice() ? 16 : isSmallDevice() ? 18 : isCompactDevice() ? 20 : 22,
 };
 
-// Responsive header sizes
+// Enhanced responsive header sizes
 export const headerSizes = {
-  height: isSmallDevice() ? 50 : 60,
-  fontSize: isSmallDevice() ? 18 : 20,
-  iconSize: isSmallDevice() ? 24 : 28,
+  height: isVerySmallDevice() ? 46 : isSmallDevice() ? 50 : isCompactDevice() ? 54 : 60,
+  fontSize: isVerySmallDevice() ? 16 : isSmallDevice() ? 18 : isCompactDevice() ? 19 : 20,
+  iconSize: isVerySmallDevice() ? 20 : isSmallDevice() ? 24 : isCompactDevice() ? 26 : 28,
+  paddingHorizontal: isVerySmallDevice() ? 12 : isCompactDevice() ? 16 : 20,
 };
 
-// Responsive tab bar sizes
+// Enhanced responsive tab bar sizes
 export const tabBarSizes = {
-  height: isSmallDevice() ? 50 : 60,
-  fontSize: isSmallDevice() ? 12 : 14,
-  iconSize: isSmallDevice() ? 20 : 24,
+  height: isVerySmallDevice() ? 46 : isSmallDevice() ? 50 : isCompactDevice() ? 54 : 60,
+  fontSize: isVerySmallDevice() ? 10 : isSmallDevice() ? 12 : isCompactDevice() ? 13 : 14,
+  iconSize: isVerySmallDevice() ? 18 : isSmallDevice() ? 20 : isCompactDevice() ? 22 : 24,
+  paddingBottom: Platform.OS === 'ios' ? (isVerySmallDevice() ? 16 : 20) : 5,
 };
 
-// Responsive bottom sheet sizes
+// Enhanced responsive bottom sheet sizes
 export const bottomSheetSizes = {
-  height: isSmallDevice() ? '40%' : '50%',
-  handleHeight: isSmallDevice() ? 4 : 6,
-  borderRadius: isSmallDevice() ? 16 : 20,
+  height: isVerySmallDevice() ? '35%' : isSmallDevice() ? '40%' : isCompactDevice() ? '45%' : '50%',
+  handleHeight: isVerySmallDevice() ? 3 : isSmallDevice() ? 4 : 6,
+  borderRadius: isVerySmallDevice() ? 12 : isSmallDevice() ? 16 : 20,
+  paddingHorizontal: isVerySmallDevice() ? 12 : isCompactDevice() ? 16 : 20,
 };
 
 // Responsive keyboard handling

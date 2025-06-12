@@ -180,6 +180,25 @@ export default function TabLayout() {
           headerTitle: 'Profile',
         }}
       />
+
+      {/* Settings Tab */}
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color }) => (
+            <Ionicons
+              name="settings"
+              size={tabIconSize}
+              color={color}
+              accessibilityLabel="Settings tab icon"
+            />
+          ),
+          tabBarAccessibilityLabel: 'Settings tab',
+          // tabBarAccessibilityRole: 'tab', // Remove unsupported property
+          headerTitle: 'Settings',
+        }}
+      />
     </Tabs>
     </View>
   );

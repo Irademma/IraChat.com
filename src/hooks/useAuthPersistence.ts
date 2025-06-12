@@ -7,10 +7,10 @@ import { useDispatch } from 'react-redux';
 
 import { logout, setLoading, setUser } from '../redux/userSlice';
 import {
-  clearAuthData,
-  createAuthData,
-  getStoredAuthData,
-  storeAuthData
+    clearAuthData,
+    createAuthData,
+    getStoredAuthData,
+    storeAuthData
 } from '../services/authStorageSimple';
 import { db, waitForAuth } from '../services/firebaseSimple';
 import { User } from '../types';
@@ -122,6 +122,16 @@ export const useAuthPersistence = (): AuthPersistenceState => {
 
               // Update Redux store
               dispatch(setUser(user));
+
+              // Track user authentication in Analytics
+              trackUserAuth(user.id, firebaseUser.phoneNumber ? 'phone' : 'email');
+              setUserAnalyticsProperties({
+                user_id: user.id,
+                phone_number: user.phoneNumber,
+                display_name: user.displayName,
+                has_avatar: !!user.avatar,
+                signup_method: firebaseUser.phoneNumber ? 'phone' : 'email',
+              });
 
               setAuthState({
                 isInitializing: false,

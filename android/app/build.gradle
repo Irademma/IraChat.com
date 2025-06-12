@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'IraChat.com'
+    namespace 'IraChat.android'
     defaultConfig {
-        applicationId 'IraChat.com'
+        applicationId 'IraChat.android'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

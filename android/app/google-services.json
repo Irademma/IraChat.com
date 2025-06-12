@@ -1,29 +1,29 @@
 {
-    "project_info": {
-      "project_number": "1070682974579",
-      "project_id": "irachat-c172f",
-      "storage_bucket": "irachat-c172f.firebasestorage.app"
-    },
-    "client": [
-      {
-        "client_info": {
-          "mobilesdk_app_id": "1:1070682974579:android:cb10e01ccdee22d5523d06",
-          "android_client_info": {
-            "package_name": "com.irachat.app"
-          }
-        },
-        "oauth_client": [],
-        "api_key": [
-          {
-            "current_key": "AIzaSyCbIA1Nm3DAeRc5uFAHCIIipqeX6YCz1AU"
-          }
-        ],
-        "services": {
-          "appinvite_service": {
-            "other_platform_oauth_client": []
-          }
+  "project_info": {
+    "project_number": "952038859243",
+    "project_id": "irachat-5c2bf",
+    "storage_bucket": "irachat-5c2bf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:952038859243:android:ab3d70b62c723a800b39ae",
+        "android_client_info": {
+          "package_name": "IraChat.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtL_r70ispLoTkZ4TCboRtCga_yWMZAiM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
         }
       }
-    ],
-    "configuration_version": "1"
-  }
+    }
+  ],
+  "configuration_version": "1"
+}

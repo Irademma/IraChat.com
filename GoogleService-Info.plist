@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyA8GHTv5Tux6jesTinknwHQC276cMQDU4o</string>
+	<string>AIzaSyB2ZHUR0i7k18MgQSBYvQ2_ppeYb4Z2dxk</string>
 	<key>GCM_SENDER_ID</key>
-	<string>1070682974579</string>
+	<string>952038859243</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.irachat.mobile</string>
+	<string>IraChat.ios</string>
 	<key>PROJECT_ID</key>
-	<string>irachat-c172f</string>
+	<string>irachat-5c2bf</string>
 	<key>STORAGE_BUCKET</key>
-	<string>irachat-c172f.firebasestorage.app</string>
+	<string>irachat-5c2bf.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1070682974579:ios:cd451f73917c64c1523d06</string>
+	<string>1:952038859243:ios:f56276205c8d43470b39ae</string>
 </dict>
 </plist>

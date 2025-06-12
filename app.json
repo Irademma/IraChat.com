@@ -17,7 +17,7 @@
     "platforms": ["ios", "android"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.irachat.mobile",
+      "bundleIdentifier": "IraChat.ios",
       "buildNumber": "1.0.0",
       "infoPlist": {
         "NSCameraUsageDescription": "IraChat needs access to camera to take photos and videos for messaging",
@@ -30,7 +30,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#667eea"
       },
-      "package": "com.irachat.app",
+      "package": "IraChat.com",
       "versionCode": 1,
       "permissions": [
         "CAMERA",
@@ -78,6 +78,10 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "scheme": "irachat",
+    "web": {
+      "bundler": "metro"
     }
   }
 }

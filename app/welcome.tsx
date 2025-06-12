@@ -1,21 +1,11 @@
 import { useRouter } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { ResponsiveContainer, ResponsiveSpacer, SafeResponsiveLayout } from '../src/components/layout/SafeResponsiveLayout';
-import AnimatedLogo from '../src/components/ui/AnimatedLogo';
-import { useResponsiveDimensions, useResponsiveFontSizes, useResponsiveLayout, useResponsiveSpacing } from '../src/hooks/useResponsiveDimensions';
-import { markAppLaunched } from '../src/services/authStorageSimple';
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { isXSmall, isSmall, isMedium, isDesktop, width } = useResponsiveDimensions();
-  const spacing = useResponsiveSpacing();
-  const fontSizes = useResponsiveFontSizes();
-  const layout = useResponsiveLayout();
 
-  const handleCreateAccount = async () => {
+  const handleCreateAccount = () => {
     console.log('Create Account button clicked');
-    // Mark that the user has interacted with the app (no longer a first-time user)
-    await markAppLaunched();
     router.push('/register');
   };
 

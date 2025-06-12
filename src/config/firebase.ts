@@ -24,15 +24,15 @@ const validateFirebaseConfig = () => {
   return missing.length === 0;
 };
 
-// Firebase configuration
+// Firebase configuration - Updated with NEW project: irachat-5c2bf
 export const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || "AIzaSyARJMFbCsU7MEo7e54vvdun-oqlLxBPBg4",
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "irachat-c172f.firebaseapp.com",
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "irachat-c172f",
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "irachat-c172f.firebasestorage.app",
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "1070682974579",
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:1070682974579:web:bded79bc44183c8f523d06",
-  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-12YVVSGMH1"
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || "AIzaSyDtL_r70ispLoTkZ4TCboRtCga_yWMZAiM",
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "irachat-5c2bf.firebaseapp.com",
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "irachat-5c2bf",
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "irachat-5c2bf.firebasestorage.app",
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "952038859243",
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:952038859243:android:ab3d70b62c723a800b39ae",
+  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-PLACEHOLDER"
 };
 
 // Validate configuration on import

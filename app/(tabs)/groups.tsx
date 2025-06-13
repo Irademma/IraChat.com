@@ -2,18 +2,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Animated,
-    FlatList,
-    Image,
-    RefreshControl,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Animated,
+  FlatList,
+  Image,
+  RefreshControl,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import { useTabNavigation } from '../../src/hooks/useTabNavigation';
+
 
 
 interface Group {
@@ -38,11 +38,8 @@ export default function GroupsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-  const [showEnhancedChat, setShowEnhancedChat] = useState(false);
-
   // Tab navigation with smooth animations
-  const { handleSwipeGesture } = useTabNavigation();
+  // const { handleSwipeGesture } = useTabNavigation();
 
   // Animation for floating action button
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -131,9 +128,8 @@ export default function GroupsScreen() {
 
   const handleGroupPress = (group: Group) => {
     try {
-      // Show enhanced group chat
-      setSelectedGroup(group);
-      setShowEnhancedChat(true);
+      // Navigate to group chat
+      router.push(`/chat/${group.id}?name=${encodeURIComponent(group.name)}&isGroup=true`);
     } catch (error) {
       Alert.alert('Error', 'Failed to open group chat');
       console.error('Group navigation error:', error);
@@ -437,23 +433,7 @@ export default function GroupsScreen() {
         </View>
       </Animated.View>
 
-      {/* Enhanced Group Chat Modal */}
-      <Modal
-        visible={showEnhancedChat}
-        animationType="slide"
-        presentationStyle="fullScreen"
-      >
-        {selectedGroup && (
-          <EnhancedGroupChatScreen
-            groupId={selectedGroup.id}
-            currentUserId="current_user_id" // Replace with actual current user ID
-            onBack={() => {
-              setShowEnhancedChat(false);
-              setSelectedGroup(null);
-            }}
-          />
-        )}
-      </Modal>
+
 
     </View>
   );

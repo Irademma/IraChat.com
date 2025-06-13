@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useLocalSearchParams } from 'expo-router';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import {
   addDoc,
   collection,
   doc,
+  getDoc,
   onSnapshot,
   orderBy,
   query,
@@ -65,27 +65,25 @@ export default function ChatRoomScreen() {
           return;
         }
 
-        // Create Firebase user with email/password (using phone as email)
-        const email = `${currentUser.phoneNumber.replace('+', '')}@irachat.app`;
-        const password = `irachat_${currentUser.id}`;
+        // 🔒 PHONE-BASED AUTH: Use phone number as unique identifier
+        console.log('📱 Using phone-based authentication for messaging');
 
+        // Create a consistent user ID based on phone number for messaging
+        const phoneBasedUserId = `phone_${currentUser.phoneNumber.replace(/[^0-9]/g, '')}`;
+
+        // Check if user document exists in Firestore
         try {
-          // Try to sign in first
-          const signInResult = await signInWithEmailAndPassword(auth, email, password);
-          console.log('✅ Firebase user signed in:', signInResult.user.uid);
-          setFirebaseUser(signInResult.user);
-        } catch (signInError: any) {
-          if (signInError.code === 'auth/user-not-found') {
-            // Create new user
-            const createResult = await createUserWithEmailAndPassword(auth, email, password);
-            console.log('✅ Firebase user created:', createResult.user.uid);
-            
-            // Store user data in Firestore
-            await setDoc(doc(db, 'users', createResult.user.uid), {
-              uid: createResult.user.uid,
+          const userDocRef = doc(db, 'users', phoneBasedUserId);
+          const userDoc = await getDoc(userDocRef);
+
+          if (!userDoc.exists()) {
+            // Create user document in Firestore for messaging
+            await setDoc(userDocRef, {
+              uid: phoneBasedUserId,
               phoneNumber: currentUser.phoneNumber,
               name: currentUser.name,
-              displayName: currentUser.displayName,
+              displayName: currentUser.displayName || currentUser.name,
+              username: currentUser.username,
               avatar: currentUser.avatar,
               status: currentUser.status,
               bio: currentUser.bio,
@@ -93,11 +91,28 @@ export default function ChatRoomScreen() {
               createdAt: new Date(),
               lastLoginAt: new Date(),
             });
-            
-            setFirebaseUser(createResult.user);
+            console.log('✅ Created user document for messaging:', phoneBasedUserId);
           } else {
-            throw signInError;
+            console.log('✅ User document exists for messaging:', phoneBasedUserId);
           }
+
+          // Set a mock Firebase user object for messaging compatibility
+          setFirebaseUser({
+            uid: phoneBasedUserId,
+            phoneNumber: currentUser.phoneNumber,
+            displayName: currentUser.name,
+            email: null // No email needed for phone-based auth
+          });
+
+        } catch (firestoreError) {
+          console.error('❌ Error setting up user for messaging:', firestoreError);
+          // Still set the user for messaging to work
+          setFirebaseUser({
+            uid: phoneBasedUserId,
+            phoneNumber: currentUser.phoneNumber,
+            displayName: currentUser.name,
+            email: null
+          });
         }
       } catch (error) {
         console.error('❌ Firebase user initialization failed:', error);
@@ -208,9 +223,9 @@ export default function ChatRoomScreen() {
       await addDoc(collection(db, 'chats', chatId as string, 'messages'), {
         text: input,
         senderId: firebaseUser.uid,
-        senderEmail: firebaseUser.email,
         senderName: currentUser?.name || 'Unknown',
         senderPhoneNumber: currentUser?.phoneNumber || '',
+        senderUsername: currentUser?.username || '',
         timestamp: serverTimestamp(),
       });
 

@@ -207,9 +207,18 @@ export default function ChatsListScreen() {
 
 
   useEffect(() => {
-    // Only load chats if we have a current user
+    // Load chats with Firebase fallback
     const loadUserChats = async () => {
       try {
+        // Check if Firebase is available
+        if (!db) {
+          console.log('📭 Firebase not available, using sample chats');
+          setChats(sampleChats);
+          setIsLoadingChats(false);
+          setHasLoadedOnce(true);
+          return;
+        }
+
         // For now, we'll load all chats but in production this should be user-specific
         // TODO: Filter chats by current user's participation
         const q = query(collection(db, 'chats'), orderBy('lastMessageAt', 'desc'));
@@ -241,6 +250,8 @@ export default function ChatsListScreen() {
         return unsubscribe;
       } catch (error) {
         console.error('❌ Error loading chats:', error);
+        console.log('📭 Falling back to sample chats');
+        setChats(sampleChats);
         setIsLoadingChats(false);
         setHasLoadedOnce(true);
       }

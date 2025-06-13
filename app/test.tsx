@@ -142,14 +142,14 @@ export default function TestScreen() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push('/auth' as any)}
+        onPress={() => router.push('/welcome')}
       >
         <Text style={styles.buttonText}>Go to Login</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={[styles.button, { backgroundColor: '#667eea' }]}
-        onPress={() => router.push('/(tabs)')}
+        onPress={() => router.push('/')}
       >
         <Text style={styles.buttonText}>Go to Main App</Text>
       </TouchableOpacity>

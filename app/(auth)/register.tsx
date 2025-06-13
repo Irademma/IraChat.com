@@ -111,19 +111,41 @@ export default function RegisterScreen() {
       setProfilePicture('');
       setError('');
 
-      // Navigate directly to chats tab after successful account creation
-      console.log('🎯 Account creation complete - navigating to chats tab');
-      router.replace('/(tabs)');
+      // Wait a moment for auth state to be properly updated, then navigate
+      console.log('🎯 Account creation complete - waiting for auth state sync...');
+      setTimeout(() => {
+        console.log('🎯 Navigating to main tabs');
+        router.replace('/(tabs)');
+      }, 500); // Give 500ms for auth state to sync
 
     } catch (error: any) {
-      console.error('Create account failed:', error);
+      console.error('❌ Create account failed:', error);
       console.error('Error details:', error.message);
       console.error('Error stack:', error.stack);
 
-      // Show the actual error message for debugging
-      const errorMessage = error.message || 'Failed to create account. Please try again.';
-      setError(errorMessage);
-      Alert.alert('Error', `Registration failed: ${errorMessage}`);
+      // Show specific error messages for phone/username conflicts
+      if (error.message.includes('phone number is already registered')) {
+        const errorMessage = 'This phone number is already registered. Each phone number can only have one account for security reasons.';
+        setError(errorMessage);
+        Alert.alert(
+          'Phone Number Already Registered',
+          'This phone number is already associated with an account. Each phone number can only have one account for security reasons.\n\nIf this is your phone number, please contact support.',
+          [{ text: 'OK', style: 'default' }]
+        );
+      } else if (error.message.includes('username is already taken')) {
+        const errorMessage = 'This username is already taken. Please choose a different username.';
+        setError(errorMessage);
+        Alert.alert(
+          'Username Taken',
+          'This username is already taken. Please choose a different username.',
+          [{ text: 'OK', style: 'default' }]
+        );
+      } else {
+        // Show the actual error message for debugging
+        const errorMessage = error.message || 'Failed to create account. Please try again.';
+        setError(errorMessage);
+        Alert.alert('Error', `Registration failed: ${errorMessage}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -134,7 +156,7 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-white"
+      style={{ flex: 1, backgroundColor: 'white' }}
       accessible={true}
       accessibilityLabel="Create account screen"
     >

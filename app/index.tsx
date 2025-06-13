@@ -22,7 +22,7 @@ export default function Index() {
       if (authTimeout) {
         console.log('⚠️ Auth timed out, bypassing to welcome');
         setDebugInfo('Auth timeout, showing welcome...');
-        setRedirectTo('/(auth)/welcome');
+        setRedirectTo('/welcome');
         setIsLoading(false);
         return;
       }
@@ -55,19 +55,19 @@ export default function Index() {
             console.log('🎉 New user, redirecting to welcome');
             setDebugInfo('New user, showing welcome...');
             await markAppLaunched();
-            setRedirectTo('/(auth)/welcome');
+            setRedirectTo('/welcome');
           } else {
             // Returning user who logged out, show auth
             console.log('🔄 Returning user, redirecting to auth');
             setDebugInfo('Returning user, showing login...');
-            setRedirectTo('/(auth)');
+            setRedirectTo('/welcome');
           }
         }
       } catch (error) {
         console.error('❌ Error determining route:', error);
         setDebugInfo('Error occurred, showing welcome...');
         // Fallback to welcome screen
-        setRedirectTo('/(auth)/welcome');
+        setRedirectTo('/welcome');
       } finally {
         setIsLoading(false);
       }
@@ -83,7 +83,7 @@ export default function Index() {
         console.log('⚠️ Auth initialization timeout, forcing bypass');
         setAuthTimeout(true);
         setDebugInfo('Auth timeout, bypassing to welcome...');
-        setRedirectTo('/(auth)/welcome');
+        setRedirectTo('/welcome');
         setIsLoading(false);
       }
     }, 5000); // 5 second timeout for auth
@@ -97,7 +97,7 @@ export default function Index() {
       if (isLoading && !redirectTo) {
         console.log('⚠️ General loading timeout reached, forcing redirect to welcome');
         setDebugInfo('Loading timeout, showing welcome...');
-        setRedirectTo('/(auth)/welcome');
+        setRedirectTo('/welcome');
         setIsLoading(false);
       }
     }, 8000); // 8 second timeout
@@ -133,5 +133,5 @@ export default function Index() {
 
   // Fallback - Force redirect to welcome if nothing else works
   console.log('⚠️ No redirect determined, forcing welcome screen');
-  return <Redirect href="/(auth)/welcome" />;
+  return <Redirect href="/welcome" />;
 }

@@ -1,8 +1,3 @@
-import { FirebaseApp, getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-
 // Validate Firebase environment variables
 const validateFirebaseConfig = () => {
   const requiredVars = [
@@ -38,18 +33,6 @@ export const firebaseConfig = {
 // Validate configuration on import
 export const isFirebaseConfigValid = validateFirebaseConfig();
 
-// Initialize Firebase
-let app: FirebaseApp;
-if (getApps().length === 0) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
-}
-
-// Initialize Firebase services
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
-
-export { app, auth, db, storage };
+// NOTE: Firebase services are initialized in src/services/firebaseSimple.ts
+// This file only exports the configuration to avoid duplicate initialization
 

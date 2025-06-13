@@ -1,7 +1,7 @@
 // Simple Firebase Configuration - Web SDK for All Platforms
-import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FirebaseApp, getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getReactNativePersistence, initializeAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { Platform } from 'react-native';
@@ -13,78 +13,38 @@ console.log(`📱 Platform detected: ${Platform.OS}`);
 import { firebaseConfig } from '../config/firebase';
 
 // Initialize Firebase App
-let app: FirebaseApp;
 let authInstance: any;
-let db: any;
 
-const initializeFirebase = () => {
-    try {
-        console.log('Starting Firebase initialization...');
-        
-        // Initialize Firebase App first
-        if (getApps().length === 0) {
-            console.log('Initializing new Firebase app...');
-            app = initializeApp(firebaseConfig);
-            console.log('✅ Firebase app initialized:', app.name);
-        } else {
-            console.log('Retrieving existing Firebase app...');
-            app = getApp();
-            console.log('✅ Firebase app retrieved:', app.name);
-        }
 
-        // Initialize Firestore
-        console.log('Initializing Firestore...');
-        db = getFirestore(app);
-        console.log('✅ Firestore initialized');
-
-        // Initialize Auth
-        console.log('Initializing Firebase Auth...');
-        try {
-            if (Platform.OS === 'web') {
-                authInstance = getAuth(app);
-                console.log('✅ Web Auth initialized');
-            } else {
-                // For React Native, use the native Firebase Auth
-                authInstance = auth();
-                console.log('✅ React Native Auth initialized');
-            }
-        } catch (authError: any) {
-            console.error('Auth initialization error details:', {
-                code: authError.code,
-                message: authError.message,
-                stack: authError.stack
-            });
-
-            if (authError.code === 'auth/already-initialized') {
-                console.log('⚠️ Auth already initialized, retrieving instance');
-                authInstance = Platform.OS === 'web' ? getAuth(app) : auth();
-            } else {
-                throw authError;
-            }
-        }
-
-        return { app, auth: authInstance, db };
-    } catch (error: any) {
-        console.error('❌ Firebase initialization failed:', {
-            message: error.message,
-            code: error.code,
-            stack: error.stack
-        });
-        throw new Error(`Firebase initialization failed: ${error.message}`);
-    }
-};
 
 // Initialize Firebase and export instances
 console.log('Starting Firebase service initialization...');
 let firebaseApp: FirebaseApp;
 let firestore: any;
 
+// Initialize Firebase synchronously with fallback
 try {
-  const initialized = initializeFirebase();
-  firebaseApp = initialized.app;
-  authInstance = initialized.auth;
-  firestore = initialized.db;
-  console.log('✅ Firebase services initialized successfully');
+  console.log('🔥 Initializing Firebase app...');
+
+  // Initialize Firebase App first
+  if (getApps().length === 0) {
+    firebaseApp = initializeApp(firebaseConfig);
+    console.log('✅ Firebase app initialized:', firebaseApp.name);
+  } else {
+    firebaseApp = getApp();
+    console.log('✅ Firebase app retrieved:', firebaseApp.name);
+  }
+
+  // Initialize Firestore
+  firestore = getFirestore(firebaseApp);
+  console.log('✅ Firestore initialized');
+
+  // Initialize Auth with AsyncStorage persistence
+  authInstance = initializeAuth(firebaseApp, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+  console.log('✅ Firebase Auth initialized with AsyncStorage persistence');
+
 } catch (error) {
   console.error('❌ Failed to initialize Firebase services:', error);
   // Set fallback values to prevent app crash
@@ -154,7 +114,7 @@ export const getPlatformInfo = () => {
 
 // Add the missing waitForAuth function
 export const waitForAuth = async (timeoutMs: number = 10000): Promise<any> => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // If auth is already available, return it immediately
     if (authInstance) {
       console.log('✅ Auth instance already available');

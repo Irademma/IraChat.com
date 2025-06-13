@@ -9,10 +9,18 @@ export default function AuthLayout() {
         presentation: 'modal'
       }}
     >
+
       <Stack.Screen
-        name="index"
+        name="welcome"
         options={{
-          title: 'Authentication',
+          title: 'Welcome',
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="register"
+        options={{
+          title: 'Register',
           headerShown: false
         }}
       />

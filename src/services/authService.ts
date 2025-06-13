@@ -162,6 +162,52 @@ export const createUserAccount = async (userData: {
       throw new Error('Phone number is required');
     }
 
+    // 🔒 SECURITY: Check if phone number already exists
+    console.log('🔍 Checking phone number uniqueness...');
+    try {
+      const { collection, query, where, getDocs } = require('firebase/firestore');
+      const phoneQuery = query(
+        collection(db, 'users'),
+        where('phoneNumber', '==', userData.phoneNumber)
+      );
+      const existingUsers = await getDocs(phoneQuery);
+
+      if (!existingUsers.empty) {
+        console.log('❌ Phone number already exists:', userData.phoneNumber);
+        throw new Error('This phone number is already registered. Each phone number can only have one account for security reasons.');
+      }
+      console.log('✅ Phone number is unique');
+    } catch (phoneCheckError: any) {
+      if (phoneCheckError.message.includes('already registered')) {
+        throw phoneCheckError; // Re-throw our custom error
+      }
+      console.warn('⚠️ Could not verify phone uniqueness (continuing anyway):', phoneCheckError);
+      // Continue with account creation if Firestore is not available
+    }
+
+    // 🔒 SECURITY: Check if username already exists
+    console.log('🔍 Checking username uniqueness...');
+    try {
+      const { collection, query, where, getDocs } = require('firebase/firestore');
+      const usernameQuery = query(
+        collection(db, 'users'),
+        where('username', '==', userData.username.trim())
+      );
+      const existingUsernames = await getDocs(usernameQuery);
+
+      if (!existingUsernames.empty) {
+        console.log('❌ Username already exists:', userData.username);
+        throw new Error('This username is already taken. Please choose a different username.');
+      }
+      console.log('✅ Username is unique');
+    } catch (usernameCheckError: any) {
+      if (usernameCheckError.message.includes('already taken')) {
+        throw usernameCheckError; // Re-throw our custom error
+      }
+      console.warn('⚠️ Could not verify username uniqueness (continuing anyway):', usernameCheckError);
+      // Continue with account creation if Firestore is not available
+    }
+
     // Debug the username before creating user object
     console.log('🔍 Username from userData:', userData.username);
     console.log('🔍 Username trimmed:', userData.username.trim());

@@ -47,7 +47,7 @@ export const useAuthPersistence = (): AuthPersistenceState => {
 
         // Ensure Firebase Auth is properly initialized before proceeding
         console.log('🔐 Ensuring Firebase Auth is initialized...');
-        const authInstance = await waitForAuth(15000); // 15 second timeout
+        const authInstance = await waitForAuth(3000); // 3 second timeout (reduced from 15 seconds)
         console.log('✅ Firebase Auth is ready and initialized');
 
         // First, check for stored authentication data
@@ -90,60 +90,86 @@ export const useAuthPersistence = (): AuthPersistenceState => {
           return null;
         }
 
-        const unsubscribeAuth = onAuthStateChanged(authInstance, async (firebaseUser: FirebaseUser | null) => {
-          if (!isMounted) return;
+        try {
+          const unsubscribeAuth = onAuthStateChanged(authInstance, async (firebaseUser: FirebaseUser | null) => {
+            if (!isMounted) return;
 
-          try {
-            if (firebaseUser) {
-              console.log('🔥 Firebase user detected:', firebaseUser.uid);
+            try {
+              if (firebaseUser) {
+                console.log('🔥 Firebase user detected:', firebaseUser.uid);
 
-              // Get additional user data from Firestore
-              const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-              const userData = userDoc.exists() ? userDoc.data() : {};
+                // Try to get additional user data from Firestore if available
+                let userData = {};
+                try {
+                  if (db && typeof db === 'object') {
+                    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+                    userData = userDoc.exists() ? userDoc.data() : {};
+                  } else {
+                    console.warn('⚠️ Firestore not available, using basic user data');
+                  }
+                } catch (firestoreError) {
+                  console.warn('⚠️ Failed to get user data from Firestore:', firestoreError);
+                }
 
-              const user: User = {
-                id: firebaseUser.uid,
-                phoneNumber: firebaseUser.phoneNumber || '',
-                displayName: firebaseUser.displayName || userData.name || '',
-                name: userData.name || '',
-                username: userData.username || '',
-                avatar: userData.avatar || '',
-                status: userData.status || userData.bio || 'I Love IraChat',
-                bio: userData.bio || 'I Love IraChat',
-                isOnline: true,
-                followersCount: userData.followersCount || 0,
-                followingCount: userData.followingCount || 0,
-                likesCount: userData.likesCount || 0,
-              };
+                const user: User = {
+                  id: firebaseUser.uid,
+                  phoneNumber: firebaseUser.phoneNumber || '',
+                  displayName: firebaseUser.displayName || (userData as any).name || '',
+                  name: (userData as any).name || '',
+                  username: (userData as any).username || '',
+                  avatar: (userData as any).avatar || '',
+                  status: (userData as any).status || (userData as any).bio || 'I Love IraChat',
+                  bio: (userData as any).bio || 'I Love IraChat',
+                  isOnline: true,
+                  followersCount: (userData as any).followersCount || 0,
+                  followingCount: (userData as any).followingCount || 0,
+                  likesCount: (userData as any).likesCount || 0,
+                };
 
-              // Store auth data securely
-              const authData = createAuthData(user, await firebaseUser.getIdToken());
-              await storeAuthData(authData);
+                // Store auth data securely
+                const authData = createAuthData(user, await firebaseUser.getIdToken());
+                await storeAuthData(authData);
 
-              // Update Redux store
-              dispatch(setUser(user));
+                // Update Redux store
+                dispatch(setUser(user));
 
-              // Track user authentication in Analytics
-              trackUserAuth(user.id, firebaseUser.phoneNumber ? 'phone' : 'email');
-              setUserAnalyticsProperties({
-                user_id: user.id,
-                phone_number: user.phoneNumber,
-                display_name: user.displayName,
-                has_avatar: !!user.avatar,
-                signup_method: firebaseUser.phoneNumber ? 'phone' : 'email',
-              });
+                // Track user authentication in Analytics (with error handling)
+                try {
+                  // TODO: Add analytics tracking when analytics service is available
+                  console.log('📊 User authenticated:', {
+                    user_id: user.id,
+                    phone_number: user.phoneNumber,
+                    display_name: user.displayName,
+                    has_avatar: !!user.avatar,
+                    signup_method: firebaseUser.phoneNumber ? 'phone' : 'email',
+                  });
+                } catch (analyticsError) {
+                  console.warn('⚠️ Analytics tracking failed:', analyticsError);
+                }
 
-              setAuthState({
-                isInitializing: false,
-                isAuthenticated: true,
-                user: user
-              });
+                setAuthState({
+                  isInitializing: false,
+                  isAuthenticated: true,
+                  user: user
+                });
 
-              console.log('✅ Firebase auth state updated and stored');
-            } else {
-              console.log('🚪 Firebase user signed out');
+                console.log('✅ Firebase auth state updated and stored');
+              } else {
+                console.log('🚪 Firebase user signed out');
 
-              // Clear stored data
+                // Clear stored data
+                await clearAuthData();
+                dispatch(logout());
+
+                setAuthState({
+                  isInitializing: false,
+                  isAuthenticated: false,
+                  user: null
+                });
+              }
+            } catch (error) {
+              console.error('❌ Error handling Firebase auth state change:', error);
+
               await clearAuthData();
               dispatch(logout());
 
@@ -153,22 +179,14 @@ export const useAuthPersistence = (): AuthPersistenceState => {
                 user: null
               });
             }
-          } catch (error) {
-            console.error('❌ Error handling Firebase auth state change:', error);
+          });
 
-            await clearAuthData();
-            dispatch(logout());
-
-            setAuthState({
-              isInitializing: false,
-              isAuthenticated: false,
-              user: null
-            });
-          }
-        });
-
-        // Store the unsubscribe function for cleanup
-        return unsubscribeAuth;
+          // Store the unsubscribe function for cleanup
+          return unsubscribeAuth;
+        } catch (authListenerError) {
+          console.error('❌ Failed to set up Firebase auth state listener:', authListenerError);
+          return null;
+        }
 
       } catch (error) {
         console.error('❌ Error during auth initialization:', error);

@@ -86,7 +86,7 @@ export default function Index() {
         setRedirectTo('/welcome');
         setIsLoading(false);
       }
-    }, 5000); // 5 second timeout for auth
+    }, 3000); // 3 second timeout for auth (reduced from 5 seconds)
 
     return () => clearTimeout(authInitTimeout);
   }, [isInitializing]);

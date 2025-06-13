@@ -210,47 +210,51 @@ export default function ChatsListScreen() {
     // Load chats with Firebase fallback
     const loadUserChats = async () => {
       try {
-        // Check if Firebase is available
-        if (!db) {
-          console.log('📭 Firebase not available, using sample chats');
+        // Check if Firebase is available and properly initialized
+        if (!db || typeof db !== 'object') {
+          console.log('📭 Firebase Firestore not available, using sample chats');
           setChats(sampleChats);
           setIsLoadingChats(false);
           setHasLoadedOnce(true);
           return;
         }
 
-        // For now, we'll load all chats but in production this should be user-specific
-        // TODO: Filter chats by current user's participation
-        const q = query(collection(db, 'chats'), orderBy('lastMessageAt', 'desc'));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-          const chatsData = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-              id: doc.id,
-              ...data
-            } as Chat;
+        // Test if Firestore is actually working by trying to create a query
+        try {
+          const q = query(collection(db, 'chats'), orderBy('lastMessageAt', 'desc'));
+          const unsubscribe = onSnapshot(q, (snapshot) => {
+            const chatsData = snapshot.docs.map(doc => {
+              const data = doc.data();
+              return {
+                id: doc.id,
+                ...data
+              } as Chat;
+            });
+
+            console.log('📥 Received chats from Firestore:', chatsData.length);
+            console.log('🔍 Chat loading state - isLoadingChats:', isLoadingChats, 'hasLoadedOnce:', hasLoadedOnce);
+            console.log('📋 Chat data:', chatsData.map(chat => ({ id: chat.id, name: chat.name, isGroup: chat.isGroup })));
+
+            setChats(chatsData);
+            setIsLoadingChats(false);
+            setHasLoadedOnce(true);
+
+            // Debug log for new user detection
+            if (chatsData.length === 0 && !hasLoadedOnce) {
+              console.log('🎯 New user detected - will show NewUserWelcome');
+            } else if (chatsData.length > 0) {
+              console.log('📱 Existing user with chats - will show chat list');
+            }
           });
 
-          console.log('📥 Received chats from Firestore:', chatsData.length);
-          console.log('🔍 Chat loading state - isLoadingChats:', isLoadingChats, 'hasLoadedOnce:', hasLoadedOnce);
-          console.log('📋 Chat data:', chatsData.map(chat => ({ id: chat.id, name: chat.name, isGroup: chat.isGroup })));
-
-          setChats(chatsData);
-          setIsLoadingChats(false);
-          setHasLoadedOnce(true);
-
-          // Debug log for new user detection
-          if (chatsData.length === 0 && !hasLoadedOnce) {
-            console.log('🎯 New user detected - will show NewUserWelcome');
-          } else if (chatsData.length > 0) {
-            console.log('📱 Existing user with chats - will show chat list');
-          }
-        });
-
-        return unsubscribe;
+          return unsubscribe;
+        } catch (firestoreError) {
+          console.error('❌ Firestore query failed:', firestoreError);
+          throw firestoreError;
+        }
       } catch (error) {
         console.error('❌ Error loading chats:', error);
-        console.log('📭 Falling back to sample chats');
+        console.log('📭 Falling back to sample chats due to Firebase error');
         setChats(sampleChats);
         setIsLoadingChats(false);
         setHasLoadedOnce(true);

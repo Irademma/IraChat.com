@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 import {
   Alert,
   ScrollView,
@@ -8,15 +8,15 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { colors } from '../theme/colors';
-import { GroupMemberPreferences } from '../types/index';
-import { handleAdminAction } from '../utils/groupManagement';
+} from "react-native";
+import { colors } from "../theme/colors";
+import { GroupMemberPreferences } from "../types/index";
+import { handleAdminAction } from "../utils/groupManagement";
 
 interface GroupSettingsProps {
   preferences: GroupMemberPreferences;
   onAction: (action: string) => void;
-  onHideContent: (type: 'message' | 'update', contentId: string) => void;
+  onHideContent: (type: "message" | "update", contentId: string) => void;
   isAdmin: boolean;
   groupId: string;
   members: Array<{
@@ -51,7 +51,7 @@ export const GroupSettings: React.FC<GroupSettingsProps> = ({
     icon: string,
     label: string,
     onPress: () => void,
-    color: string = colors.primary
+    color: string = colors.primary,
   ) => (
     <TouchableOpacity
       style={[styles.actionButton, { borderColor: color }]}
@@ -63,57 +63,78 @@ export const GroupSettings: React.FC<GroupSettingsProps> = ({
   );
 
   const handleMemberAction = async (
-    action: 'block' | 'unblock' | 'promote' | 'demote' | 'remove',
-    memberId: string
+    action: "block" | "unblock" | "promote" | "demote" | "remove",
+    memberId: string,
   ) => {
     if (!isAdmin) {
-      Alert.alert('Permission Denied', 'Only group admins can perform this action.');
+      Alert.alert(
+        "Permission Denied",
+        "Only group admins can perform this action.",
+      );
       return;
     }
 
     try {
       switch (action) {
-        case 'block':
+        case "block":
           if (isAdmin) {
             onBlockMember(memberId);
           } else {
-            Alert.alert('Permission Denied', 'Only group admins can block members.');
+            Alert.alert(
+              "Permission Denied",
+              "Only group admins can block members.",
+            );
           }
           break;
-        case 'unblock':
+        case "unblock":
           if (isAdmin) {
             onUnblockMember(memberId);
           } else {
-            Alert.alert('Permission Denied', 'Only group admins can unblock members.');
+            Alert.alert(
+              "Permission Denied",
+              "Only group admins can unblock members.",
+            );
           }
           break;
-        case 'promote':
-          await handleAdminAction('addAdmin', groupId, memberId, isAdmin, async () => {
-            onPromoteToAdmin(memberId);
-          });
+        case "promote":
+          await handleAdminAction(
+            "addAdmin",
+            groupId,
+            memberId,
+            isAdmin,
+            async () => {
+              onPromoteToAdmin(memberId);
+            },
+          );
           break;
-        case 'demote':
-          await handleAdminAction('removeAdmin', groupId, memberId, isAdmin, async () => {
-            onDemoteFromAdmin(memberId);
-          });
+        case "demote":
+          await handleAdminAction(
+            "removeAdmin",
+            groupId,
+            memberId,
+            isAdmin,
+            async () => {
+              onDemoteFromAdmin(memberId);
+            },
+          );
           break;
-        case 'remove':
+        case "remove":
           Alert.alert(
-            'Remove Member',
-            'Are you sure you want to remove this member from the group?',
+            "Remove Member",
+            "Are you sure you want to remove this member from the group?",
             [
-              { text: 'Cancel', style: 'cancel' },
+              { text: "Cancel", style: "cancel" },
               {
-                text: 'Remove',
-                style: 'destructive',
+                text: "Remove",
+                style: "destructive",
                 onPress: () => onRemoveMember(memberId),
               },
-            ]
+            ],
           );
           break;
       }
     } catch (error) {
-      console.error('Error handling member action:', error);
+      console.error("Error handling member action:", error);
     }
   };
 
@@ -125,7 +146,9 @@ export const GroupSettings: React.FC<GroupSettingsProps> = ({
           <Text style={styles.preferenceLabel}>Mute Notifications</Text>
           <Switch
             value={preferences.isMuted}
-            onValueChange={() => onAction(preferences.isMuted ? 'unmute' : 'mute')}
+            onValueChange={() =>
+              onAction(preferences.isMuted ? "unmute" : "mute")
+            }
             trackColor={{ false: colors.border, true: colors.primary }}
           />
         </View>
@@ -133,7 +156,9 @@ export const GroupSettings: React.FC<GroupSettingsProps> = ({
           <Text style={styles.preferenceLabel}>Archive Group</Text>
           <Switch
             value={preferences.isArchived}
-            onValueChange={() => onAction(preferences.isArchived ? 'unarchive' : 'archive')}
+            onValueChange={() =>
+              onAction(preferences.isArchived ? "unarchive" : "archive")
+            }
             trackColor={{ false: colors.border, true: colors.primary }}
           />
         </View>
@@ -146,11 +171,13 @@ export const GroupSettings: React.FC<GroupSettingsProps> = ({
             <Text style={styles.preferenceLabel}>Lock Group</Text>
             <Switch
               value={preferences.isLocked}
-              onValueChange={() => onAction(preferences.isLocked ? 'unlock' : 'lock')}
+              onValueChange={() =>
+                onAction(preferences.isLocked ? "unlock" : "lock")
+              }
               trackColor={{ false: colors.border, true: colors.primary }}
             />
           </View>
-          {renderActionButton('person-add', 'Add Member', onAddMember)}
+          {renderActionButton("person-add", "Add Member", onAddMember)}
         </View>
       )}
 
@@ -161,7 +188,7 @@ export const GroupSettings: React.FC<GroupSettingsProps> = ({
             <View style={styles.memberInfo}>
               <Text style={styles.memberName}>
                 {member.name}
-                {member.isAdmin && ' (Admin)'}
+                {member.isAdmin && " (Admin)"}
               </Text>
               {member.isBlocked && (
                 <Text style={styles.blockedLabel}>Blocked</Text>
@@ -169,44 +196,39 @@ export const GroupSettings: React.FC<GroupSettingsProps> = ({
             </View>
             {isAdmin && (
               <View style={styles.memberActions}>
-                {member.isBlocked ? (
+                {member.isBlocked
+                  ? renderActionButton(
+                      "lock-open",
+                      "Unblock",
+                      () => handleMemberAction("unblock", member.id),
+                      colors.success,
+                    )
+                  : renderActionButton(
+                      "lock-closed",
+                      "Block",
+                      () => handleMemberAction("block", member.id),
+                      colors.error,
+                    )}
+                {!member.isAdmin
+                  ? renderActionButton(
+                      "star",
+                      "Promote",
+                      () => handleMemberAction("promote", member.id),
+                      colors.warning,
+                    )
+                  : renderActionButton(
+                      "star-outline",
+                      "Demote",
+                      () => handleMemberAction("demote", member.id),
+                      colors.warning,
+                    )}
+                {!member.isAdmin &&
                   renderActionButton(
-                    'lock-open',
-                    'Unblock',
-                    () => handleMemberAction('unblock', member.id),
-                    colors.success
-                  )
-                ) : (
-                  renderActionButton(
-                    'lock-closed',
-                    'Block',
-                    () => handleMemberAction('block', member.id),
-                    colors.error
-                  )
-                )}
-                {!member.isAdmin ? (
-                  renderActionButton(
-                    'star',
-                    'Promote',
-                    () => handleMemberAction('promote', member.id),
-                    colors.warning
-                  )
-                ) : (
-                  renderActionButton(
-                    'star-outline',
-                    'Demote',
-                    () => handleMemberAction('demote', member.id),
-                    colors.warning
-                  )
-                )}
-                {!member.isAdmin && (
-                  renderActionButton(
-                    'person-remove',
-                    'Remove',
-                    () => handleMemberAction('remove', member.id),
-                    colors.error
-                  )
-                )}
+                    "person-remove",
+                    "Remove",
+                    () => handleMemberAction("remove", member.id),
+                    colors.error,
+                  )}
               </View>
             )}
           </View>
@@ -259,7 +281,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 16,
   },
@@ -269,9 +291,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   preferenceItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   preferenceLabel: {
@@ -279,8 +301,8 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 12,
     borderWidth: 1,
     borderRadius: 8,
@@ -289,14 +311,14 @@ const styles = StyleSheet.create({
   actionButtonText: {
     marginLeft: 8,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   memberItem: {
     marginBottom: 16,
   },
   memberInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
   memberName: {
@@ -309,8 +331,8 @@ const styles = StyleSheet.create({
     color: colors.error,
   },
   memberActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   hiddenContentButton: {
@@ -323,4 +345,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
   },
-}); 
+});

@@ -1,9 +1,19 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
-import * as DocumentPicker from 'expo-document-picker';
-import * as ImagePicker from 'expo-image-picker';
-import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { Audio } from "expo-av";
+import * as DocumentPicker from "expo-document-picker";
+import * as ImagePicker from "expo-image-picker";
+import {
+    addDoc,
+    collection,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    orderBy,
+    query,
+    serverTimestamp,
+    updateDoc,
+} from "firebase/firestore";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     Alert,
     Animated,
@@ -19,9 +29,9 @@ import {
     TouchableOpacity,
     Vibration,
     View,
-} from 'react-native';
-import { auth, db } from '../services/firebaseSimple';
-import { MessageStatus } from './MessageStatus';
+} from "react-native";
+import { auth, db } from "../services/firebaseSimple";
+import { MessageStatus } from "./MessageStatus";
 
 // Enhanced Message Interface
 interface Message {
@@ -29,8 +39,8 @@ interface Message {
   text?: string;
   senderId: string;
   timestamp: any;
-  status: 'sent' | 'delivered' | 'read';
-  type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'voice';
+  status: "sent" | "delivered" | "read";
+  type: "text" | "image" | "video" | "audio" | "document" | "voice";
   mediaUrl?: string;
   mediaThumbnail?: string;
   duration?: number; // for audio/video
@@ -74,7 +84,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
 }) => {
   // Core State
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [partnerTyping, setPartnerTyping] = useState(false);
 
@@ -103,83 +113,113 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   // Refs
   const flatListRef = useRef<FlatList>(null);
   const textInputRef = useRef<TextInput>(null);
-  const recordingTimer = useRef<NodeJS.Timeout | null>(null);
+  const recordingTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const currentUser = auth.currentUser;
-  const { width: screenWidth } = Dimensions.get('window');
+  const currentUser = auth?.currentUser;
+  const { width: screenWidth } = Dimensions.get("window");
 
-  // Load Messages with Real-time Updates
+  // Load Messages with Real-time Updates - Optimized for faster loading
   useEffect(() => {
-    if (!currentUser) {
-      console.warn('No authenticated user found');
+    if (!currentUser || !chatId) {
+      console.warn("Missing required data for message loading");
       return;
     }
 
-    const q = query(
-      collection(db, `chats/${chatId}/messages`),
-      orderBy('timestamp', 'asc')
-    );
+    // Add a small delay to allow UI to render first
+    const timeoutId = setTimeout(() => {
+      const q = query(
+        collection(db, `chats/${chatId}/messages`),
+        orderBy("timestamp", "asc"),
+      );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const newMessages = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Message[];
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const newMessages = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as Message[];
 
-      setMessages(newMessages);
+          setMessages(newMessages);
 
-      // Auto-scroll to bottom for new messages
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+          // Optimize scroll timing - only scroll if messages exist
+          if (newMessages.length > 0) {
+            setTimeout(() => {
+              flatListRef.current?.scrollToEnd({ animated: false }); // Disable animation for faster loading
+            }, 50); // Reduced timeout
+          }
 
-      // Mark messages as read
-      markMessagesAsRead(newMessages);
-    });
+          // Defer read marking to not block UI
+          setTimeout(() => {
+            markMessagesAsRead(newMessages);
+          }, 100);
+        },
+        (error) => {
+          console.error("❌ Message listener error:", error);
+        }
+      );
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    }, 50); // Small delay to let UI render first
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [chatId, currentUser]);
 
-  // Typing Indicator Effect
+  // Typing Indicator Effect - Lazy loaded
   useEffect(() => {
-    if (partnerTyping) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(typingAnimation, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(typingAnimation, {
-            toValue: 0,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    } else {
-      typingAnimation.setValue(0);
-    }
+    // Defer animation setup to not block initial render
+    const animationTimeout = setTimeout(() => {
+      if (partnerTyping) {
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(typingAnimation, {
+              toValue: 1,
+              duration: 500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(typingAnimation, {
+              toValue: 0,
+              duration: 500,
+              useNativeDriver: true,
+            }),
+          ]),
+        ).start();
+      } else {
+        typingAnimation.setValue(0);
+      }
+    }, 100);
+
+    return () => clearTimeout(animationTimeout);
   }, [partnerTyping]);
 
-  // Reply Animation Effect
+  // Reply Animation Effect - Lazy loaded
   useEffect(() => {
-    if (replyingTo) {
-      Animated.spring(replyAnimation, {
-        toValue: 1,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.spring(replyAnimation, {
-        toValue: 0,
-        useNativeDriver: true,
-      }).start();
-    }
+    // Defer animation setup to not block initial render
+    const animationTimeout = setTimeout(() => {
+      if (replyingTo) {
+        Animated.spring(replyAnimation, {
+          toValue: 1,
+          useNativeDriver: true,
+        }).start();
+      } else {
+        Animated.spring(replyAnimation, {
+          toValue: 0,
+          useNativeDriver: true,
+        }).start();
+      }
+    }, 100);
+
+    return () => clearTimeout(animationTimeout);
   }, [replyingTo]);
 
-  // Recording Animation Effect
+  // Recording Animation Effect - Only when needed
   useEffect(() => {
     if (isRecording) {
+      // Start animation immediately when recording starts
       Animated.loop(
         Animated.sequence([
           Animated.timing(recordingAnimation, {
@@ -192,12 +232,12 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
             duration: 800,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       ).start();
 
       // Start recording timer
       recordingTimer.current = setInterval(() => {
-        setRecordingDuration(prev => prev + 1);
+        setRecordingDuration((prev) => prev + 1);
       }, 1000);
     } else {
       recordingAnimation.setValue(1);
@@ -216,23 +256,26 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   }, [isRecording]);
 
   // Mark Messages as Read
-  const markMessagesAsRead = useCallback(async (messagesToMark: Message[]) => {
-    if (!currentUser) return;
+  const markMessagesAsRead = useCallback(
+    async (messagesToMark: Message[]) => {
+      if (!currentUser) return;
 
-    const unreadMessages = messagesToMark.filter(
-      msg => msg.senderId !== currentUser.uid && msg.status !== 'read'
-    );
+      const unreadMessages = messagesToMark.filter(
+        (msg) => msg.senderId !== currentUser.uid && msg.status !== "read",
+      );
 
-    for (const message of unreadMessages) {
-      try {
-        await updateDoc(doc(db, `chats/${chatId}/messages/${message.id}`), {
-          status: 'read',
-        });
-      } catch (error) {
-        console.error('Error marking message as read:', error);
+      for (const message of unreadMessages) {
+        try {
+          await updateDoc(doc(db, `chats/${chatId}/messages/${message.id}`), {
+            status: "read",
+          });
+        } catch (error) {
+          console.error("Error marking message as read:", error);
+        }
       }
-    }
-  }, [currentUser, chatId]);
+    },
+    [currentUser, chatId],
+  );
 
   // Send Text Message
   const sendMessage = async () => {
@@ -243,37 +286,41 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
         text: newMessage,
         senderId: currentUser.uid,
         timestamp: serverTimestamp(),
-        status: 'sent',
-        type: 'text',
+        status: "sent",
+        type: "text",
       };
 
       // Add reply data if replying
       if (replyingTo) {
         messageData.replyTo = {
           messageId: replyingTo.id,
-          text: replyingTo.text || 'Media',
-          senderName: replyingTo.senderId === currentUser.uid ? 'You' : partnerName,
+          text: replyingTo.text || "Media",
+          senderName:
+            replyingTo.senderId === currentUser.uid ? "You" : partnerName,
           type: replyingTo.type,
         };
       }
 
-      const messageRef = await addDoc(collection(db, `chats/${chatId}/messages`), messageData);
+      const messageRef = await addDoc(
+        collection(db, `chats/${chatId}/messages`),
+        messageData,
+      );
 
       // Update message status to delivered after 1 second
       setTimeout(async () => {
         await updateDoc(doc(db, `chats/${chatId}/messages/${messageRef.id}`), {
-          status: 'delivered',
+          status: "delivered",
         });
       }, 1000);
 
       // Mark as read after 3 seconds (simulating partner reading)
       setTimeout(async () => {
         await updateDoc(doc(db, `chats/${chatId}/messages/${messageRef.id}`), {
-          status: 'read',
+          status: "read",
         });
       }, 3000);
 
-      setNewMessage('');
+      setNewMessage("");
       setIsTyping(false);
       setReplyingTo(null);
 
@@ -281,10 +328,9 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
-
     } catch (error) {
-      console.error('Error sending message:', error);
-      Alert.alert('Error', 'Failed to send message');
+      console.error("Error sending message:", error);
+      Alert.alert("Error", "Failed to send message");
     }
   };
 
@@ -302,8 +348,8 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       setEditingMessage(null);
       setShowMessageActions(false);
     } catch (error) {
-      console.error('Error editing message:', error);
-      Alert.alert('Error', 'Failed to edit message');
+      console.error("Error editing message:", error);
+      Alert.alert("Error", "Failed to edit message");
     }
   };
 
@@ -313,8 +359,8 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       await deleteDoc(doc(db, `chats/${chatId}/messages/${messageId}`));
       setShowMessageActions(false);
     } catch (error) {
-      console.error('Error deleting message:', error);
-      Alert.alert('Error', 'Failed to delete message');
+      console.error("Error deleting message:", error);
+      Alert.alert("Error", "Failed to delete message");
     }
   };
 
@@ -327,7 +373,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
         text: message.text,
         senderId: currentUser.uid,
         timestamp: serverTimestamp(),
-        status: 'sent',
+        status: "sent",
         type: message.type,
         mediaUrl: message.mediaUrl,
         fileName: message.fileName,
@@ -335,11 +381,14 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
         forwardedFrom: partnerName,
       };
 
-      await addDoc(collection(db, `chats/${targetChatId}/messages`), forwardedMessage);
-      Alert.alert('Success', 'Message forwarded');
+      await addDoc(
+        collection(db, `chats/${targetChatId}/messages`),
+        forwardedMessage,
+      );
+      Alert.alert("Success", "Message forwarded");
     } catch (error) {
-      console.error('Error forwarding message:', error);
-      Alert.alert('Error', 'Failed to forward message');
+      console.error("Error forwarding message:", error);
+      Alert.alert("Error", "Failed to forward message");
     }
   };
 
@@ -347,8 +396,11 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   const startRecording = async () => {
     try {
       const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please grant microphone permission to record voice messages');
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Please grant microphone permission to record voice messages",
+        );
         return;
       }
 
@@ -358,16 +410,15 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       });
 
       const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
+        Audio.RecordingOptionsPresets.HIGH_QUALITY,
       );
 
       setRecording(recording);
       setIsRecording(true);
       Vibration.vibrate(50); // Haptic feedback
-
     } catch (error) {
-      console.error('Failed to start recording:', error);
-      Alert.alert('Error', 'Failed to start recording');
+      console.error("Failed to start recording:", error);
+      Alert.alert("Error", "Failed to start recording");
     }
   };
 
@@ -387,8 +438,8 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
 
       Vibration.vibrate(50); // Haptic feedback
     } catch (error) {
-      console.error('Failed to stop recording:', error);
-      Alert.alert('Error', 'Failed to stop recording');
+      console.error("Failed to stop recording:", error);
+      Alert.alert("Error", "Failed to stop recording");
     }
   };
 
@@ -401,8 +452,8 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       const messageData: Partial<Message> = {
         senderId: currentUser.uid,
         timestamp: serverTimestamp(),
-        status: 'sent',
-        type: 'voice',
+        status: "sent",
+        type: "voice",
         mediaUrl: audioUri,
         duration: recordingDuration,
       };
@@ -410,18 +461,18 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       if (replyingTo) {
         messageData.replyTo = {
           messageId: replyingTo.id,
-          text: replyingTo.text || 'Media',
-          senderName: replyingTo.senderId === currentUser.uid ? 'You' : partnerName,
+          text: replyingTo.text || "Media",
+          senderName:
+            replyingTo.senderId === currentUser.uid ? "You" : partnerName,
           type: replyingTo.type,
         };
       }
 
       await addDoc(collection(db, `chats/${chatId}/messages`), messageData);
       setReplyingTo(null);
-
     } catch (error) {
-      console.error('Error sending voice message:', error);
-      Alert.alert('Error', 'Failed to send voice message');
+      console.error("Error sending voice message:", error);
+      Alert.alert("Error", "Failed to send voice message");
     }
   };
 
@@ -447,7 +498,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
 
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri },
-        { shouldPlay: true }
+        { shouldPlay: true },
       );
 
       setSound(newSound);
@@ -459,45 +510,48 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
           setSound(null);
         }
       });
-
     } catch (error) {
-      console.error('Error playing voice message:', error);
-      Alert.alert('Error', 'Failed to play voice message');
+      console.error("Error playing voice message:", error);
+      Alert.alert("Error", "Failed to play voice message");
     }
   };
 
   // Media Functions
   const pickImage = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please grant photo library permission');
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Please grant photo library permission",
+        );
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
       });
 
       if (!result.canceled && result.assets[0]) {
-        await sendMediaMessage(result.assets[0].uri, 'image');
+        await sendMediaMessage(result.assets[0].uri, "image");
       }
 
       setShowAttachmentMenu(false);
     } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Failed to pick image");
     }
   };
 
   const takePhoto = async () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please grant camera permission');
+      if (status !== "granted") {
+        Alert.alert("Permission Required", "Please grant camera permission");
         return;
       }
 
@@ -508,40 +562,40 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       });
 
       if (!result.canceled && result.assets[0]) {
-        await sendMediaMessage(result.assets[0].uri, 'image');
+        await sendMediaMessage(result.assets[0].uri, "image");
       }
 
       setShowAttachmentMenu(false);
     } catch (error) {
-      console.error('Error taking photo:', error);
-      Alert.alert('Error', 'Failed to take photo');
+      console.error("Error taking photo:", error);
+      Alert.alert("Error", "Failed to take photo");
     }
   };
 
   const pickDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: '*/*',
+        type: "*/*",
         copyToCacheDirectory: true,
       });
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        await sendMediaMessage(asset.uri, 'document', asset.name, asset.size);
+        await sendMediaMessage(asset.uri, "document", asset.name, asset.size);
       }
 
       setShowAttachmentMenu(false);
     } catch (error) {
-      console.error('Error picking document:', error);
-      Alert.alert('Error', 'Failed to pick document');
+      console.error("Error picking document:", error);
+      Alert.alert("Error", "Failed to pick document");
     }
   };
 
   const sendMediaMessage = async (
     mediaUri: string,
-    type: 'image' | 'video' | 'document',
+    type: "image" | "video" | "document",
     fileName?: string,
-    fileSize?: number
+    fileSize?: number,
   ) => {
     if (!currentUser) return;
 
@@ -549,7 +603,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       const messageData: Partial<Message> = {
         senderId: currentUser.uid,
         timestamp: serverTimestamp(),
-        status: 'sent',
+        status: "sent",
         type,
         mediaUrl: mediaUri,
         fileName,
@@ -559,18 +613,18 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       if (replyingTo) {
         messageData.replyTo = {
           messageId: replyingTo.id,
-          text: replyingTo.text || 'Media',
-          senderName: replyingTo.senderId === currentUser.uid ? 'You' : partnerName,
+          text: replyingTo.text || "Media",
+          senderName:
+            replyingTo.senderId === currentUser.uid ? "You" : partnerName,
           type: replyingTo.type,
         };
       }
 
       await addDoc(collection(db, `chats/${chatId}/messages`), messageData);
       setReplyingTo(null);
-
     } catch (error) {
-      console.error('Error sending media message:', error);
-      Alert.alert('Error', 'Failed to send media');
+      console.error("Error sending media message:", error);
+      Alert.alert("Error", "Failed to send media");
     }
   };
 
@@ -580,7 +634,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
 
     try {
       const messageRef = doc(db, `chats/${chatId}/messages/${messageId}`);
-      const message = messages.find(m => m.id === messageId);
+      const message = messages.find((m) => m.id === messageId);
 
       if (message) {
         const currentReactions = message.reactions || {};
@@ -600,14 +654,14 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
 
       setShowMessageActions(false);
     } catch (error) {
-      console.error('Error adding reaction:', error);
-      Alert.alert('Error', 'Failed to add reaction');
+      console.error("Error adding reaction:", error);
+      Alert.alert("Error", "Failed to add reaction");
     }
   };
 
   // Message Actions
   const handleMessageLongPress = (message: Message) => {
-    if (message.senderId === currentUser?.uid || message.type === 'text') {
+    if (message.senderId === currentUser?.uid || message.type === "text") {
       setSelectedMessage(message);
       setShowMessageActions(true);
       Vibration.vibrate(50); // Haptic feedback
@@ -621,9 +675,9 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   };
 
   const handleEdit = (message: Message) => {
-    if (message.senderId === currentUser?.uid && message.type === 'text') {
+    if (message.senderId === currentUser?.uid && message.type === "text") {
       setEditingMessage(message);
-      setNewMessage(message.text || '');
+      setNewMessage(message.text || "");
       setShowMessageActions(false);
       textInputRef.current?.focus();
     }
@@ -631,35 +685,38 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
 
   const handleDelete = (message: Message) => {
     Alert.alert(
-      'Delete Message',
-      'Are you sure you want to delete this message?',
+      "Delete Message",
+      "Are you sure you want to delete this message?",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => deleteMessage(message.id)
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteMessage(message.id),
         },
-      ]
+      ],
     );
   };
 
   const handleForward = (message: Message) => {
     // In a real app, you'd show a chat selection screen
-    Alert.alert('Forward Message', 'Forward functionality would show chat selection');
+    Alert.alert(
+      "Forward Message",
+      "Forward functionality would show chat selection",
+    );
     setShowMessageActions(false);
   };
 
   const handleCopy = (message: Message) => {
     if (message.text) {
       // In React Native, you'd use Clipboard API
-      Alert.alert('Copied', 'Message copied to clipboard');
+      Alert.alert("Copied", "Message copied to clipboard");
     }
     setShowMessageActions(false);
   };
 
   // Emoji reactions
-  const commonEmojis = ['❤️', '😂', '😮', '😢', '😡', '👍', '👎', '🔥'];
+  const commonEmojis = ["❤️", "😂", "😮", "😢", "😡", "👍", "👎", "🔥"];
 
   const handleTextChange = (text: string) => {
     setNewMessage(text);
@@ -675,27 +732,35 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   // Get reaction summary
   const getReactionSummary = (reactions: { [userId: string]: string } = {}) => {
     const reactionCounts: { [emoji: string]: number } = {};
-    Object.values(reactions).forEach(emoji => {
+    Object.values(reactions).forEach((emoji) => {
       reactionCounts[emoji] = (reactionCounts[emoji] || 0) + 1;
     });
 
     return Object.entries(reactionCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 3)
-      .map(([emoji, count]) => `${emoji}${count > 1 ? count : ''}`)
-      .join(' ');
+      .map(([emoji, count]) => `${emoji}${count > 1 ? count : ""}`)
+      .join(" ");
   };
 
   // Render Message Component
-  const renderMessage = ({ item: message, index }: { item: Message; index: number }) => {
+  const renderMessage = ({
+    item: message,
+    index,
+  }: {
+    item: Message;
+    index: number;
+  }) => {
     const isMyMessage = message.senderId === currentUser?.uid;
-    const showAvatar = !isMyMessage && (index === 0 || messages[index - 1]?.senderId !== message.senderId);
+    const showAvatar =
+      !isMyMessage &&
+      (index === 0 || messages[index - 1]?.senderId !== message.senderId);
     const reactions = message.reactions || {};
     const hasReactions = Object.keys(reactions).length > 0;
 
@@ -703,39 +768,52 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       <View style={{ marginVertical: 4, paddingHorizontal: 16 }}>
         {/* Reply Preview */}
         {message.replyTo && (
-          <View style={{
-            marginLeft: isMyMessage ? 50 : 0,
-            marginRight: isMyMessage ? 0 : 50,
-            marginBottom: 4,
-          }}>
-            <View style={{
-              backgroundColor: '#f0f0f0',
-              borderLeftWidth: 3,
-              borderLeftColor: '#667eea',
-              paddingLeft: 8,
-              paddingVertical: 4,
-              borderRadius: 4,
-            }}>
-              <Text style={{ fontSize: 12, color: '#667eea', fontWeight: '600' }}>
+          <View
+            style={{
+              marginLeft: isMyMessage ? 50 : 0,
+              marginRight: isMyMessage ? 0 : 50,
+              marginBottom: 4,
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "#f0f0f0",
+                borderLeftWidth: 3,
+                borderLeftColor: "#667eea",
+                paddingLeft: 8,
+                paddingVertical: 4,
+                borderRadius: 4,
+              }}
+            >
+              <Text
+                style={{ fontSize: 12, color: "#667eea", fontWeight: "600" }}
+              >
                 {message.replyTo.senderName}
               </Text>
-              <Text style={{ fontSize: 12, color: '#666' }} numberOfLines={1}>
+              <Text style={{ fontSize: 12, color: "#666" }} numberOfLines={1}>
                 {message.replyTo.text}
               </Text>
             </View>
           </View>
         )}
 
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: isMyMessage ? 'flex-end' : 'flex-start',
-          alignItems: 'flex-end',
-        }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: isMyMessage ? "flex-end" : "flex-start",
+            alignItems: "flex-end",
+          }}
+        >
           {/* Partner Avatar */}
           {showAvatar && !isMyMessage && (
             <Image
               source={{ uri: partnerAvatar }}
-              style={{ width: 32, height: 32, borderRadius: 16, marginRight: 8 }}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                marginRight: 8,
+              }}
             />
           )}
 
@@ -747,43 +825,59 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
               marginLeft: !isMyMessage && !showAvatar ? 40 : 0,
             }}
           >
-            <View style={{
-              backgroundColor: isMyMessage ? '#667eea' : '#f0f0f0',
-              borderRadius: 16,
-              padding: 12,
-              borderBottomRightRadius: isMyMessage ? 4 : 16,
-              borderBottomLeftRadius: isMyMessage ? 16 : 4,
-            }}>
+            <View
+              style={{
+                backgroundColor: isMyMessage ? "#667eea" : "#f0f0f0",
+                borderRadius: 16,
+                padding: 12,
+                borderBottomRightRadius: isMyMessage ? 4 : 16,
+                borderBottomLeftRadius: isMyMessage ? 16 : 4,
+              }}
+            >
               {/* Forwarded Label */}
               {message.isForwarded && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                  <Ionicons name="arrow-forward" size={12} color={isMyMessage ? '#fff' : '#666'} />
-                  <Text style={{
-                    fontSize: 11,
-                    color: isMyMessage ? '#fff' : '#666',
-                    marginLeft: 4,
-                    fontStyle: 'italic',
-                  }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 4,
+                  }}
+                >
+                  <Ionicons
+                    name="arrow-forward"
+                    size={12}
+                    color={isMyMessage ? "#fff" : "#666"}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      color: isMyMessage ? "#fff" : "#666",
+                      marginLeft: 4,
+                      fontStyle: "italic",
+                    }}
+                  >
                     Forwarded from {message.forwardedFrom}
                   </Text>
                 </View>
               )}
 
               {/* Message Content */}
-              {message.type === 'text' && (
-                <Text style={{
-                  color: isMyMessage ? '#fff' : '#000',
-                  fontSize: 16,
-                  lineHeight: 20,
-                }}>
+              {message.type === "text" && (
+                <Text
+                  style={{
+                    color: isMyMessage ? "#fff" : "#000",
+                    fontSize: 16,
+                    lineHeight: 20,
+                  }}
+                >
                   {message.text}
                 </Text>
               )}
 
-              {message.type === 'image' && (
+              {message.type === "image" && (
                 <TouchableOpacity
                   onPress={() => {
-                    setSelectedImage(message.mediaUrl || '');
+                    setSelectedImage(message.mediaUrl || "");
                     setShowImageViewer(true);
                   }}
                 >
@@ -799,118 +893,152 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
                 </TouchableOpacity>
               )}
 
-              {message.type === 'voice' && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', minWidth: 150 }}>
+              {message.type === "voice" && (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    minWidth: 150,
+                  }}
+                >
                   <TouchableOpacity
-                    onPress={() => playVoiceMessage(message.mediaUrl || '', message.id)}
+                    onPress={() =>
+                      playVoiceMessage(message.mediaUrl || "", message.id)
+                    }
                     style={{
                       width: 32,
                       height: 32,
                       borderRadius: 16,
-                      backgroundColor: isMyMessage ? '#fff' : '#667eea',
-                      justifyContent: 'center',
-                      alignItems: 'center',
+                      backgroundColor: isMyMessage ? "#fff" : "#667eea",
+                      justifyContent: "center",
+                      alignItems: "center",
                       marginRight: 8,
                     }}
                   >
                     <Ionicons
-                      name={playingAudio === message.id ? 'pause' : 'play'}
+                      name={playingAudio === message.id ? "pause" : "play"}
                       size={16}
-                      color={isMyMessage ? '#667eea' : '#fff'}
+                      color={isMyMessage ? "#667eea" : "#fff"}
                     />
                   </TouchableOpacity>
                   <View style={{ flex: 1 }}>
-                    <View style={{
-                      height: 2,
-                      backgroundColor: isMyMessage ? 'rgba(255,255,255,0.3)' : 'rgba(102,126,234,0.3)',
-                      borderRadius: 1,
-                    }}>
-                      <View style={{
+                    <View
+                      style={{
                         height: 2,
-                        backgroundColor: isMyMessage ? '#fff' : '#667eea',
+                        backgroundColor: isMyMessage
+                          ? "rgba(255,255,255,0.3)"
+                          : "rgba(102,126,234,0.3)",
                         borderRadius: 1,
-                        width: '30%', // This would be dynamic based on playback progress
-                      }} />
+                      }}
+                    >
+                      <View
+                        style={{
+                          height: 2,
+                          backgroundColor: isMyMessage ? "#fff" : "#667eea",
+                          borderRadius: 1,
+                          width: "30%", // This would be dynamic based on playback progress
+                        }}
+                      />
                     </View>
                   </View>
-                  <Text style={{
-                    color: isMyMessage ? '#fff' : '#666',
-                    fontSize: 12,
-                    marginLeft: 8,
-                  }}>
+                  <Text
+                    style={{
+                      color: isMyMessage ? "#fff" : "#666",
+                      fontSize: 12,
+                      marginLeft: 8,
+                    }}
+                  >
                     {formatDuration(message.duration || 0)}
                   </Text>
                 </View>
               )}
 
-              {message.type === 'document' && (
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
-                    backgroundColor: isMyMessage ? '#fff' : '#667eea',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginRight: 12,
-                  }}>
+              {message.type === "document" && (
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: isMyMessage ? "#fff" : "#667eea",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginRight: 12,
+                    }}
+                  >
                     <Ionicons
                       name="document"
                       size={20}
-                      color={isMyMessage ? '#667eea' : '#fff'}
+                      color={isMyMessage ? "#667eea" : "#fff"}
                     />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{
-                      color: isMyMessage ? '#fff' : '#000',
-                      fontSize: 14,
-                      fontWeight: '600',
-                    }} numberOfLines={1}>
-                      {message.fileName || 'Document'}
+                    <Text
+                      style={{
+                        color: isMyMessage ? "#fff" : "#000",
+                        fontSize: 14,
+                        fontWeight: "600",
+                      }}
+                      numberOfLines={1}
+                    >
+                      {message.fileName || "Document"}
                     </Text>
-                    <Text style={{
-                      color: isMyMessage ? 'rgba(255,255,255,0.8)' : '#666',
-                      fontSize: 12,
-                    }}>
-                      {message.fileSize ? `${(message.fileSize / 1024).toFixed(1)} KB` : 'Unknown size'}
+                    <Text
+                      style={{
+                        color: isMyMessage ? "rgba(255,255,255,0.8)" : "#666",
+                        fontSize: 12,
+                      }}
+                    >
+                      {message.fileSize
+                        ? `${(message.fileSize / 1024).toFixed(1)} KB`
+                        : "Unknown size"}
                     </Text>
                   </View>
                 </View>
               )}
 
               {/* Message Info */}
-              <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: 4,
-              }}>
-                <Text style={{
-                  fontSize: 11,
-                  color: isMyMessage ? 'rgba(255,255,255,0.8)' : '#999',
-                }}>
-                  {message.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  {message.isEdited && ' • edited'}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginTop: 4,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: isMyMessage ? "rgba(255,255,255,0.8)" : "#999",
+                  }}
+                >
+                  {message.timestamp
+                    ?.toDate()
+                    .toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  {message.isEdited && " • edited"}
                 </Text>
 
-                {isMyMessage && (
-                  <MessageStatus status={message.status} />
-                )}
+                {isMyMessage && <MessageStatus status={message.status} />}
               </View>
             </View>
 
             {/* Reactions */}
             {hasReactions && (
-              <View style={{
-                backgroundColor: '#fff',
-                borderRadius: 12,
-                paddingHorizontal: 8,
-                paddingVertical: 2,
-                marginTop: 4,
-                alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-                borderWidth: 1,
-                borderColor: '#e0e0e0',
-              }}>
+              <View
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: 12,
+                  paddingHorizontal: 8,
+                  paddingVertical: 2,
+                  marginTop: 4,
+                  alignSelf: isMyMessage ? "flex-end" : "flex-start",
+                  borderWidth: 1,
+                  borderColor: "#e0e0e0",
+                }}
+              >
                 <Text style={{ fontSize: 12 }}>
                   {getReactionSummary(reactions)}
                 </Text>
@@ -924,28 +1052,30 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, backgroundColor: '#f8f9fa' }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1, backgroundColor: "#f8f9fa" }}
     >
       {/* Header */}
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 16,
-        backgroundColor: '#fff',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-      }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          padding: 16,
+          backgroundColor: "#fff",
+          borderBottomWidth: 1,
+          borderBottomColor: "#e0e0e0",
+        }}
+      >
         <Image
           source={{ uri: partnerAvatar }}
           style={{ width: 40, height: 40, borderRadius: 20 }}
         />
         <View style={{ marginLeft: 12, flex: 1 }}>
-          <Text style={{ fontSize: 18, fontWeight: '600', color: '#000' }}>
+          <Text style={{ fontSize: 18, fontWeight: "600", color: "#000" }}>
             {partnerName}
           </Text>
-          <Text style={{ fontSize: 14, color: '#666' }}>
-            {partnerTyping ? 'typing...' : (isOnline ? 'Online' : 'Offline')}
+          <Text style={{ fontSize: 14, color: "#666" }}>
+            {partnerTyping ? "typing..." : isOnline ? "Online" : "Offline"}
           </Text>
         </View>
 
@@ -960,24 +1090,35 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
 
       {/* Reply Bar */}
       {replyingTo && (
-        <Animated.View style={{
-          transform: [{ translateY: replyAnimation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [50, 0],
-          })}],
-          opacity: replyAnimation,
-          backgroundColor: '#f0f0f0',
-          padding: 12,
-          borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
-        }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Animated.View
+          style={{
+            transform: [
+              {
+                translateY: replyAnimation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [50, 0],
+                }),
+              },
+            ],
+            opacity: replyAnimation,
+            backgroundColor: "#f0f0f0",
+            padding: 12,
+            borderTopWidth: 1,
+            borderTopColor: "#e0e0e0",
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 12, color: '#667eea', fontWeight: '600' }}>
-                Replying to {replyingTo.senderId === currentUser?.uid ? 'yourself' : partnerName}
+              <Text
+                style={{ fontSize: 12, color: "#667eea", fontWeight: "600" }}
+              >
+                Replying to{" "}
+                {replyingTo.senderId === currentUser?.uid
+                  ? "yourself"
+                  : partnerName}
               </Text>
-              <Text style={{ fontSize: 14, color: '#666' }} numberOfLines={1}>
-                {replyingTo.text || 'Media message'}
+              <Text style={{ fontSize: 14, color: "#666" }} numberOfLines={1}>
+                {replyingTo.text || "Media message"}
               </Text>
             </View>
             <TouchableOpacity
@@ -1008,62 +1149,74 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
 
       {/* Typing Indicator */}
       {partnerTyping && (
-        <Animated.View style={{
-          opacity: typingAnimation,
-          paddingHorizontal: 16,
-          paddingVertical: 8,
-        }}>
-          <View style={{
-            backgroundColor: '#f0f0f0',
-            borderRadius: 16,
-            padding: 12,
-            alignSelf: 'flex-start',
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}>
-            <Text style={{ color: '#666', fontSize: 14 }}>
+        <Animated.View
+          style={{
+            opacity: typingAnimation,
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#f0f0f0",
+              borderRadius: 16,
+              padding: 12,
+              alignSelf: "flex-start",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: "#666", fontSize: 14 }}>
               {partnerName} is typing
             </Text>
-            <View style={{ marginLeft: 8, flexDirection: 'row' }}>
-              <Animated.View style={{
-                width: 4,
-                height: 4,
-                borderRadius: 2,
-                backgroundColor: '#666',
-                marginHorizontal: 1,
-                transform: [{ scale: typingAnimation }],
-              }} />
-              <Animated.View style={{
-                width: 4,
-                height: 4,
-                borderRadius: 2,
-                backgroundColor: '#666',
-                marginHorizontal: 1,
-                transform: [{ scale: typingAnimation }],
-              }} />
-              <Animated.View style={{
-                width: 4,
-                height: 4,
-                borderRadius: 2,
-                backgroundColor: '#666',
-                marginHorizontal: 1,
-                transform: [{ scale: typingAnimation }],
-              }} />
+            <View style={{ marginLeft: 8, flexDirection: "row" }}>
+              <Animated.View
+                style={{
+                  width: 4,
+                  height: 4,
+                  borderRadius: 2,
+                  backgroundColor: "#666",
+                  marginHorizontal: 1,
+                  transform: [{ scale: typingAnimation }],
+                }}
+              />
+              <Animated.View
+                style={{
+                  width: 4,
+                  height: 4,
+                  borderRadius: 2,
+                  backgroundColor: "#666",
+                  marginHorizontal: 1,
+                  transform: [{ scale: typingAnimation }],
+                }}
+              />
+              <Animated.View
+                style={{
+                  width: 4,
+                  height: 4,
+                  borderRadius: 2,
+                  backgroundColor: "#666",
+                  marginHorizontal: 1,
+                  transform: [{ scale: typingAnimation }],
+                }}
+              />
             </View>
           </View>
         </Animated.View>
       )}
 
       {/* Input Bar */}
-      <View style={{
-        backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        paddingBottom: Platform.OS === 'ios' ? 34 : 12,
-      }}>
-        <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+      <View
+        style={{
+          backgroundColor: "#fff",
+          borderTopWidth: 1,
+          borderTopColor: "#e0e0e0",
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          paddingBottom: Platform.OS === "ios" ? 34 : 12,
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
           {/* Attachment Button */}
           <TouchableOpacity
             onPress={() => setShowAttachmentMenu(true)}
@@ -1071,9 +1224,9 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
               width: 40,
               height: 40,
               borderRadius: 20,
-              backgroundColor: '#f0f0f0',
-              justifyContent: 'center',
-              alignItems: 'center',
+              backgroundColor: "#f0f0f0",
+              justifyContent: "center",
+              alignItems: "center",
               marginRight: 8,
             }}
           >
@@ -1081,20 +1234,24 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
           </TouchableOpacity>
 
           {/* Text Input Container */}
-          <View style={{
-            flex: 1,
-            backgroundColor: '#f8f9fa',
-            borderRadius: 20,
-            borderWidth: 1,
-            borderColor: '#e0e0e0',
-            marginRight: 8,
-            minHeight: 40,
-            maxHeight: 120,
-            justifyContent: 'center',
-          }}>
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#f8f9fa",
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: "#e0e0e0",
+              marginRight: 8,
+              minHeight: 40,
+              maxHeight: 120,
+              justifyContent: "center",
+            }}
+          >
             <TextInput
               ref={textInputRef}
-              placeholder={editingMessage ? "Edit message..." : "Type a message..."}
+              placeholder={
+                editingMessage ? "Edit message..." : "Type a message..."
+              }
               placeholderTextColor="#999"
               value={newMessage}
               onChangeText={handleTextChange}
@@ -1103,8 +1260,8 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
                 paddingHorizontal: 16,
                 paddingVertical: 10,
                 fontSize: 16,
-                color: '#000',
-                textAlignVertical: 'center',
+                color: "#000",
+                textAlignVertical: "center",
               }}
             />
           </View>
@@ -1116,9 +1273,9 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
               width: 40,
               height: 40,
               borderRadius: 20,
-              backgroundColor: '#f0f0f0',
-              justifyContent: 'center',
-              alignItems: 'center',
+              backgroundColor: "#f0f0f0",
+              justifyContent: "center",
+              alignItems: "center",
               marginRight: 8,
             }}
           >
@@ -1128,18 +1285,22 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
           {/* Send/Voice Button */}
           {newMessage.trim() || editingMessage ? (
             <TouchableOpacity
-              onPress={editingMessage ? () => {
-                if (editingMessage && newMessage.trim()) {
-                  editMessage(editingMessage.id, newMessage);
-                }
-              } : sendMessage}
+              onPress={
+                editingMessage
+                  ? () => {
+                      if (editingMessage && newMessage.trim()) {
+                        editMessage(editingMessage.id, newMessage);
+                      }
+                    }
+                  : sendMessage
+              }
               style={{
                 width: 40,
                 height: 40,
                 borderRadius: 20,
-                backgroundColor: '#667eea',
-                justifyContent: 'center',
-                alignItems: 'center',
+                backgroundColor: "#667eea",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
               <Ionicons
@@ -1149,7 +1310,9 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
               />
             </TouchableOpacity>
           ) : (
-            <Animated.View style={{ transform: [{ scale: recordingAnimation }] }}>
+            <Animated.View
+              style={{ transform: [{ scale: recordingAnimation }] }}
+            >
               <TouchableOpacity
                 onPressIn={startRecording}
                 onPressOut={stopRecording}
@@ -1157,9 +1320,9 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
                   width: 40,
                   height: 40,
                   borderRadius: 20,
-                  backgroundColor: isRecording ? '#ff4444' : '#667eea',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  backgroundColor: isRecording ? "#ff4444" : "#667eea",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
                 <Ionicons
@@ -1174,23 +1337,27 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
 
         {/* Recording Indicator */}
         {isRecording && (
-          <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginTop: 8,
-            padding: 8,
-            backgroundColor: '#fff5f5',
-            borderRadius: 8,
-          }}>
-            <View style={{
-              width: 8,
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: '#ff4444',
-              marginRight: 8,
-            }} />
-            <Text style={{ color: '#ff4444', fontSize: 14, fontWeight: '600' }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: 8,
+              padding: 8,
+              backgroundColor: "#fff5f5",
+              borderRadius: 8,
+            }}
+          >
+            <View
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: "#ff4444",
+                marginRight: 8,
+              }}
+            />
+            <Text style={{ color: "#ff4444", fontSize: 14, fontWeight: "600" }}>
               Recording... {formatDuration(recordingDuration)}
             </Text>
           </View>
@@ -1207,93 +1374,105 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
         <Pressable
           style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            justifyContent: 'flex-end',
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "flex-end",
           }}
           onPress={() => setShowAttachmentMenu(false)}
         >
-          <View style={{
-            backgroundColor: '#fff',
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            padding: 20,
-          }}>
-            <Text style={{
-              fontSize: 18,
-              fontWeight: '600',
-              textAlign: 'center',
-              marginBottom: 20,
-              color: '#000',
-            }}>
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              padding: 20,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "600",
+                textAlign: "center",
+                marginBottom: 20,
+                color: "#000",
+              }}
+            >
               Send Media
             </Text>
 
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              marginBottom: 20,
-            }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+                marginBottom: 20,
+              }}
+            >
               <TouchableOpacity
                 onPress={takePhoto}
                 style={{
-                  alignItems: 'center',
+                  alignItems: "center",
                   padding: 16,
                 }}
               >
-                <View style={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: 30,
-                  backgroundColor: '#667eea',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginBottom: 8,
-                }}>
+                <View
+                  style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 30,
+                    backgroundColor: "#667eea",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
                   <Ionicons name="camera" size={30} color="white" />
                 </View>
-                <Text style={{ fontSize: 12, color: '#666' }}>Camera</Text>
+                <Text style={{ fontSize: 12, color: "#666" }}>Camera</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={pickImage}
                 style={{
-                  alignItems: 'center',
+                  alignItems: "center",
                   padding: 16,
                 }}
               >
-                <View style={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: 30,
-                  backgroundColor: '#10B981',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginBottom: 8,
-                }}>
+                <View
+                  style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 30,
+                    backgroundColor: "#10B981",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
                   <Ionicons name="images" size={30} color="white" />
                 </View>
-                <Text style={{ fontSize: 12, color: '#666' }}>Gallery</Text>
+                <Text style={{ fontSize: 12, color: "#666" }}>Gallery</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={pickDocument}
                 style={{
-                  alignItems: 'center',
+                  alignItems: "center",
                   padding: 16,
                 }}
               >
-                <View style={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: 30,
-                  backgroundColor: '#F59E0B',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginBottom: 8,
-                }}>
+                <View
+                  style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 30,
+                    backgroundColor: "#F59E0B",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
                   <Ionicons name="document" size={30} color="white" />
                 </View>
-                <Text style={{ fontSize: 12, color: '#666' }}>Document</Text>
+                <Text style={{ fontSize: 12, color: "#666" }}>Document</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1310,34 +1489,40 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
         <Pressable
           style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            justifyContent: 'center',
-            alignItems: 'center',
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
           }}
           onPress={() => setShowMessageActions(false)}
         >
-          <View style={{
-            backgroundColor: '#fff',
-            borderRadius: 12,
-            padding: 20,
-            margin: 20,
-            minWidth: 250,
-          }}>
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 12,
+              padding: 20,
+              margin: 20,
+              minWidth: 250,
+            }}
+          >
             {/* Reactions */}
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              marginBottom: 20,
-              paddingVertical: 10,
-            }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+                marginBottom: 20,
+                paddingVertical: 10,
+              }}
+            >
               {commonEmojis.map((emoji) => (
                 <TouchableOpacity
                   key={emoji}
-                  onPress={() => selectedMessage && addReaction(selectedMessage.id, emoji)}
+                  onPress={() =>
+                    selectedMessage && addReaction(selectedMessage.id, emoji)
+                  }
                   style={{
                     padding: 8,
                     borderRadius: 20,
-                    backgroundColor: '#f8f9fa',
+                    backgroundColor: "#f8f9fa",
                   }}
                 >
                   <Text style={{ fontSize: 20 }}>{emoji}</Text>
@@ -1349,56 +1534,65 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
             <TouchableOpacity
               onPress={() => selectedMessage && handleReply(selectedMessage)}
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
+                flexDirection: "row",
+                alignItems: "center",
                 paddingVertical: 12,
                 paddingHorizontal: 16,
               }}
             >
               <Ionicons name="arrow-undo" size={20} color="#667eea" />
-              <Text style={{ marginLeft: 12, fontSize: 16, color: '#000' }}>Reply</Text>
+              <Text style={{ marginLeft: 12, fontSize: 16, color: "#000" }}>
+                Reply
+              </Text>
             </TouchableOpacity>
 
-            {selectedMessage?.senderId === currentUser?.uid && selectedMessage?.type === 'text' && (
-              <TouchableOpacity
-                onPress={() => selectedMessage && handleEdit(selectedMessage)}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingVertical: 12,
-                  paddingHorizontal: 16,
-                }}
-              >
-                <Ionicons name="create" size={20} color="#667eea" />
-                <Text style={{ marginLeft: 12, fontSize: 16, color: '#000' }}>Edit</Text>
-              </TouchableOpacity>
-            )}
+            {selectedMessage?.senderId === currentUser?.uid &&
+              selectedMessage?.type === "text" && (
+                <TouchableOpacity
+                  onPress={() => selectedMessage && handleEdit(selectedMessage)}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingVertical: 12,
+                    paddingHorizontal: 16,
+                  }}
+                >
+                  <Ionicons name="create" size={20} color="#667eea" />
+                  <Text style={{ marginLeft: 12, fontSize: 16, color: "#000" }}>
+                    Edit
+                  </Text>
+                </TouchableOpacity>
+              )}
 
             <TouchableOpacity
               onPress={() => selectedMessage && handleForward(selectedMessage)}
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
+                flexDirection: "row",
+                alignItems: "center",
                 paddingVertical: 12,
                 paddingHorizontal: 16,
               }}
             >
               <Ionicons name="arrow-forward" size={20} color="#667eea" />
-              <Text style={{ marginLeft: 12, fontSize: 16, color: '#000' }}>Forward</Text>
+              <Text style={{ marginLeft: 12, fontSize: 16, color: "#000" }}>
+                Forward
+              </Text>
             </TouchableOpacity>
 
-            {selectedMessage?.type === 'text' && (
+            {selectedMessage?.type === "text" && (
               <TouchableOpacity
                 onPress={() => selectedMessage && handleCopy(selectedMessage)}
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
+                  flexDirection: "row",
+                  alignItems: "center",
                   paddingVertical: 12,
                   paddingHorizontal: 16,
                 }}
               >
                 <Ionicons name="copy" size={20} color="#667eea" />
-                <Text style={{ marginLeft: 12, fontSize: 16, color: '#000' }}>Copy</Text>
+                <Text style={{ marginLeft: 12, fontSize: 16, color: "#000" }}>
+                  Copy
+                </Text>
               </TouchableOpacity>
             )}
 
@@ -1406,14 +1600,18 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
               <TouchableOpacity
                 onPress={() => selectedMessage && handleDelete(selectedMessage)}
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
+                  flexDirection: "row",
+                  alignItems: "center",
                   paddingVertical: 12,
                   paddingHorizontal: 16,
                 }}
               >
                 <Ionicons name="trash" size={20} color="#ff4444" />
-                <Text style={{ marginLeft: 12, fontSize: 16, color: '#ff4444' }}>Delete</Text>
+                <Text
+                  style={{ marginLeft: 12, fontSize: 16, color: "#ff4444" }}
+                >
+                  Delete
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -1430,15 +1628,15 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
         <Pressable
           style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.9)',
-            justifyContent: 'center',
-            alignItems: 'center',
+            backgroundColor: "rgba(0,0,0,0.9)",
+            justifyContent: "center",
+            alignItems: "center",
           }}
           onPress={() => setShowImageViewer(false)}
         >
           <TouchableOpacity
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 50,
               right: 20,
               zIndex: 1,

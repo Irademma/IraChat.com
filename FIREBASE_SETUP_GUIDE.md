@@ -21,6 +21,7 @@ This guide will help you properly configure Firebase for your IraChat applicatio
 ### 2. Enable Firebase Services
 
 #### Authentication
+
 1. Go to **Authentication** → **Sign-in method**
 2. Enable these providers:
    - ✅ **Email/Password**
@@ -29,6 +30,7 @@ This guide will help you properly configure Firebase for your IraChat applicatio
    - ✅ **Anonymous** (for guest users)
 
 #### Firestore Database
+
 1. Go to **Firestore Database**
 2. Click "Create database"
 3. Choose **Start in test mode** (for development)
@@ -36,6 +38,7 @@ This guide will help you properly configure Firebase for your IraChat applicatio
 5. Click "Done"
 
 #### Storage
+
 1. Go to **Storage**
 2. Click "Get started"
 3. Choose **Start in test mode**
@@ -43,6 +46,7 @@ This guide will help you properly configure Firebase for your IraChat applicatio
 5. Click "Done"
 
 #### Cloud Messaging (Optional)
+
 1. Go to **Cloud Messaging**
 2. Click "Get started"
 3. This enables push notifications
@@ -58,6 +62,7 @@ This guide will help you properly configure Firebase for your IraChat applicatio
 ### 4. Configure Your App
 
 #### Update .env File
+
 Your `.env` file should already be created with your configuration. Verify it matches your Firebase config:
 
 ```env
@@ -72,6 +77,7 @@ EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
 ```
 
 #### Test Firebase Connection
+
 Run the Firebase test page to verify everything is working:
 
 ```bash
@@ -94,19 +100,19 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    
+
     // Chat rules
     match /chats/{chatId} {
-      allow read, write: if request.auth != null && 
+      allow read, write: if request.auth != null &&
         request.auth.uid in resource.data.participants;
     }
-    
+
     // Message rules
     match /chats/{chatId}/messages/{messageId} {
-      allow read, write: if request.auth != null && 
+      allow read, write: if request.auth != null &&
         request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
     }
-    
+
     // Test messages (for development only - remove in production)
     match /test_messages/{messageId} {
       allow read, write: if request.auth != null;
@@ -125,12 +131,12 @@ service firebase.storage {
     match /profile_images/{userId}/{allPaths=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    
+
     // Chat media
     match /chat_media/{chatId}/{allPaths=**} {
       allow read, write: if request.auth != null;
     }
-    
+
     // Voice messages
     match /voice_messages/{userId}/{allPaths=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
@@ -142,6 +148,7 @@ service firebase.storage {
 ## 🧪 Testing Your Setup
 
 ### 1. Run Firebase Tests
+
 1. Start your app: `npm start`
 2. Navigate to `/firebase-test` in your app
 3. Run all tests to verify:
@@ -151,6 +158,7 @@ service firebase.storage {
    - ✅ Storage is accessible
 
 ### 2. Test Core Features
+
 1. **Registration**: Create a new account
 2. **Login**: Sign in with your account
 3. **Profile**: Update your profile information
@@ -162,21 +170,25 @@ service firebase.storage {
 ### Common Issues
 
 #### "Firebase not initialized"
+
 - Check your `.env` file has all required variables
 - Restart your development server
 - Verify Firebase config in console
 
 #### "Permission denied" errors
+
 - Update Firestore security rules
 - Ensure user is authenticated
 - Check user permissions in Firebase Console
 
 #### "Network request failed"
+
 - Check internet connection
 - Verify Firebase project is active
 - Check Firebase service status
 
 #### Authentication issues
+
 - Enable Email/Password in Firebase Console
 - Check authentication configuration
 - Verify domain is authorized
@@ -184,12 +196,14 @@ service firebase.storage {
 ### Debug Steps
 
 1. **Check Firebase Console**:
+
    - Go to your Firebase project
    - Check Authentication → Users
    - Check Firestore → Data
    - Check Storage → Files
 
 2. **Check App Logs**:
+
    ```bash
    # View logs in development
    npx expo start --clear
@@ -203,16 +217,19 @@ service firebase.storage {
 ## 📱 Production Deployment
 
 ### 1. Update Security Rules
+
 - Remove test collections
 - Restrict permissions
 - Add proper validation
 
 ### 2. Environment Variables
+
 - Set production Firebase config
 - Use environment-specific projects
 - Secure API keys
 
 ### 3. Performance Optimization
+
 - Enable offline persistence
 - Set up proper indexing
 - Configure caching

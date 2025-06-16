@@ -1,13 +1,16 @@
-import React from 'react';
-import { Text, TextStyle, Platform } from 'react-native';
-import { useResponsiveFontSizes, useResponsiveDimensions } from '../../hooks/useResponsiveDimensions';
+import React from "react";
+import { Text, TextStyle, Platform } from "react-native";
+import {
+  useResponsiveFontSizes,
+  useResponsiveDimensions,
+} from "../../hooks/useResponsiveDimensions";
 
 interface ResponsiveTextProps {
   children: React.ReactNode;
-  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
-  weight?: 'normal' | 'medium' | 'semibold' | 'bold';
+  size?: "xs" | "sm" | "base" | "lg" | "xl" | "2xl" | "3xl" | "4xl";
+  weight?: "normal" | "medium" | "semibold" | "bold";
   color?: string;
-  align?: 'left' | 'center' | 'right' | 'justify';
+  align?: "left" | "center" | "right" | "justify";
   style?: TextStyle;
   className?: string;
   numberOfLines?: number;
@@ -17,12 +20,12 @@ interface ResponsiveTextProps {
 
 export function ResponsiveText({
   children,
-  size = 'base',
-  weight = 'normal',
+  size = "base",
+  weight = "normal",
   color,
-  align = 'left',
+  align = "left",
   style,
-  className = '',
+  className = "",
   numberOfLines,
   adjustsFontSizeToFit = false,
   minimumFontScale = 0.8,
@@ -31,10 +34,10 @@ export function ResponsiveText({
   const { fontScale } = useResponsiveDimensions();
 
   const fontWeightMap = {
-    normal: '400' as '400',
-    medium: '500' as '500',
-    semibold: '600' as '600',
-    bold: '700' as '700',
+    normal: "400" as "400",
+    medium: "500" as "500",
+    semibold: "600" as "600",
+    bold: "700" as "700",
   };
 
   const textStyle: TextStyle = {
@@ -48,10 +51,11 @@ export function ResponsiveText({
   };
 
   // Web-specific optimizations
-  if (Platform.OS === 'web') {
-    (textStyle as any).fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    (textStyle as any).WebkitFontSmoothing = 'antialiased';
-    (textStyle as any).MozOsxFontSmoothing = 'grayscale';
+  if (Platform.OS === "web") {
+    (textStyle as any).fontFamily =
+      'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    (textStyle as any).WebkitFontSmoothing = "antialiased";
+    (textStyle as any).MozOsxFontSmoothing = "grayscale";
   }
 
   return (
@@ -59,7 +63,7 @@ export function ResponsiveText({
       style={textStyle}
       className={className}
       numberOfLines={numberOfLines}
-      adjustsFontSizeToFit={adjustsFontSizeToFit && Platform.OS !== 'web'}
+      adjustsFontSizeToFit={adjustsFontSizeToFit && Platform.OS !== "web"}
       minimumFontScale={minimumFontScale}
     >
       {children}
@@ -68,53 +72,35 @@ export function ResponsiveText({
 }
 
 // Heading component with predefined styles
-interface ResponsiveHeadingProps extends Omit<ResponsiveTextProps, 'size'> {
+interface ResponsiveHeadingProps extends Omit<ResponsiveTextProps, "size"> {
   level: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
 export function ResponsiveHeading({
   level,
-  weight = 'bold',
+  weight = "bold",
   ...props
 }: ResponsiveHeadingProps) {
   const sizeMap = {
-    1: '4xl' as const,
-    2: '3xl' as const,
-    3: '2xl' as const,
-    4: 'xl' as const,
-    5: 'lg' as const,
-    6: 'base' as const,
+    1: "4xl" as const,
+    2: "3xl" as const,
+    3: "2xl" as const,
+    4: "xl" as const,
+    5: "lg" as const,
+    6: "base" as const,
   };
 
-  return (
-    <ResponsiveText
-      size={sizeMap[level]}
-      weight={weight}
-      {...props}
-    />
-  );
+  return <ResponsiveText size={sizeMap[level]} weight={weight} {...props} />;
 }
 
 // Caption component for small text
-export function ResponsiveCaption(props: Omit<ResponsiveTextProps, 'size'>) {
-  return (
-    <ResponsiveText
-      size="xs"
-      color="#6B7280"
-      {...props}
-    />
-  );
+export function ResponsiveCaption(props: Omit<ResponsiveTextProps, "size">) {
+  return <ResponsiveText size="xs" color="#6B7280" {...props} />;
 }
 
 // Body text component with optimized line height
-export function ResponsiveBody(props: Omit<ResponsiveTextProps, 'size'>) {
-  return (
-    <ResponsiveText
-      size="base"
-      style={{ lineHeight: 24 }}
-      {...props}
-    />
-  );
+export function ResponsiveBody(props: Omit<ResponsiveTextProps, "size">) {
+  return <ResponsiveText size="base" style={{ lineHeight: 24 }} {...props} />;
 }
 
 // Link component with interactive styles
@@ -126,63 +112,38 @@ interface ResponsiveLinkProps extends ResponsiveTextProps {
 export function ResponsiveLink({
   onPress,
   href,
-  color = '#3B82F6',
+  color = "#3B82F6",
   style,
   ...props
 }: ResponsiveLinkProps) {
   const linkStyle: TextStyle = {
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
     ...style,
   };
 
-  if (Platform.OS === 'web' && href) {
+  if (Platform.OS === "web" && href) {
     // For web, use anchor tag behavior
-    return (
-      <ResponsiveText
-        color={color}
-        style={linkStyle}
-        {...props}
-      />
-    );
+    return <ResponsiveText color={color} style={linkStyle} {...props} />;
   }
 
-  return (
-    <ResponsiveText
-      color={color}
-      style={linkStyle}
-      {...props}
-    />
-  );
+  return <ResponsiveText color={color} style={linkStyle} {...props} />;
 }
 
 // Error text component
-export function ResponsiveErrorText(props: Omit<ResponsiveTextProps, 'color' | 'size'>) {
-  return (
-    <ResponsiveText
-      size="sm"
-      color="#EF4444"
-      {...props}
-    />
-  );
+export function ResponsiveErrorText(
+  props: Omit<ResponsiveTextProps, "color" | "size">,
+) {
+  return <ResponsiveText size="sm" color="#EF4444" {...props} />;
 }
 
 // Success text component
-export function ResponsiveSuccessText(props: Omit<ResponsiveTextProps, 'color' | 'size'>) {
-  return (
-    <ResponsiveText
-      size="sm"
-      color="#667eea"
-      {...props}
-    />
-  );
+export function ResponsiveSuccessText(
+  props: Omit<ResponsiveTextProps, "color" | "size">,
+) {
+  return <ResponsiveText size="sm" color="#667eea" {...props} />;
 }
 
 // Muted text component
-export function ResponsiveMutedText(props: Omit<ResponsiveTextProps, 'color'>) {
-  return (
-    <ResponsiveText
-      color="#6B7280"
-      {...props}
-    />
-  );
+export function ResponsiveMutedText(props: Omit<ResponsiveTextProps, "color">) {
+  return <ResponsiveText color="#6B7280" {...props} />;
 }

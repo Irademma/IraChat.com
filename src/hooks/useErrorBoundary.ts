@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useAnalytics } from './useAnalytics';
+import { useCallback, useEffect, useState } from "react";
+import { useAnalytics } from "./useAnalytics";
 
 interface ErrorInfo {
   error: Error;
@@ -13,26 +13,33 @@ interface UseErrorBoundaryProps {
   fallback?: React.ReactNode;
 }
 
-export const useErrorBoundary = ({ currentUserId, onError, fallback }: UseErrorBoundaryProps = {}) => {
+export const useErrorBoundary = ({
+  currentUserId,
+  onError,
+  fallback,
+}: UseErrorBoundaryProps = {}) => {
   const [error, setError] = useState<Error | null>(null);
   const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null);
   const { trackError } = useAnalytics({ currentUserId, onError });
 
-  const handleError = useCallback((error: Error, componentStack: string = '') => {
-    const errorInfo: ErrorInfo = {
-      error,
-      componentStack,
-      timestamp: Date.now(),
-    };
+  const handleError = useCallback(
+    (error: Error, componentStack: string = "") => {
+      const errorInfo: ErrorInfo = {
+        error,
+        componentStack,
+        timestamp: Date.now(),
+      };
 
-    setError(error);
-    setErrorInfo(errorInfo);
+      setError(error);
+      setErrorInfo(errorInfo);
 
-    if (currentUserId) {
-      trackError(error, componentStack);
-    }
-    onError?.(error);
-  }, [onError, trackError, currentUserId]);
+      if (currentUserId) {
+        trackError(error, componentStack);
+      }
+      onError?.(error);
+    },
+    [onError, trackError, currentUserId],
+  );
 
   const resetError = useCallback(() => {
     setError(null);
@@ -52,4 +59,4 @@ export const useErrorBoundary = ({ currentUserId, onError, fallback }: UseErrorB
     resetError,
     fallback,
   };
-}; 
+};

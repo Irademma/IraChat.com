@@ -1,17 +1,17 @@
-import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
-import { useRouter, useSegments } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { useRouter, useSegments } from "expo-router";
+import { useEffect, useRef } from "react";
 import {
-    Animated,
-    Dimensions,
-    Platform,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+  Animated,
+  Dimensions,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get("window");
 
 interface TabConfig {
   name: string;
@@ -21,16 +21,21 @@ interface TabConfig {
 }
 
 const tabs: TabConfig[] = [
-  { name: 'chats', title: 'Chats', icon: 'chatbubbles', route: '/(tabs)' },
-  { name: 'groups', title: 'Groups', icon: 'people', route: '/(tabs)/groups' },
-  { name: 'updates', title: 'Updates', icon: 'radio-button-on', route: '/(tabs)/updates' },
-  { name: 'calls', title: 'Calls', icon: 'call', route: '/(tabs)/calls' },
+  { name: "chats", title: "Chats", icon: "chatbubbles", route: "/(tabs)" },
+  { name: "groups", title: "Groups", icon: "people", route: "/(tabs)/groups" },
+  {
+    name: "updates",
+    title: "Updates",
+    icon: "radio-button-on",
+    route: "/(tabs)/updates",
+  },
+  { name: "calls", title: "Calls", icon: "call", route: "/(tabs)/calls" },
 ];
 
 export default function AnimatedTabBar() {
   const router = useRouter();
   const segments = useSegments();
-  
+
   // Animation values
   const indicatorPosition = useRef(new Animated.Value(0)).current;
   const tabScales = useRef(tabs.map(() => new Animated.Value(1))).current;
@@ -39,9 +44,9 @@ export default function AnimatedTabBar() {
   // Get current tab index
   const getCurrentTabIndex = () => {
     const currentSegment = segments[segments.length - 1];
-    if (currentSegment === 'groups') return 1;
-    if (currentSegment === 'updates') return 2;
-    if (currentSegment === 'calls') return 3;
+    if (currentSegment === "groups") return 1;
+    if (currentSegment === "updates") return 2;
+    if (currentSegment === "calls") return 3;
     return 0;
   };
 
@@ -50,7 +55,7 @@ export default function AnimatedTabBar() {
   // Animate indicator and tab states
   useEffect(() => {
     const tabWidth = screenWidth / tabs.length;
-    
+
     // Animate indicator position
     Animated.spring(indicatorPosition, {
       toValue: activeTabIndex * tabWidth,
@@ -62,7 +67,7 @@ export default function AnimatedTabBar() {
     // Animate tab scales and opacities
     tabs.forEach((_, index) => {
       const isActive = index === activeTabIndex;
-      
+
       Animated.parallel([
         Animated.spring(tabScales[index], {
           toValue: isActive ? 1.1 : 1,
@@ -74,7 +79,7 @@ export default function AnimatedTabBar() {
           toValue: isActive ? 1 : 0.6,
           duration: 200,
           useNativeDriver: true,
-        })
+        }),
       ]).start();
     });
   }, [activeTabIndex]);
@@ -83,7 +88,7 @@ export default function AnimatedTabBar() {
     if (index === activeTabIndex) return;
 
     // Add haptic feedback
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios") {
       // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
 
@@ -100,7 +105,7 @@ export default function AnimatedTabBar() {
         useNativeDriver: true,
         tension: 300,
         friction: 20,
-      })
+      }),
     ]).start();
 
     // Navigate to tab
@@ -110,23 +115,25 @@ export default function AnimatedTabBar() {
   const tabWidth = screenWidth / tabs.length;
 
   return (
-    <View style={{
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: Platform.OS === 'ios' ? 85 : 65,
-      backgroundColor: Platform.OS === 'ios' ? 'transparent' : '#FFFFFF',
-      borderTopWidth: Platform.OS === 'ios' ? 0 : 1,
-      borderTopColor: '#E5E7EB',
-    }}>
+    <View
+      style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: Platform.OS === "ios" ? 85 : 65,
+        backgroundColor: Platform.OS === "ios" ? "transparent" : "#FFFFFF",
+        borderTopWidth: Platform.OS === "ios" ? 0 : 1,
+        borderTopColor: "#E5E7EB",
+      }}
+    >
       {/* iOS Blur Background */}
-      {Platform.OS === 'ios' && (
+      {Platform.OS === "ios" && (
         <BlurView
           intensity={85}
           tint="light"
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             left: 0,
             right: 0,
@@ -138,57 +145,64 @@ export default function AnimatedTabBar() {
       {/* Animated Indicator */}
       <Animated.View
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: 0,
           width: tabWidth,
           height: 3,
-          backgroundColor: '#667eea',
+          backgroundColor: "#667eea",
           borderRadius: 1.5,
           transform: [{ translateX: indicatorPosition }],
         }}
       />
 
       {/* Tab Buttons */}
-      <View style={{
-        flexDirection: 'row',
-        height: '100%',
-        paddingBottom: Platform.OS === 'ios' ? 20 : 5,
-        paddingTop: 8,
-      }}>
+      <View
+        style={{
+          flexDirection: "row",
+          height: "100%",
+          paddingBottom: Platform.OS === "ios" ? 20 : 5,
+          paddingTop: 8,
+        }}
+      >
         {tabs.map((tab, index) => (
           <TouchableOpacity
             key={tab.name}
             style={{
               flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
+              alignItems: "center",
+              justifyContent: "center",
             }}
             onPress={() => handleTabPress(index)}
             activeOpacity={0.7}
           >
             <Animated.View
               style={{
-                alignItems: 'center',
+                alignItems: "center",
                 transform: [{ scale: tabScales[index] }],
                 opacity: tabOpacities[index],
               }}
             >
-              <View style={{
-                padding: 4,
-                borderRadius: 12,
-                backgroundColor: activeTabIndex === index ? 'rgba(102, 126, 234, 0.1)' : 'transparent',
-              }}>
+              <View
+                style={{
+                  padding: 4,
+                  borderRadius: 12,
+                  backgroundColor:
+                    activeTabIndex === index
+                      ? "rgba(102, 126, 234, 0.1)"
+                      : "transparent",
+                }}
+              >
                 <Ionicons
                   name={tab.icon}
                   size={24}
-                  color={activeTabIndex === index ? '#667eea' : '#8E8E93'}
+                  color={activeTabIndex === index ? "#667eea" : "#8E8E93"}
                 />
               </View>
               <Text
                 style={{
                   fontSize: 11,
-                  fontWeight: '600',
-                  color: activeTabIndex === index ? '#667eea' : '#8E8E93',
+                  fontWeight: "600",
+                  color: activeTabIndex === index ? "#667eea" : "#8E8E93",
                   marginTop: 4,
                 }}
               >
@@ -203,16 +217,16 @@ export default function AnimatedTabBar() {
       {activeTabIndex === 0 && (
         <Animated.View
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: -20,
             right: 20,
             width: 40,
             height: 40,
             borderRadius: 20,
-            backgroundColor: '#667eea',
-            justifyContent: 'center',
-            alignItems: 'center',
-            shadowColor: '#000',
+            backgroundColor: "#667eea",
+            justifyContent: "center",
+            alignItems: "center",
+            shadowColor: "#000",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.3,
             shadowRadius: 8,

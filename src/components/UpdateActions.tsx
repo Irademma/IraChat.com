@@ -1,9 +1,16 @@
 // Vertical media right-side action buttons for updates
-import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Update } from '../types';
-import { formatNumber } from '../utils/formatNumber';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import {
+  Animated,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Update } from "../types";
+import { formatNumber } from "../utils/formatNumber";
 
 interface UpdateActionsProps {
   update: Update;
@@ -27,10 +34,7 @@ export const UpdateActions: React.FC<UpdateActionsProps> = ({
   return (
     <View style={styles.container}>
       {/* Profile Picture */}
-      <TouchableOpacity
-        onPress={onProfilePress}
-        style={styles.profileButton}
-      >
+      <TouchableOpacity onPress={onProfilePress} style={styles.profileButton}>
         <Image
           source={{ uri: update.user.avatar }}
           style={styles.profilePicture}
@@ -41,31 +45,32 @@ export const UpdateActions: React.FC<UpdateActionsProps> = ({
       </TouchableOpacity>
 
       {/* Like Button */}
-      <TouchableOpacity
-        onPress={onLike}
-        style={styles.actionButton}
-      >
-        <Animated.View style={[
-          styles.actionIcon,
-          likeAnimation && {
-            transform: [{
-              scale: likeAnimation.interpolate({
-                inputRange: [0, 0.5, 1],
-                outputRange: [1, 1.3, 1],
-              }),
-            }],
-          },
-        ]}>
+      <TouchableOpacity onPress={onLike} style={styles.actionButton}>
+        <Animated.View
+          style={[
+            styles.actionIcon,
+            likeAnimation && {
+              transform: [
+                {
+                  scale: likeAnimation.interpolate({
+                    inputRange: [0, 0.5, 1],
+                    outputRange: [1, 1.3, 1],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
           {update.isLiked ? (
             <Image
-              source={require('../../assets/images/heart-red.png')}
+              source={require("../../assets/images/heart-red.png")}
               style={styles.heartIcon}
               resizeMode="contain"
             />
           ) : (
             <Image
-              source={require('../../assets/images/heart.png')}
-              style={[styles.heartIcon, { tintColor: '#FFFFFF' }]}
+              source={require("../../assets/images/heart.png")}
+              style={[styles.heartIcon, { tintColor: "#FFFFFF" }]}
               resizeMode="contain"
             />
           )}
@@ -74,21 +79,17 @@ export const UpdateActions: React.FC<UpdateActionsProps> = ({
       </TouchableOpacity>
 
       {/* Comment Button */}
-      <TouchableOpacity
-        onPress={onComment}
-        style={styles.actionButton}
-      >
+      <TouchableOpacity onPress={onComment} style={styles.actionButton}>
         <View style={styles.actionIcon}>
           <Ionicons name="chatbubble-ellipses" size={28} color="#FFFFFF" />
         </View>
-        <Text style={styles.actionText}>{formatNumber(update.commentCount)}</Text>
+        <Text style={styles.actionText}>
+          {formatNumber(update.commentCount)}
+        </Text>
       </TouchableOpacity>
 
       {/* Share Button */}
-      <TouchableOpacity
-        onPress={onShare}
-        style={styles.actionButton}
-      >
+      <TouchableOpacity onPress={onShare} style={styles.actionButton}>
         <View style={styles.actionIcon}>
           <Ionicons name="share-social" size={28} color="#FFFFFF" />
         </View>
@@ -96,10 +97,7 @@ export const UpdateActions: React.FC<UpdateActionsProps> = ({
       </TouchableOpacity>
 
       {/* Download Button */}
-      <TouchableOpacity
-        onPress={onDownload}
-        style={styles.actionButton}
-      >
+      <TouchableOpacity onPress={onDownload} style={styles.actionButton}>
         <View style={styles.actionIcon}>
           <Ionicons name="download" size={28} color="#FFFFFF" />
         </View>
@@ -123,43 +121,43 @@ export const UpdateActions: React.FC<UpdateActionsProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+    alignItems: "center",
+    justifyContent: "flex-end",
     paddingBottom: 20,
   },
   profileButton: {
     marginBottom: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   profilePicture: {
     width: 50,
     height: 50,
     borderRadius: 25,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: "#FFFFFF",
   },
   followButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: -5,
-    backgroundColor: '#FF2D55',
+    backgroundColor: "#FF2D55",
     borderRadius: 12,
     width: 24,
     height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: "#000000",
   },
   actionButton: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
   },
   actionIcon: {
     width: 44,
     height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 22,
     marginBottom: 4,
   },
@@ -168,14 +166,14 @@ const styles = StyleSheet.create({
     height: 28,
   },
   actionText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   musicContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -185,9 +183,9 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   musicText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
     maxWidth: 100,
   },
 });

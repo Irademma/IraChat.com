@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { firebaseConfig, isFirebaseConfigValid } from '../config/firebase';
-import { auth, db, storage } from '../services/firebaseSimple';
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, Alert, ScrollView } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { firebaseConfig, isFirebaseConfigValid } from "../config/firebase";
+import { auth, db, storage } from "../services/firebaseSimple";
 
 interface FirebaseStatus {
   config: boolean;
@@ -29,29 +29,29 @@ export default function FirebaseSetupChecker() {
 
   const checkFirebaseSetup = async () => {
     setLoading(true);
-    
+
     try {
       // Check configuration
       const configValid = isFirebaseConfigValid;
-      
+
       // Check auth service
       const authValid = auth !== null && auth !== undefined;
-      
+
       // Check Firestore
       const firestoreValid = db !== null && db !== undefined;
-      
+
       // Check Storage
       const storageValid = storage !== null && storage !== undefined;
-      
+
       // Check connectivity (simple test)
       let connectivityValid = false;
       try {
         // Try to access Firebase (this will fail gracefully if offline)
-        if (auth && typeof auth.onAuthStateChanged === 'function') {
+        if (auth && typeof auth.onAuthStateChanged === "function") {
           connectivityValid = true;
         }
       } catch (error) {
-        console.log('Connectivity check failed:', error);
+        console.log("Connectivity check failed:", error);
       }
 
       setStatus({
@@ -62,44 +62,48 @@ export default function FirebaseSetupChecker() {
         connectivity: connectivityValid,
       });
     } catch (error) {
-      console.error('Error checking Firebase setup:', error);
+      console.error("Error checking Firebase setup:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const StatusItem = ({ 
-    title, 
-    status, 
-    description 
-  }: { 
-    title: string; 
-    status: boolean; 
-    description: string; 
+  const StatusItem = ({
+    title,
+    status,
+    description,
+  }: {
+    title: string;
+    status: boolean;
+    description: string;
   }) => (
     <View className="flex-row items-center py-3 px-4 bg-white rounded-lg mb-2 border border-gray-200">
-      <View className={`w-6 h-6 rounded-full items-center justify-center mr-3 ${
-        status ? 'bg-green-100' : 'bg-red-100'
-      }`}>
-        <Ionicons 
-          name={status ? "checkmark" : "close"} 
-          size={16} 
-          color={status ? "#10B981" : "#EF4444"} 
+      <View
+        className={`w-6 h-6 rounded-full items-center justify-center mr-3 ${
+          status ? "bg-green-100" : "bg-red-100"
+        }`}
+      >
+        <Ionicons
+          name={status ? "checkmark" : "close"}
+          size={16}
+          color={status ? "#10B981" : "#EF4444"}
         />
       </View>
       <View className="flex-1">
         <Text className="text-gray-800 font-medium">{title}</Text>
         <Text className="text-gray-500 text-sm">{description}</Text>
       </View>
-      <Text className={`text-sm font-medium ${
-        status ? 'text-green-600' : 'text-red-600'
-      }`}>
-        {status ? 'OK' : 'Error'}
+      <Text
+        className={`text-sm font-medium ${
+          status ? "text-green-600" : "text-red-600"
+        }`}
+      >
+        {status ? "OK" : "Error"}
       </Text>
     </View>
   );
 
-  const allServicesWorking = Object.values(status).every(s => s);
+  const allServicesWorking = Object.values(status).every((s) => s);
 
   if (loading) {
     return (
@@ -115,25 +119,28 @@ export default function FirebaseSetupChecker() {
       <ScrollView className="flex-1 p-4">
         {/* Header */}
         <View className="bg-white rounded-lg p-6 mb-4 items-center">
-          <View className={`w-16 h-16 rounded-full items-center justify-center mb-4 ${
-            allServicesWorking ? 'bg-green-100' : 'bg-red-100'
-          }`}>
-            <Ionicons 
-              name={allServicesWorking ? "checkmark-circle" : "warning"} 
-              size={32} 
-              color={allServicesWorking ? "#10B981" : "#EF4444"} 
+          <View
+            className={`w-16 h-16 rounded-full items-center justify-center mb-4 ${
+              allServicesWorking ? "bg-green-100" : "bg-red-100"
+            }`}
+          >
+            <Ionicons
+              name={allServicesWorking ? "checkmark-circle" : "warning"}
+              size={32}
+              color={allServicesWorking ? "#10B981" : "#EF4444"}
             />
           </View>
           <Text className="text-xl font-bold text-gray-800 mb-2">
             Firebase Setup
           </Text>
-          <Text className={`text-center ${
-            allServicesWorking ? 'text-green-600' : 'text-red-600'
-          }`}>
-            {allServicesWorking 
-              ? 'All services are working correctly!' 
-              : 'Some services need attention'
-            }
+          <Text
+            className={`text-center ${
+              allServicesWorking ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {allServicesWorking
+              ? "All services are working correctly!"
+              : "Some services need attention"}
           </Text>
         </View>
 
@@ -143,25 +150,25 @@ export default function FirebaseSetupChecker() {
           status={status.config}
           description="Environment variables and Firebase config"
         />
-        
+
         <StatusItem
           title="Authentication"
           status={status.auth}
           description="Firebase Auth service initialization"
         />
-        
+
         <StatusItem
           title="Firestore Database"
           status={status.firestore}
           description="Cloud Firestore database connection"
         />
-        
+
         <StatusItem
           title="Cloud Storage"
           status={status.storage}
           description="Firebase Storage for media files"
         />
-        
+
         <StatusItem
           title="Connectivity"
           status={status.connectivity}
@@ -184,17 +191,19 @@ export default function FirebaseSetupChecker() {
             className="bg-gray-100 py-3 px-6 rounded-lg mb-3"
           >
             <Text className="text-gray-700 text-center font-medium">
-              {showDetails ? 'Hide' : 'Show'} Configuration Details
+              {showDetails ? "Hide" : "Show"} Configuration Details
             </Text>
           </TouchableOpacity>
 
           {!allServicesWorking && (
             <TouchableOpacity
-              onPress={() => Alert.alert(
-                'Firebase Setup Help',
-                'Please check:\n\n1. Your .env file has all Firebase variables\n2. Your Firebase project is active\n3. You have internet connection\n4. Firebase services are enabled in your project',
-                [{ text: 'OK' }]
-              )}
+              onPress={() =>
+                Alert.alert(
+                  "Firebase Setup Help",
+                  "Please check:\n\n1. Your .env file has all Firebase variables\n2. Your Firebase project is active\n3. You have internet connection\n4. Firebase services are enabled in your project",
+                  [{ text: "OK" }],
+                )
+              }
               className="bg-orange-100 border border-orange-200 py-3 px-6 rounded-lg"
             >
               <Text className="text-orange-700 text-center font-medium">

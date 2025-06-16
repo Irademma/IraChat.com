@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Dimensions, ScaledSize } from 'react-native';
+import { useEffect, useState } from "react";
+import { Dimensions, ScaledSize } from "react-native";
 import {
-    fontSize,
-    hp,
-    isLargeDevice,
-    isMediumDevice,
-    isSmallDevice,
-    isTablet,
-    spacing,
-    wp
-} from '../utils/responsive';
+  fontSize,
+  hp,
+  isLargeDevice,
+  isMediumDevice,
+  isSmallDevice,
+  isTablet,
+  spacing,
+  wp,
+} from "../utils/responsive";
 
 interface ResponsiveState {
   width: number;
@@ -26,10 +26,12 @@ interface ResponsiveState {
 }
 
 export const useResponsive = (): ResponsiveState => {
-  const [dimensions, setDimensions] = useState<ScaledSize>(Dimensions.get('window'));
+  const [dimensions, setDimensions] = useState<ScaledSize>(
+    Dimensions.get("window"),
+  );
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions(window);
     });
 
@@ -51,4 +53,4 @@ export const useResponsive = (): ResponsiveState => {
     fontSize,
     spacing,
   };
-}; 
+};

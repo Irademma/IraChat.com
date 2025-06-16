@@ -1,15 +1,15 @@
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect } from 'react';
-import { ChatRoom } from '../components/ChatRoom';
-import { auth } from '../services/firebase';
+import { useLocalSearchParams } from "expo-router";
+import { useEffect } from "react";
+import { ChatRoom } from "../components/ChatRoom";
+import { auth } from "../services/firebase";
 
 const IndividualChatScreen = () => {
   const params = useLocalSearchParams();
 
   useEffect(() => {
     // Ensure user is authenticated
-    if (!auth.currentUser) {
-      console.warn('User not authenticated');
+    if (!auth?.currentUser) {
+      console.warn("User not authenticated");
       // You might want to redirect to login here
     }
   }, []);
@@ -19,7 +19,7 @@ const IndividualChatScreen = () => {
     id: params.contactId as string,
     name: params.contactName as string,
     avatar: params.contactAvatar as string,
-    isOnline: params.contactIsOnline === 'true',
+    isOnline: params.contactIsOnline === "true",
   };
 
   return (

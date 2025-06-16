@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export const FastLoader = () => {
   return (
@@ -19,31 +19,31 @@ export const FastLoader = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
   },
   content: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   text: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
+    fontWeight: "bold",
+    color: "#1f2937",
     marginTop: 12,
     marginBottom: 20,
   },
   progressBar: {
     width: 120,
     height: 3,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: "#e5e7eb",
     borderRadius: 2,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   progress: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#3B82F6',
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#3B82F6",
     borderRadius: 2,
   },
 });

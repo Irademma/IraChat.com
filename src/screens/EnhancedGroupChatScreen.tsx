@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   FlatList,
@@ -8,13 +8,13 @@ import {
   TouchableOpacity,
   Text,
   Alert,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { AdvancedGroupHeader } from '../components/AdvancedGroupHeader';
-import { SwipeableMessage } from '../components/SwipeableMessage';
-import { XStyleMediaViewer } from '../components/XStyleMediaViewer';
-import { GroupProfilePanel } from '../components/GroupProfilePanel';
-import { ScrollAwareLayout } from '../components/ScrollAwareLayout';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { AdvancedGroupHeader } from "../components/AdvancedGroupHeader";
+import { SwipeableMessage } from "../components/SwipeableMessage";
+import { XStyleMediaViewer } from "../components/XStyleMediaViewer";
+import { GroupProfilePanel } from "../components/GroupProfilePanel";
+import { ScrollAwareLayout } from "../components/ScrollAwareLayout";
 
 interface EnhancedGroupChatScreenProps {
   groupId: string;
@@ -22,14 +22,12 @@ interface EnhancedGroupChatScreenProps {
   onBack: () => void;
 }
 
-export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = ({
-  groupId,
-  currentUserId,
-  onBack,
-}) => {
+export const EnhancedGroupChatScreen: React.FC<
+  EnhancedGroupChatScreenProps
+> = ({ groupId, currentUserId, onBack }) => {
   // State management
   const [messages, setMessages] = useState<any[]>([]);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const [showGroupProfile, setShowGroupProfile] = useState(false);
   const [showMediaViewer, setShowMediaViewer] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<any>(null);
@@ -39,46 +37,48 @@ export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = (
   // Mock data - replace with real data from your backend
   const groupInfo = {
     id: groupId,
-    name: 'IraChat Team',
-    avatar: 'https://via.placeholder.com/100',
-    description: 'Official IraChat development team',
+    name: "IraChat Team",
+    avatar: "https://via.placeholder.com/100",
+    description: "Official IraChat development team",
     memberCount: 12,
     createdAt: new Date(),
   };
 
   const members = [
     {
-      id: '1',
-      name: 'John Admin',
-      username: '@johnadmin',
-      avatar: 'https://via.placeholder.com/40',
-      role: 'admin' as const,
+      id: "1",
+      name: "John Admin",
+      username: "@johnadmin",
+      avatar: "https://via.placeholder.com/40",
+      role: "admin" as const,
       joinedAt: new Date(),
       lastSeen: new Date(),
     },
     {
-      id: '2',
-      name: 'Jane Member',
-      username: '@janemember',
-      avatar: 'https://via.placeholder.com/40',
-      role: 'member' as const,
+      id: "2",
+      name: "Jane Member",
+      username: "@janemember",
+      avatar: "https://via.placeholder.com/40",
+      role: "member" as const,
       joinedAt: new Date(),
       lastSeen: new Date(),
     },
   ];
 
   const mostActiveUser = {
-    id: '2',
-    name: 'Jane Member',
-    avatar: 'https://via.placeholder.com/24',
+    id: "2",
+    name: "Jane Member",
+    avatar: "https://via.placeholder.com/24",
     isVisible: true, // 24-hour visibility cycle
   };
 
-  const admins = members.filter(m => m.role === 'admin').map(admin => ({
-    id: admin.id,
-    name: admin.name,
-    username: admin.username,
-  }));
+  const admins = members
+    .filter((m) => m.role === "admin")
+    .map((admin) => ({
+      id: admin.id,
+      name: admin.name,
+      username: admin.username,
+    }));
 
   const groupSettings = {
     isMuted: false,
@@ -91,42 +91,42 @@ export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = (
   useEffect(() => {
     setMessages([
       {
-        id: '1',
-        content: 'Welcome to the IraChat team group!',
+        id: "1",
+        content: "Welcome to the IraChat team group!",
         sender: {
-          id: '1',
-          name: 'John Admin',
-          avatar: 'https://via.placeholder.com/32',
+          id: "1",
+          name: "John Admin",
+          avatar: "https://via.placeholder.com/32",
         },
         timestamp: new Date(Date.now() - 3600000),
-        type: 'text',
+        type: "text",
       },
       {
-        id: '2',
-        content: 'Thanks for adding me!',
+        id: "2",
+        content: "Thanks for adding me!",
         sender: {
-          id: '2',
-          name: 'Jane Member',
-          avatar: 'https://via.placeholder.com/32',
+          id: "2",
+          name: "Jane Member",
+          avatar: "https://via.placeholder.com/32",
         },
         timestamp: new Date(Date.now() - 1800000),
-        type: 'text',
+        type: "text",
       },
       {
-        id: '3',
-        content: 'Check out this screenshot of the new feature',
+        id: "3",
+        content: "Check out this screenshot of the new feature",
         sender: {
-          id: '1',
-          name: 'John Admin',
-          avatar: 'https://via.placeholder.com/32',
+          id: "1",
+          name: "John Admin",
+          avatar: "https://via.placeholder.com/32",
         },
         timestamp: new Date(Date.now() - 900000),
-        type: 'image',
+        type: "image",
         media: [
           {
-            id: 'media1',
-            uri: 'https://via.placeholder.com/300x200',
-            type: 'image',
+            id: "media1",
+            uri: "https://via.placeholder.com/300x200",
+            type: "image",
           },
         ],
       },
@@ -141,16 +141,16 @@ export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = (
       content: inputText.trim(),
       sender: {
         id: currentUserId,
-        name: 'You',
-        avatar: 'https://via.placeholder.com/32',
+        name: "You",
+        avatar: "https://via.placeholder.com/32",
       },
       timestamp: new Date(),
-      type: 'text',
+      type: "text",
       replyTo: replyingTo,
     };
 
-    setMessages(prev => [...prev, newMessage]);
-    setInputText('');
+    setMessages((prev) => [...prev, newMessage]);
+    setInputText("");
     setReplyingTo(null);
 
     // Scroll to bottom
@@ -161,15 +161,22 @@ export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = (
 
   const handleReply = (message: any) => {
     setReplyingTo(message);
-    Alert.alert('Reply', `Replying to: ${message.content.substring(0, 50)}...`);
+    Alert.alert("Reply", `Replying to: ${message.content.substring(0, 50)}...`);
   };
 
   const handleArchive = (message: any) => {
-    Alert.alert('Archive', `Message archived: ${message.content.substring(0, 50)}...`);
+    Alert.alert(
+      "Archive",
+      `Message archived: ${message.content.substring(0, 50)}...`,
+    );
   };
 
   const handleMediaPress = (mediaUri: string, mediaType: string) => {
-    setSelectedMedia({ uri: mediaUri, type: mediaType, id: Date.now().toString() });
+    setSelectedMedia({
+      uri: mediaUri,
+      type: mediaType,
+      id: Date.now().toString(),
+    });
     setShowMediaViewer(true);
   };
 
@@ -203,27 +210,27 @@ export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = (
   const renderFooter = () => (
     <View
       style={{
-        backgroundColor: 'white',
+        backgroundColor: "white",
         paddingHorizontal: 16,
         paddingVertical: 12,
         borderTopWidth: 1,
-        borderTopColor: '#eee',
+        borderTopColor: "#eee",
       }}
     >
       {/* Reply indicator */}
       {replyingTo && (
         <View
           style={{
-            backgroundColor: '#f0f0f0',
+            backgroundColor: "#f0f0f0",
             padding: 8,
             borderRadius: 8,
             marginBottom: 8,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          <Text style={{ fontSize: 12, color: '#666' }}>
+          <Text style={{ fontSize: 12, color: "#666" }}>
             Replying to: {replyingTo.content.substring(0, 30)}...
           </Text>
           <TouchableOpacity onPress={() => setReplyingTo(null)}>
@@ -233,7 +240,7 @@ export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = (
       )}
 
       {/* Input area */}
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
         <TextInput
           value={inputText}
           onChangeText={setInputText}
@@ -241,7 +248,7 @@ export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = (
           style={{
             flex: 1,
             borderWidth: 1,
-            borderColor: '#ddd',
+            borderColor: "#ddd",
             borderRadius: 20,
             paddingHorizontal: 16,
             paddingVertical: 8,
@@ -253,7 +260,7 @@ export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = (
         <TouchableOpacity
           onPress={handleSendMessage}
           style={{
-            backgroundColor: '#667eea',
+            backgroundColor: "#667eea",
             borderRadius: 20,
             padding: 8,
           }}
@@ -266,8 +273,8 @@ export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = (
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: 'white' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1, backgroundColor: "white" }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollAwareLayout
         headerComponent={renderHeader()}
@@ -291,19 +298,33 @@ export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = (
         groupInfo={groupInfo}
         members={members}
         currentUserId={currentUserId}
-        isCurrentUserAdmin={members.find(m => m.id === currentUserId)?.role === 'admin'}
+        isCurrentUserAdmin={
+          members.find((m) => m.id === currentUserId)?.role === "admin"
+        }
         sharedMedia={[]}
         sharedFiles={[]}
         sharedLinks={[]}
         recentEvents={[]}
         groupSettings={groupSettings}
         onUpdateGroupSettings={() => {}}
-        onAddMember={() => Alert.alert('Add Member', 'Add member functionality')}
-        onRemoveMember={() => Alert.alert('Remove Member', 'Remove member functionality')}
-        onPromoteMember={() => Alert.alert('Promote Member', 'Promote member functionality')}
-        onDemoteMember={() => Alert.alert('Demote Member', 'Demote member functionality')}
-        onChangeGroupPhoto={() => Alert.alert('Change Photo', 'Change group photo functionality')}
-        onChangeGroupName={() => Alert.alert('Change Name', 'Change group name functionality')}
+        onAddMember={() =>
+          Alert.alert("Add Member", "Add member functionality")
+        }
+        onRemoveMember={() =>
+          Alert.alert("Remove Member", "Remove member functionality")
+        }
+        onPromoteMember={() =>
+          Alert.alert("Promote Member", "Promote member functionality")
+        }
+        onDemoteMember={() =>
+          Alert.alert("Demote Member", "Demote member functionality")
+        }
+        onChangeGroupPhoto={() =>
+          Alert.alert("Change Photo", "Change group photo functionality")
+        }
+        onChangeGroupName={() =>
+          Alert.alert("Change Name", "Change group name functionality")
+        }
         onMediaPress={handleMediaPress}
       />
 
@@ -312,7 +333,7 @@ export const EnhancedGroupChatScreen: React.FC<EnhancedGroupChatScreenProps> = (
         visible={showMediaViewer}
         mediaItem={selectedMedia}
         onClose={() => setShowMediaViewer(false)}
-        onDelete={() => Alert.alert('Delete', 'Delete media functionality')}
+        onDelete={() => Alert.alert("Delete", "Delete media functionality")}
         canDelete={selectedMedia?.sender?.id === currentUserId}
       />
     </KeyboardAvoidingView>

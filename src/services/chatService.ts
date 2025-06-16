@@ -13,9 +13,9 @@ import {
   setDoc,
   updateDoc,
   where,
-  writeBatch
-} from 'firebase/firestore';
-import { db } from './firebaseSimple';
+  writeBatch,
+} from "firebase/firestore";
+import { db } from "./firebaseSimple";
 
 export interface Message {
   id: string;
@@ -24,7 +24,7 @@ export interface Message {
   senderName: string;
   senderAvatar?: string;
   timestamp: Date;
-  type: 'text' | 'image' | 'video' | 'audio' | 'file';
+  type: "text" | "image" | "video" | "audio" | "file";
   mediaUrl?: string;
   mediaType?: string;
   isRead: boolean;
@@ -55,7 +55,7 @@ export interface ChatMember {
   userId: string;
   name: string;
   avatar?: string;
-  role: 'admin' | 'member';
+  role: "admin" | "member";
   joinedAt: Date;
 }
 
@@ -69,12 +69,16 @@ class ChatService {
     participantAvatars: { [userId: string]: string } = {},
     isGroup: boolean = false,
     groupName?: string,
-    groupDescription?: string
+    groupDescription?: string,
   ): Promise<string> {
     try {
-      console.log('💬 Creating new chat...', { participants, isGroup, groupName });
+      console.log("💬 Creating new chat...", {
+        participants,
+        isGroup,
+        groupName,
+      });
 
-      const chatData: Omit<Chat, 'id'> = {
+      const chatData: Omit<Chat, "id"> = {
         participants,
         participantNames,
         participantAvatars,
@@ -82,24 +86,27 @@ class ChatService {
         name: isGroup ? groupName : undefined,
         groupDescription: isGroup ? groupDescription : undefined,
         groupAdmin: isGroup ? participants[0] : undefined,
-        unreadCount: participants.reduce((acc, userId) => {
-          acc[userId] = 0;
-          return acc;
-        }, {} as { [userId: string]: number }),
+        unreadCount: participants.reduce(
+          (acc, userId) => {
+            acc[userId] = 0;
+            return acc;
+          },
+          {} as { [userId: string]: number },
+        ),
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
-      const chatRef = await addDoc(collection(db, 'chats'), {
+      const chatRef = await addDoc(collection(db, "chats"), {
         ...chatData,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
-      console.log('✅ Chat created successfully:', chatRef.id);
+      console.log("✅ Chat created successfully:", chatRef.id);
       return chatRef.id;
     } catch (error) {
-      console.error('❌ Error creating chat:', error);
+      console.error("❌ Error creating chat:", error);
       throw error;
     }
   }
@@ -112,14 +119,18 @@ class ChatService {
     senderId: string,
     senderName: string,
     text: string,
-    type: 'text' | 'image' | 'video' | 'audio' | 'file' = 'text',
+    type: "text" | "image" | "video" | "audio" | "file" = "text",
     mediaUrl?: string,
-    senderAvatar?: string
+    senderAvatar?: string,
   ): Promise<string> {
     try {
-      console.log('📤 Sending message...', { chatId, senderId, text: text.substring(0, 50) });
+      console.log("📤 Sending message...", {
+        chatId,
+        senderId,
+        text: text.substring(0, 50),
+      });
 
-      const messageData: Omit<Message, 'id'> = {
+      const messageData: Omit<Message, "id"> = {
         text,
         senderId,
         senderName,
@@ -128,30 +139,30 @@ class ChatService {
         type,
         mediaUrl,
         isRead: false,
-        isDelivered: true
+        isDelivered: true,
       };
 
       // Add message to messages subcollection
       const messageRef = await addDoc(
-        collection(db, 'chats', chatId, 'messages'),
+        collection(db, "chats", chatId, "messages"),
         {
           ...messageData,
-          timestamp: serverTimestamp()
-        }
+          timestamp: serverTimestamp(),
+        },
       );
 
       // Update chat's last message info
-      await updateDoc(doc(db, 'chats', chatId), {
+      await updateDoc(doc(db, "chats", chatId), {
         lastMessage: text,
         lastMessageAt: serverTimestamp(),
         lastMessageSender: senderId,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
-      console.log('✅ Message sent successfully:', messageRef.id);
+      console.log("✅ Message sent successfully:", messageRef.id);
       return messageRef.id;
     } catch (error) {
-      console.error('❌ Error sending message:', error);
+      console.error("❌ Error sending message:", error);
       throw error;
     }
   }
@@ -159,30 +170,35 @@ class ChatService {
   /**
    * Listen to messages in a chat
    */
-  listenToMessages(chatId: string, onMessagesUpdate: (messages: Message[]) => void): () => void {
-    console.log('👂 Listening to messages for chat:', chatId);
+  listenToMessages(
+    chatId: string,
+    onMessagesUpdate: (messages: Message[]) => void,
+  ): () => void {
+    console.log("👂 Listening to messages for chat:", chatId);
 
-    const messagesRef = collection(db, 'chats', chatId, 'messages');
-    const q = query(messagesRef, orderBy('timestamp', 'asc'));
+    const messagesRef = collection(db, "chats", chatId, "messages");
+    const q = query(messagesRef, orderBy("timestamp", "asc"));
 
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const messages: Message[] = snapshot.docs.map(doc => {
+        const messages: Message[] = snapshot.docs.map((doc) => {
           const data = doc.data();
           return {
             id: doc.id,
             ...data,
-            timestamp: data.timestamp?.toDate() || new Date()
+            timestamp: data.timestamp?.toDate() || new Date(),
           } as Message;
         });
 
-        console.log(`📥 Received ${messages.length} messages for chat ${chatId}`);
+        console.log(
+          `📥 Received ${messages.length} messages for chat ${chatId}`,
+        );
         onMessagesUpdate(messages);
       },
       (error) => {
-        console.error('❌ Error listening to messages:', error);
-      }
+        console.error("❌ Error listening to messages:", error);
+      },
     );
 
     return unsubscribe;
@@ -191,27 +207,30 @@ class ChatService {
   /**
    * Listen to user's chats
    */
-  listenToUserChats(userId: string, onChatsUpdate: (chats: Chat[]) => void): () => void {
-    console.log('👂 Listening to chats for user:', userId);
+  listenToUserChats(
+    userId: string,
+    onChatsUpdate: (chats: Chat[]) => void,
+  ): () => void {
+    console.log("👂 Listening to chats for user:", userId);
 
-    const chatsRef = collection(db, 'chats');
+    const chatsRef = collection(db, "chats");
     const q = query(
       chatsRef,
-      where('participants', 'array-contains', userId),
-      orderBy('updatedAt', 'desc')
+      where("participants", "array-contains", userId),
+      orderBy("updatedAt", "desc"),
     );
 
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const chats: Chat[] = snapshot.docs.map(doc => {
+        const chats: Chat[] = snapshot.docs.map((doc) => {
           const data = doc.data();
           return {
             id: doc.id,
             ...data,
             createdAt: data.createdAt?.toDate() || new Date(),
             updatedAt: data.updatedAt?.toDate() || new Date(),
-            lastMessageAt: data.lastMessageAt?.toDate()
+            lastMessageAt: data.lastMessageAt?.toDate(),
           } as Chat;
         });
 
@@ -219,8 +238,8 @@ class ChatService {
         onChatsUpdate(chats);
       },
       (error) => {
-        console.error('❌ Error listening to chats:', error);
-      }
+        console.error("❌ Error listening to chats:", error);
+      },
     );
 
     return unsubscribe;
@@ -231,8 +250,8 @@ class ChatService {
    */
   async getChatById(chatId: string): Promise<Chat | null> {
     try {
-      const chatDoc = await getDoc(doc(db, 'chats', chatId));
-      
+      const chatDoc = await getDoc(doc(db, "chats", chatId));
+
       if (!chatDoc.exists()) {
         return null;
       }
@@ -243,10 +262,10 @@ class ChatService {
         ...data,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date(),
-        lastMessageAt: data.lastMessageAt?.toDate()
+        lastMessageAt: data.lastMessageAt?.toDate(),
       } as Chat;
     } catch (error) {
-      console.error('❌ Error getting chat:', error);
+      console.error("❌ Error getting chat:", error);
       return null;
     }
   }
@@ -256,33 +275,33 @@ class ChatService {
    */
   async markMessagesAsRead(chatId: string, userId: string): Promise<void> {
     try {
-      console.log('👁️ Marking messages as read...', { chatId, userId });
+      console.log("👁️ Marking messages as read...", { chatId, userId });
 
       const batch = writeBatch(db);
 
       // Get unread messages
-      const messagesRef = collection(db, 'chats', chatId, 'messages');
+      const messagesRef = collection(db, "chats", chatId, "messages");
       const q = query(
         messagesRef,
-        where('senderId', '!=', userId),
-        where('isRead', '==', false)
+        where("senderId", "!=", userId),
+        where("isRead", "==", false),
       );
 
       const snapshot = await getDocs(q);
-      
-      snapshot.docs.forEach(doc => {
+
+      snapshot.docs.forEach((doc) => {
         batch.update(doc.ref, { isRead: true });
       });
 
       // Reset unread count for this user
-      batch.update(doc(db, 'chats', chatId), {
-        [`unreadCount.${userId}`]: 0
+      batch.update(doc(db, "chats", chatId), {
+        [`unreadCount.${userId}`]: 0,
       });
 
       await batch.commit();
-      console.log('✅ Messages marked as read');
+      console.log("✅ Messages marked as read");
     } catch (error) {
-      console.error('❌ Error marking messages as read:', error);
+      console.error("❌ Error marking messages as read:", error);
     }
   }
 
@@ -291,10 +310,10 @@ class ChatService {
    */
   async deleteMessage(chatId: string, messageId: string): Promise<void> {
     try {
-      await deleteDoc(doc(db, 'chats', chatId, 'messages', messageId));
-      console.log('✅ Message deleted successfully');
+      await deleteDoc(doc(db, "chats", chatId, "messages", messageId));
+      console.log("✅ Message deleted successfully");
     } catch (error) {
-      console.error('❌ Error deleting message:', error);
+      console.error("❌ Error deleting message:", error);
       throw error;
     }
   }
@@ -302,15 +321,20 @@ class ChatService {
   /**
    * Add reaction to message
    */
-  async addReaction(chatId: string, messageId: string, userId: string, reaction: string): Promise<void> {
+  async addReaction(
+    chatId: string,
+    messageId: string,
+    userId: string,
+    reaction: string,
+  ): Promise<void> {
     try {
-      const messageRef = doc(db, 'chats', chatId, 'messages', messageId);
+      const messageRef = doc(db, "chats", chatId, "messages", messageId);
       await updateDoc(messageRef, {
-        [`reactions.${userId}`]: reaction
+        [`reactions.${userId}`]: reaction,
       });
-      console.log('✅ Reaction added successfully');
+      console.log("✅ Reaction added successfully");
     } catch (error) {
-      console.error('❌ Error adding reaction:', error);
+      console.error("❌ Error adding reaction:", error);
       throw error;
     }
   }
@@ -324,16 +348,16 @@ class ChatService {
       name?: string;
       groupDescription?: string;
       groupAvatar?: string;
-    }
+    },
   ): Promise<void> {
     try {
-      await updateDoc(doc(db, 'chats', chatId), {
+      await updateDoc(doc(db, "chats", chatId), {
         ...updates,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
-      console.log('✅ Chat info updated successfully');
+      console.log("✅ Chat info updated successfully");
     } catch (error) {
-      console.error('❌ Error updating chat info:', error);
+      console.error("❌ Error updating chat info:", error);
       throw error;
     }
   }
@@ -341,23 +365,31 @@ class ChatService {
   /**
    * Add member to group chat
    */
-  async addMemberToGroup(chatId: string, userId: string, userName: string, userAvatar?: string): Promise<void> {
+  async addMemberToGroup(
+    chatId: string,
+    userId: string,
+    userName: string,
+    userAvatar?: string,
+  ): Promise<void> {
     try {
-      const chatRef = doc(db, 'chats', chatId);
+      const chatRef = doc(db, "chats", chatId);
       const chatDoc = await getDoc(chatRef);
-      
+
       if (!chatDoc.exists()) {
-        throw new Error('Chat not found');
+        throw new Error("Chat not found");
       }
 
       const chatData = chatDoc.data() as Chat;
-      
+
       if (!chatData.isGroup) {
-        throw new Error('Cannot add member to non-group chat');
+        throw new Error("Cannot add member to non-group chat");
       }
 
       const updatedParticipants = [...chatData.participants, userId];
-      const updatedParticipantNames = { ...chatData.participantNames, [userId]: userName };
+      const updatedParticipantNames = {
+        ...chatData.participantNames,
+        [userId]: userName,
+      };
       const updatedParticipantAvatars = { ...chatData.participantAvatars };
       if (userAvatar) {
         updatedParticipantAvatars[userId] = userAvatar;
@@ -368,12 +400,12 @@ class ChatService {
         participantNames: updatedParticipantNames,
         participantAvatars: updatedParticipantAvatars,
         [`unreadCount.${userId}`]: 0,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
-      console.log('✅ Member added to group successfully');
+      console.log("✅ Member added to group successfully");
     } catch (error) {
-      console.error('❌ Error adding member to group:', error);
+      console.error("❌ Error adding member to group:", error);
       throw error;
     }
   }
@@ -383,23 +415,25 @@ class ChatService {
    */
   async removeMemberFromGroup(chatId: string, userId: string): Promise<void> {
     try {
-      const chatRef = doc(db, 'chats', chatId);
+      const chatRef = doc(db, "chats", chatId);
       const chatDoc = await getDoc(chatRef);
-      
+
       if (!chatDoc.exists()) {
-        throw new Error('Chat not found');
+        throw new Error("Chat not found");
       }
 
       const chatData = chatDoc.data() as Chat;
-      
+
       if (!chatData.isGroup) {
-        throw new Error('Cannot remove member from non-group chat');
+        throw new Error("Cannot remove member from non-group chat");
       }
 
-      const updatedParticipants = chatData.participants.filter(p => p !== userId);
+      const updatedParticipants = chatData.participants.filter(
+        (p) => p !== userId,
+      );
       const updatedParticipantNames = { ...chatData.participantNames };
       delete updatedParticipantNames[userId];
-      
+
       const updatedParticipantAvatars = { ...chatData.participantAvatars };
       delete updatedParticipantAvatars[userId];
 
@@ -411,12 +445,12 @@ class ChatService {
         participantNames: updatedParticipantNames,
         participantAvatars: updatedParticipantAvatars,
         unreadCount: updatedUnreadCount,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
-      console.log('✅ Member removed from group successfully');
+      console.log("✅ Member removed from group successfully");
     } catch (error) {
-      console.error('❌ Error removing member from group:', error);
+      console.error("❌ Error removing member from group:", error);
       throw error;
     }
   }

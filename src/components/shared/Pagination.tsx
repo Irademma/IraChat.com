@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 
 interface PaginationProps {
   path: string;
@@ -37,14 +37,12 @@ export default function Pagination({
         onPress={handlePrevious}
         disabled={pageNumber <= 1}
         className={`px-4 py-2 rounded-lg ${
-          pageNumber <= 1
-            ? 'bg-gray-100'
-            : 'bg-blue-500'
+          pageNumber <= 1 ? "bg-gray-100" : "bg-blue-500"
         }`}
       >
         <Text
-          className={pageNumber <= 1 ? 'text-gray-400' : 'text-white'}
-          style={{ fontWeight: '500' }}
+          className={pageNumber <= 1 ? "text-gray-400" : "text-white"}
+          style={{ fontWeight: "500" }}
         >
           Previous
         </Text>
@@ -52,9 +50,7 @@ export default function Pagination({
 
       {/* Page Info */}
       <View className="flex-row items-center">
-        <Text className="text-gray-600 text-sm">
-          Page {pageNumber}
-        </Text>
+        <Text className="text-gray-600 text-sm">Page {pageNumber}</Text>
       </View>
 
       {/* Next Button */}
@@ -62,14 +58,12 @@ export default function Pagination({
         onPress={handleNext}
         disabled={!isNext}
         className={`px-4 py-2 rounded-lg ${
-          !isNext
-            ? 'bg-gray-100'
-            : 'bg-blue-500'
+          !isNext ? "bg-gray-100" : "bg-blue-500"
         }`}
       >
         <Text
-          className={!isNext ? 'text-gray-400' : 'text-white'}
-          style={{ fontWeight: '500' }}
+          className={!isNext ? "text-gray-400" : "text-white"}
+          style={{ fontWeight: "500" }}
         >
           Next
         </Text>

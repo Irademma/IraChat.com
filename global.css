@@ -1,6 +1,6 @@
 /* stylelint-disable */
 /* Import responsive CSS for web platform */
-@import './src/styles/responsive.css';
+@import "./src/styles/responsive.css";
 
 /* Tailwind CSS directives - CSS validation disabled for this file */
 @tailwind base;

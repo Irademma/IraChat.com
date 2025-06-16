@@ -1,7 +1,7 @@
-import { useRouter, useSegments } from 'expo-router';
-import { onAuthStateChanged } from 'firebase/auth';
-import { useEffect } from 'react';
-import { auth } from '../services/firebaseSimple';
+import { useRouter, useSegments } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
+import { useEffect } from "react";
+import { auth } from "../config/firebaseAuth";
 
 export function AuthNavigator() {
   const segments = useSegments();
@@ -9,14 +9,14 @@ export function AuthNavigator() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const inAuthGroup = segments[0] === '(auth)';
+      const inAuthGroup = segments[0] === "(auth)";
 
       if (!user && !inAuthGroup) {
         // Redirect to the sign-in page if not signed in
-        router.replace('/(auth)');
+        router.replace("/(auth)");
       } else if (user && inAuthGroup) {
         // Redirect to the main app if signed in
-        router.replace('/(tabs)');
+        router.replace("/(tabs)");
       }
     });
 
@@ -24,4 +24,4 @@ export function AuthNavigator() {
   }, [segments]);
 
   return null;
-} 
+}

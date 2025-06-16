@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,9 +8,9 @@ import {
   Modal,
   ScrollView,
   Dimensions,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 
 interface GroupHeaderProps {
   groupName: string;
@@ -87,7 +87,7 @@ export const AdvancedGroupHeader: React.FC<GroupHeaderProps> = ({
   const toggleAdminList = () => {
     const newState = !showAdminList;
     setShowAdminList(newState);
-    
+
     Animated.timing(adminListAnimation, {
       toValue: newState ? 1 : 0,
       duration: 300,
@@ -99,7 +99,7 @@ export const AdvancedGroupHeader: React.FC<GroupHeaderProps> = ({
   const toggleDropdownMenu = () => {
     const newState = !showDropdownMenu;
     setShowDropdownMenu(newState);
-    
+
     Animated.timing(dropdownAnimation, {
       toValue: newState ? 1 : 0,
       duration: 300,
@@ -108,51 +108,54 @@ export const AdvancedGroupHeader: React.FC<GroupHeaderProps> = ({
   };
 
   return (
-    <Animated.View 
+    <Animated.View
       style={{
         opacity: headerOpacity,
-        backgroundColor: '#667eea',
+        backgroundColor: "#667eea",
         paddingTop: 50,
         paddingBottom: 10,
         paddingHorizontal: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        position: 'relative',
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        position: "relative",
       }}
     >
       {/* Left Side - Group Profile & Most Active */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
         {/* Back Button */}
         <TouchableOpacity onPress={onBack} style={{ marginRight: 12 }}>
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
 
         {/* Group Profile Picture */}
-        <TouchableOpacity onPress={onGroupProfilePress} style={{ position: 'relative' }}>
+        <TouchableOpacity
+          onPress={onGroupProfilePress}
+          style={{ position: "relative" }}
+        >
           <Image
             source={{ uri: groupAvatar }}
             style={{
               width: 40,
               height: 40,
               borderRadius: 20,
-              backgroundColor: '#8B9FEE',
+              backgroundColor: "#8B9FEE",
             }}
           />
-          
+
           {/* Most Active Member Avatar (Stacked 50% overlap) */}
           {mostActiveUser?.isVisible && (
             <TouchableOpacity
               onPress={handleMostActiveTap}
               style={{
-                position: 'absolute',
+                position: "absolute",
                 right: -10,
                 bottom: -5,
                 width: 24,
                 height: 24,
                 borderRadius: 12,
                 borderWidth: 2,
-                borderColor: 'white',
+                borderColor: "white",
               }}
             >
               <Image
@@ -161,7 +164,7 @@ export const AdvancedGroupHeader: React.FC<GroupHeaderProps> = ({
                   width: 20,
                   height: 20,
                   borderRadius: 10,
-                  backgroundColor: '#8B9FEE',
+                  backgroundColor: "#8B9FEE",
                 }}
               />
             </TouchableOpacity>
@@ -170,17 +173,17 @@ export const AdvancedGroupHeader: React.FC<GroupHeaderProps> = ({
 
         {/* Group Info */}
         <View style={{ marginLeft: 12, flex: 1 }}>
-          <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+          <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
             {groupName}
           </Text>
-          <Text style={{ color: '#E0E7FF', fontSize: 12 }}>
+          <Text style={{ color: "#E0E7FF", fontSize: 12 }}>
             {memberCount} members
           </Text>
         </View>
       </View>
 
       {/* Right Side - Admin Toggle & Menu */}
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
         {/* Admin Toggle Icon */}
         <TouchableOpacity onPress={toggleAdminList} style={{ marginRight: 12 }}>
           <Ionicons name="shield-checkmark" size={20} color="white" />
@@ -196,23 +199,25 @@ export const AdvancedGroupHeader: React.FC<GroupHeaderProps> = ({
       {showMostActiveText && mostActiveUser && (
         <Animated.View
           style={{
-            position: 'absolute',
+            position: "absolute",
             right: 16,
             top: 80,
-            backgroundColor: 'rgba(135, 206, 235, 0.9)', // Sky blue
+            backgroundColor: "rgba(135, 206, 235, 0.9)", // Sky blue
             paddingHorizontal: 12,
             paddingVertical: 8,
             borderRadius: 8,
             opacity: mostActiveTextAnimation,
-            transform: [{
-              translateY: mostActiveTextAnimation.interpolate({
-                inputRange: [0, 1],
-                outputRange: [-10, 0],
-              }),
-            }],
+            transform: [
+              {
+                translateY: mostActiveTextAnimation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-10, 0],
+                }),
+              },
+            ],
           }}
         >
-          <Text style={{ color: 'white', fontSize: 12, fontWeight: '500' }}>
+          <Text style={{ color: "white", fontSize: 12, fontWeight: "500" }}>
             This is the most active member in the group in the last seven days.
           </Text>
         </Animated.View>
@@ -222,32 +227,44 @@ export const AdvancedGroupHeader: React.FC<GroupHeaderProps> = ({
       {showAdminList && (
         <Animated.View
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 70,
             right: 50,
-            backgroundColor: 'white',
+            backgroundColor: "white",
             borderRadius: 8,
             padding: 12,
             minWidth: 150,
             opacity: adminListAnimation,
-            transform: [{
-              scale: adminListAnimation.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.8, 1],
-              }),
-            }],
-            shadowColor: '#000',
+            transform: [
+              {
+                scale: adminListAnimation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.8, 1],
+                }),
+              },
+            ],
+            shadowColor: "#000",
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.25,
             shadowRadius: 3.84,
             elevation: 5,
           }}
         >
-          <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 8, color: '#333' }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "600",
+              marginBottom: 8,
+              color: "#333",
+            }}
+          >
             Admins
           </Text>
           {admins.map((admin, index) => (
-            <Text key={admin.id} style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+            <Text
+              key={admin.id}
+              style={{ fontSize: 12, color: "#666", marginBottom: 4 }}
+            >
               {admin.username}
             </Text>
           ))}
@@ -258,32 +275,38 @@ export const AdvancedGroupHeader: React.FC<GroupHeaderProps> = ({
       {showDropdownMenu && (
         <Animated.View
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 70,
             right: 16,
-            backgroundColor: 'white',
+            backgroundColor: "white",
             borderRadius: 8,
             padding: 8,
             minWidth: 120,
             opacity: dropdownAnimation,
-            transform: [{
-              scale: dropdownAnimation.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.8, 1],
-              }),
-            }],
-            shadowColor: '#000',
+            transform: [
+              {
+                scale: dropdownAnimation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.8, 1],
+                }),
+              },
+            ],
+            shadowColor: "#000",
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.25,
             shadowRadius: 3.84,
             elevation: 5,
           }}
         >
-          <TouchableOpacity style={{ paddingVertical: 8, paddingHorizontal: 12 }}>
-            <Text style={{ fontSize: 14, color: '#333' }}>Settings</Text>
+          <TouchableOpacity
+            style={{ paddingVertical: 8, paddingHorizontal: 12 }}
+          >
+            <Text style={{ fontSize: 14, color: "#333" }}>Settings</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={{ paddingVertical: 8, paddingHorizontal: 12 }}>
-            <Text style={{ fontSize: 14, color: '#333' }}>Profile</Text>
+          <TouchableOpacity
+            style={{ paddingVertical: 8, paddingHorizontal: 12 }}
+          >
+            <Text style={{ fontSize: 14, color: "#333" }}>Profile</Text>
           </TouchableOpacity>
         </Animated.View>
       )}

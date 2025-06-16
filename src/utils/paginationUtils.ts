@@ -7,7 +7,7 @@ export interface PaginationOptions {
   limit?: number;
   offset?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface PaginationResult<T> {
@@ -47,8 +47,8 @@ export const createPaginationParams = (options: PaginationOptions = {}) => {
     page = 1,
     limit = 20,
     offset,
-    sortBy = 'timestamp',
-    sortOrder = 'desc'
+    sortBy = "timestamp",
+    sortOrder = "desc",
   } = options;
 
   const actualOffset = offset !== undefined ? offset : (page - 1) * limit;
@@ -58,7 +58,7 @@ export const createPaginationParams = (options: PaginationOptions = {}) => {
     limit,
     offset: actualOffset,
     sortBy,
-    sortOrder
+    sortOrder,
   };
 };
 
@@ -68,7 +68,7 @@ export const createPaginationParams = (options: PaginationOptions = {}) => {
 export const createPaginationResult = <T>(
   data: T[],
   total: number,
-  options: PaginationOptions = {}
+  options: PaginationOptions = {},
 ): PaginationResult<T> => {
   const { page = 1, limit = 20 } = options;
   const totalPages = Math.ceil(total / limit);
@@ -85,8 +85,8 @@ export const createPaginationResult = <T>(
       hasNext,
       hasPrev,
       nextPage: hasNext ? page + 1 : undefined,
-      prevPage: hasPrev ? page - 1 : undefined
-    }
+      prevPage: hasPrev ? page - 1 : undefined,
+    },
   };
 };
 
@@ -96,12 +96,12 @@ export const createPaginationResult = <T>(
 export const calculatePagination = (
   currentPage: number,
   totalItems: number,
-  itemsPerPage: number
+  itemsPerPage: number,
 ) => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage - 1, totalItems - 1);
-  
+
   return {
     currentPage,
     totalPages,
@@ -112,7 +112,7 @@ export const calculatePagination = (
     hasNext: currentPage < totalPages,
     hasPrev: currentPage > 1,
     isFirst: currentPage === 1,
-    isLast: currentPage === totalPages
+    isLast: currentPage === totalPages,
   };
 };
 
@@ -122,7 +122,7 @@ export const calculatePagination = (
 export const getPageNumbers = (
   currentPage: number,
   totalPages: number,
-  maxVisible: number = 5
+  maxVisible: number = 5,
 ): (number | string)[] => {
   if (totalPages <= maxVisible) {
     return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -149,7 +149,7 @@ export const getPageNumbers = (
 
   // Add ellipsis if needed
   if (startPage > 2) {
-    pages.push('...');
+    pages.push("...");
   }
 
   // Add middle pages
@@ -159,7 +159,7 @@ export const getPageNumbers = (
 
   // Add ellipsis if needed
   if (endPage < totalPages - 1) {
-    pages.push('...');
+    pages.push("...");
   }
 
   // Always show last page (if more than 1 page)
@@ -176,26 +176,32 @@ export const getPageNumbers = (
 export class InfiniteScrollManager<T> {
   private state: InfiniteScrollState<T>;
   private options: InfiniteScrollOptions;
-  private loadFunction: (page: number, limit: number) => Promise<{ data: T[]; total: number }>;
+  private loadFunction: (
+    page: number,
+    limit: number,
+  ) => Promise<{ data: T[]; total: number }>;
 
   constructor(
-    loadFunction: (page: number, limit: number) => Promise<{ data: T[]; total: number }>,
-    options: InfiniteScrollOptions = {}
+    loadFunction: (
+      page: number,
+      limit: number,
+    ) => Promise<{ data: T[]; total: number }>,
+    options: InfiniteScrollOptions = {},
   ) {
     this.loadFunction = loadFunction;
     this.options = {
       initialLimit: 20,
       loadMoreLimit: 20,
       threshold: 0.8,
-      ...options
+      ...options,
     };
-    
+
     this.state = {
       data: [],
       loading: false,
       hasMore: true,
       page: 0,
-      total: 0
+      total: 0,
     };
   }
 
@@ -205,17 +211,18 @@ export class InfiniteScrollManager<T> {
 
     try {
       const result = await this.loadFunction(1, this.options.initialLimit!);
-      
+
       this.state = {
         data: result.data,
         loading: false,
         hasMore: result.data.length === this.options.initialLimit,
         page: 1,
-        total: result.total
+        total: result.total,
       };
     } catch (error) {
       this.state.loading = false;
-      this.state.error = error instanceof Error ? error.message : 'Failed to load data';
+      this.state.error =
+        error instanceof Error ? error.message : "Failed to load data";
     }
 
     return { ...this.state };
@@ -231,24 +238,32 @@ export class InfiniteScrollManager<T> {
 
     try {
       const nextPage = this.state.page + 1;
-      const result = await this.loadFunction(nextPage, this.options.loadMoreLimit!);
-      
+      const result = await this.loadFunction(
+        nextPage,
+        this.options.loadMoreLimit!,
+      );
+
       this.state = {
         data: [...this.state.data, ...result.data],
         loading: false,
         hasMore: result.data.length === this.options.loadMoreLimit,
         page: nextPage,
-        total: result.total
+        total: result.total,
       };
     } catch (error) {
       this.state.loading = false;
-      this.state.error = error instanceof Error ? error.message : 'Failed to load more data';
+      this.state.error =
+        error instanceof Error ? error.message : "Failed to load more data";
     }
 
     return { ...this.state };
   }
 
-  shouldLoadMore(scrollPosition: number, contentHeight: number, containerHeight: number): boolean {
+  shouldLoadMore(
+    scrollPosition: number,
+    contentHeight: number,
+    containerHeight: number,
+  ): boolean {
     if (this.state.loading || !this.state.hasMore) {
       return false;
     }
@@ -263,7 +278,7 @@ export class InfiniteScrollManager<T> {
       loading: false,
       hasMore: true,
       page: 0,
-      total: 0
+      total: 0,
     };
   }
 
@@ -276,8 +291,16 @@ export class InfiniteScrollManager<T> {
  * Hook-like utilities for React components
  */
 export const usePaginationHelpers = () => {
-  const goToPage = (currentPage: number, targetPage: number, totalPages: number) => {
-    if (targetPage < 1 || targetPage > totalPages || targetPage === currentPage) {
+  const goToPage = (
+    currentPage: number,
+    targetPage: number,
+    totalPages: number,
+  ) => {
+    if (
+      targetPage < 1 ||
+      targetPage > totalPages ||
+      targetPage === currentPage
+    ) {
       return currentPage;
     }
     return targetPage;
@@ -300,20 +323,20 @@ export const usePaginationHelpers = () => {
     goToNextPage,
     goToPrevPage,
     goToFirstPage,
-    goToLastPage
+    goToLastPage,
   };
 };
 
 // Additional exports for UpdatesScreen compatibility
 export const handleRefresh = async (
   setRefreshing: (refreshing: boolean) => void,
-  loadData: () => Promise<void>
+  loadData: () => Promise<void>,
 ): Promise<void> => {
   try {
     setRefreshing(true);
     await loadData();
   } catch (error) {
-    console.error('Error refreshing data:', error);
+    console.error("Error refreshing data:", error);
   } finally {
     setRefreshing(false);
   }
@@ -322,7 +345,7 @@ export const handleRefresh = async (
 export const loadMoreUpdates = async (
   hasMore: boolean,
   isLoading: boolean,
-  loadData: () => Promise<void>
+  loadData: () => Promise<void>,
 ): Promise<void> => {
   if (!hasMore || isLoading) {
     return;
@@ -331,7 +354,7 @@ export const loadMoreUpdates = async (
   try {
     await loadData();
   } catch (error) {
-    console.error('Error loading more updates:', error);
+    console.error("Error loading more updates:", error);
   }
 };
 
@@ -343,5 +366,5 @@ export default {
   InfiniteScrollManager,
   usePaginationHelpers,
   handleRefresh,
-  loadMoreUpdates
+  loadMoreUpdates,
 };

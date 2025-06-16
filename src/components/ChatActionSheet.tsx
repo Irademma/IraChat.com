@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,9 @@ import {
   Animated,
   Dimensions,
   StyleSheet,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from './ThemeProvider';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "./ThemeProvider";
 
 interface ChatActionSheetProps {
   visible: boolean;
@@ -21,7 +21,7 @@ interface ChatActionSheetProps {
   chatName?: string;
 }
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function ChatActionSheet({
   visible,
@@ -30,7 +30,7 @@ export default function ChatActionSheet({
   onMuteChat,
   onArchiveChat,
   onPinChat,
-  chatName = 'Chat',
+  chatName = "Chat",
 }: ChatActionSheetProps) {
   const { colors } = useTheme();
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
@@ -95,13 +95,13 @@ export default function ChatActionSheet({
       <Ionicons
         name={icon as any}
         size={24}
-        color={destructive ? '#EF4444' : color}
+        color={destructive ? "#EF4444" : color}
       />
       <Text
         style={[
           styles.actionText,
           {
-            color: destructive ? '#EF4444' : colors.text,
+            color: destructive ? "#EF4444" : colors.text,
             marginLeft: 16,
           },
         ]}
@@ -159,13 +159,9 @@ export default function ChatActionSheet({
           {/* Actions */}
           <View style={styles.actions}>
             {onPinChat && (
-              <ActionButton
-                icon="pin"
-                title="Pin Chat"
-                onPress={onPinChat}
-              />
+              <ActionButton icon="pin" title="Pin Chat" onPress={onPinChat} />
             )}
-            
+
             {onMuteChat && (
               <ActionButton
                 icon="notifications-off"
@@ -173,7 +169,7 @@ export default function ChatActionSheet({
                 onPress={onMuteChat}
               />
             )}
-            
+
             {onArchiveChat && (
               <ActionButton
                 icon="archive"
@@ -181,7 +177,7 @@ export default function ChatActionSheet({
                 onPress={onArchiveChat}
               />
             )}
-            
+
             {onDeleteChat && (
               <ActionButton
                 icon="trash"
@@ -200,11 +196,11 @@ export default function ChatActionSheet({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   sheet: {
     borderTopLeftRadius: 20,
@@ -213,16 +209,16 @@ const styles = StyleSheet.create({
     maxHeight: SCREEN_HEIGHT * 0.6,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     flex: 1,
   },
   closeButton: {
@@ -233,8 +229,8 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 16,
     paddingHorizontal: 16,
     marginVertical: 4,
@@ -243,6 +239,6 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

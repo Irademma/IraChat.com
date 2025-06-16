@@ -1,14 +1,23 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, REHYDRATE } from 'redux-persist';
-import chatReducer from './chatSlice';
-import userReducer from './userSlice';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import {
+  FLUSH,
+  PAUSE,
+  PERSIST,
+  persistReducer,
+  persistStore,
+  PURGE,
+  REGISTER,
+  REHYDRATE,
+} from "redux-persist";
+import chatReducer from "./chatSlice";
+import userReducer from "./userSlice";
 
 // Persist configuration
 const persistConfig = {
-  key: 'root',
+  key: "root",
   storage: AsyncStorage,
-  whitelist: ['user', 'chat'], // Only persist user and chat data
+  whitelist: ["user", "chat"], // Only persist user and chat data
   blacklist: [], // Don't persist these reducers
 };
 
@@ -29,12 +38,12 @@ export const store = configureStore({
         // Ignore these action types for serialization checks
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
         // Ignore these field paths in the state
-        ignoredPaths: ['register'],
+        ignoredPaths: ["register"],
         // Custom serialization check
         warnAfter: 32,
       },
     }),
-  devTools: process.env.NODE_ENV !== 'production',
+  devTools: process.env.NODE_ENV !== "production",
 });
 
 // Create persistor

@@ -1,8 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import PostCard from '../src/components/cards/PostCard';
-import Pagination from '../src/components/shared/Pagination';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  RefreshControl,
+  Alert,
+} from "react-native";
+import { useRouter } from "expo-router";
+import PostCard from "../src/components/cards/PostCard";
+import Pagination from "../src/components/shared/Pagination";
 
 interface Post {
   _id: string;
@@ -42,7 +50,7 @@ export default function SocialFeedScreen() {
   const loadUserAndPosts = async () => {
     try {
       // Load current user data
-      const userData = localStorage.getItem('iraChat_currentUser');
+      const userData = localStorage.getItem("iraChat_currentUser");
       if (userData) {
         const user = JSON.parse(userData);
         setCurrentUser(user);
@@ -52,15 +60,17 @@ export default function SocialFeedScreen() {
       const result = await fetchPosts(currentPage, 3);
       const postsWithOwnership = await Promise.all(
         result.posts.map(async (post: any) => {
-          const isOwner = currentUser ? await isPostByUser(currentUser._id || currentUser.id, post._id) : false;
+          const isOwner = currentUser
+            ? await isPostByUser(currentUser._id || currentUser.id, post._id)
+            : false;
           return { ...post, isOwner };
-        })
+        }),
       );
 
       setPosts(postsWithOwnership);
       setHasNextPage(result.isNext);
     } catch (error) {
-      console.error('Error loading posts:', error);
+      console.error("Error loading posts:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -72,54 +82,52 @@ export default function SocialFeedScreen() {
     // Mock implementation - in real app, this would fetch from your backend
     const mockPosts = [
       {
-        _id: '1',
-        text: 'Welcome to IraChat Social! 🎉 Share your thoughts and connect with friends.',
+        _id: "1",
+        text: "Welcome to IraChat Social! 🎉 Share your thoughts and connect with friends.",
         author: {
-          _id: 'system',
-          name: 'IraChat Team',
-          username: 'irachat',
-          image: '',
+          _id: "system",
+          name: "IraChat Team",
+          username: "irachat",
+          image: "",
         },
         createdAt: new Date().toISOString(),
         children: [
-          { _id: 'comment1', text: 'Great app!', author: 'user1' },
-          { _id: 'comment2', text: 'Love it!', author: 'user2' },
+          { _id: "comment1", text: "Great app!", author: "user1" },
+          { _id: "comment2", text: "Love it!", author: "user2" },
         ],
-        likes: ['user1', 'user2', 'user3'],
+        likes: ["user1", "user2", "user3"],
         repostOf: null,
         parentId: null,
         group: null,
       },
       {
-        _id: '2',
-        text: 'Just shared a beautiful sunset photo! 🌅 Nature never fails to amaze me.',
+        _id: "2",
+        text: "Just shared a beautiful sunset photo! 🌅 Nature never fails to amaze me.",
         author: {
-          _id: 'user1',
-          name: 'John Doe',
-          username: 'johndoe',
-          image: '',
+          _id: "user1",
+          name: "John Doe",
+          username: "johndoe",
+          image: "",
         },
         createdAt: new Date(Date.now() - 3600000).toISOString(),
-        children: [
-          { _id: 'comment3', text: 'Beautiful!', author: 'user2' },
-        ],
-        likes: ['user2', 'user3'],
+        children: [{ _id: "comment3", text: "Beautiful!", author: "user2" }],
+        likes: ["user2", "user3"],
         repostOf: null,
         parentId: null,
         group: null,
       },
       {
-        _id: '3',
-        text: 'Working on some exciting new features for IraChat! Stay tuned for updates. 💻✨',
+        _id: "3",
+        text: "Working on some exciting new features for IraChat! Stay tuned for updates. 💻✨",
         author: {
-          _id: 'dev1',
-          name: 'Sarah Wilson',
-          username: 'sarahdev',
-          image: '',
+          _id: "dev1",
+          name: "Sarah Wilson",
+          username: "sarahdev",
+          image: "",
         },
         createdAt: new Date(Date.now() - 7200000).toISOString(),
         children: [],
-        likes: ['user1'],
+        likes: ["user1"],
         repostOf: null,
         parentId: null,
         group: null,
@@ -141,11 +149,11 @@ export default function SocialFeedScreen() {
   const isPostByUser = async (userId: string, postId: string) => {
     // Mock implementation - in real app, this would check if user owns the post
     // For demo, let's say user owns posts with specific IDs
-    return userId === 'current_user_id' && postId === '2';
+    return userId === "current_user_id" && postId === "2";
   };
 
   const handleCreatePost = () => {
-    Alert.alert('Create Post', 'Post creation functionality coming soon!');
+    Alert.alert("Create Post", "Post creation functionality coming soon!");
   };
 
   const handleRefresh = () => {
@@ -166,10 +174,7 @@ export default function SocialFeedScreen() {
           <TouchableOpacity onPress={() => router.back()}>
             <Text className="text-white text-lg">← Back</Text>
           </TouchableOpacity>
-          <Text
-            className="text-white text-xl"
-            style={{ fontWeight: '700' }}
-          >
+          <Text className="text-white text-xl" style={{ fontWeight: "700" }}>
             Social Feed
           </Text>
           <TouchableOpacity
@@ -182,7 +187,7 @@ export default function SocialFeedScreen() {
       </View>
 
       {/* Content - Following your example pattern */}
-      <ScrollView 
+      <ScrollView
         className="flex-1"
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
@@ -194,14 +199,14 @@ export default function SocialFeedScreen() {
           {posts.length === 0 ? (
             <View className="bg-white rounded-lg p-8 items-center">
               <Image
-                source={require('../assets/images/comment.png')}
+                source={require("../assets/images/comment.png")}
                 className="w-16 h-16 mb-4"
-                style={{ tintColor: '#9CA3AF' }}
+                style={{ tintColor: "#9CA3AF" }}
                 resizeMode="contain"
               />
               <Text
                 className="text-gray-500 text-lg text-center"
-                style={{ fontWeight: '500' }}
+                style={{ fontWeight: "500" }}
               >
                 No posts found
               </Text>
@@ -212,10 +217,7 @@ export default function SocialFeedScreen() {
                 onPress={handleCreatePost}
                 className="bg-blue-500 px-6 py-3 rounded-lg mt-4"
               >
-                <Text
-                  className="text-white"
-                  style={{ fontWeight: '500' }}
-                >
+                <Text className="text-white" style={{ fontWeight: "500" }}>
                   Create Post
                 </Text>
               </TouchableOpacity>
@@ -227,9 +229,9 @@ export default function SocialFeedScreen() {
                 <View className="mb-4" key={post._id}>
                   <PostCard
                     id={post._id}
-                    currentUserId={currentUser?.id || ''}
+                    currentUserId={currentUser?.id || ""}
                     owner={post.isOwner}
-                    DB_userID={currentUser?._id || currentUser?.id || ''}
+                    DB_userID={currentUser?._id || currentUser?.id || ""}
                     repostOf={post.repostOf}
                     parentId={post.parentId}
                     content={post.text}
@@ -242,7 +244,7 @@ export default function SocialFeedScreen() {
                   />
                 </View>
               ))}
-              
+
               {/* Following your example's Pagination */}
               <Pagination
                 path="/social-feed"

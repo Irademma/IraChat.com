@@ -1,61 +1,57 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React from "react";
 import {
   Alert,
   Image,
   ScrollView,
   Text,
   TouchableOpacity,
-  View
-} from 'react-native';
-import { useSelector } from 'react-redux';
-import { RootState } from '../src/redux/store';
+  View,
+} from "react-native";
+import { useSelector } from "react-redux";
+import { RootState } from "../src/redux/store";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
   const handleEditProfile = () => {
-    router.push('/edit-profile');
+    router.push("/edit-profile");
   };
 
   const handleSettings = () => {
-    Alert.alert('Settings', 'Settings screen coming soon!');
+    Alert.alert("Settings", "Settings screen coming soon!");
   };
 
   const handlePrivacy = () => {
-    Alert.alert('Privacy', 'Privacy settings coming soon!');
+    Alert.alert("Privacy", "Privacy settings coming soon!");
   };
 
   const handleNotifications = () => {
-    router.push('/notifications-settings');
+    router.push("/notifications-settings");
   };
 
   const handleHelp = () => {
-    Alert.alert('Help', 'Help & Support coming soon!');
+    Alert.alert("Help", "Help & Support coming soon!");
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
-          style: 'destructive',
-          onPress: () => {
-            // In a real app, this would clear user data and navigate to auth
-            Alert.alert('Logged Out', 'You have been logged out successfully');
-          }
-        }
-      ]
-    );
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: () => {
+          // In a real app, this would clear user data and navigate to auth
+          Alert.alert("Logged Out", "You have been logged out successfully");
+        },
+      },
+    ]);
   };
 
   return (
-    <ScrollView 
+    <ScrollView
       className="flex-1 bg-gray-50"
       accessible={true}
       accessibilityLabel="Profile screen"
@@ -72,9 +68,7 @@ export default function ProfileScreen() {
           >
             <Ionicons name="arrow-back" size={24} color="#374151" />
           </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-900">
-            Profile
-          </Text>
+          <Text className="text-xl font-bold text-gray-900">Profile</Text>
         </View>
       </View>
 
@@ -84,8 +78,10 @@ export default function ProfileScreen() {
           {/* Avatar */}
           <View className="relative">
             <Image
-              source={{ 
-                uri: currentUser?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200'
+              source={{
+                uri:
+                  currentUser?.avatar ||
+                  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
               }}
               className="w-24 h-24 rounded-full"
               resizeMode="cover"
@@ -103,10 +99,10 @@ export default function ProfileScreen() {
 
           {/* User Info */}
           <Text className="text-xl font-bold text-gray-900 mt-4">
-            {currentUser?.name || 'User Name'}
+            {currentUser?.name || "User Name"}
           </Text>
           <Text className="text-gray-500 mt-1">
-            {currentUser?.phoneNumber || '+256 XXX XXX XXX'}
+            {currentUser?.phoneNumber || "+256 XXX XXX XXX"}
           </Text>
           {currentUser?.bio && (
             <Text className="text-gray-600 text-center mt-2">
@@ -122,9 +118,7 @@ export default function ProfileScreen() {
             accessibilityRole="button"
             accessibilityLabel="Edit profile"
           >
-            <Text className="text-white font-medium">
-              Edit Profile
-            </Text>
+            <Text className="text-white font-medium">Edit Profile</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -142,9 +136,7 @@ export default function ProfileScreen() {
           <View className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center mr-3">
             <Ionicons name="settings-outline" size={20} color="#6B7280" />
           </View>
-          <Text className="flex-1 text-gray-900 font-medium">
-            Settings
-          </Text>
+          <Text className="flex-1 text-gray-900 font-medium">Settings</Text>
           <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
         </TouchableOpacity>
 
@@ -159,9 +151,7 @@ export default function ProfileScreen() {
           <View className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center mr-3">
             <Ionicons name="shield-outline" size={20} color="#6B7280" />
           </View>
-          <Text className="flex-1 text-gray-900 font-medium">
-            Privacy
-          </Text>
+          <Text className="flex-1 text-gray-900 font-medium">Privacy</Text>
           <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
         </TouchableOpacity>
 
@@ -212,17 +202,13 @@ export default function ProfileScreen() {
           <View className="w-10 h-10 bg-red-100 rounded-full items-center justify-center mr-3">
             <Ionicons name="log-out-outline" size={20} color="#EF4444" />
           </View>
-          <Text className="flex-1 text-red-500 font-medium">
-            Logout
-          </Text>
+          <Text className="flex-1 text-red-500 font-medium">Logout</Text>
         </TouchableOpacity>
       </View>
 
       {/* App Info */}
       <View className="items-center py-6">
-        <Text className="text-gray-400 text-sm">
-          IraChat v1.0.0
-        </Text>
+        <Text className="text-gray-400 text-sm">IraChat v1.0.0</Text>
         <Text className="text-gray-400 text-xs mt-1">
           Made with ❤️ in Uganda
         </Text>

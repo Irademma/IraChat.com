@@ -1,10 +1,17 @@
-import { useRouter } from 'expo-router';
-import { signOut } from 'firebase/auth';
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../src/redux/store';
-import { logout } from '../../src/redux/userSlice';
-import { auth } from '../../src/services/firebaseSimple';
+import { useRouter } from "expo-router";
+import { signOut } from "firebase/auth";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../src/redux/store";
+import { logout } from "../../src/redux/userSlice";
+import { auth } from "../../src/services/firebaseSimple";
 
 export default function SettingsScreen() {
   const dispatch = useDispatch();
@@ -12,66 +19,66 @@ export default function SettingsScreen() {
 
   // Get current user from Redux store
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
-  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.user.isAuthenticated,
+  );
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            if (auth) {
               await signOut(auth);
-              dispatch(logout());
-            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert('Error', 'Failed to logout. Please try again.');
             }
-          },
+            dispatch(logout());
+          } catch (error) {
+            console.error("Logout error:", error);
+            Alert.alert("Error", "Failed to logout. Please try again.");
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const settingsOptions = [
     {
-      title: 'Account',
-      icon: require('../../assets/images/profile.png'),
-      onPress: () => router.push('/account-settings'),
+      title: "Account",
+      icon: require("../../assets/images/profile.png"),
+      onPress: () => router.push("/account-settings"),
     },
     {
-      title: 'Notifications',
-      icon: require('../../assets/images/notification.png'),
-      onPress: () => router.push('/notifications-settings'),
+      title: "Notifications",
+      icon: require("../../assets/images/notification.png"),
+      onPress: () => router.push("/notifications-settings"),
     },
     {
-      title: 'Privacy',
-      icon: require('../../assets/images/setting.png'),
-      onPress: () => router.push('/privacy-settings'),
+      title: "Privacy",
+      icon: require("../../assets/images/setting.png"),
+      onPress: () => router.push("/privacy-settings"),
     },
     {
-      title: 'Theme & Appearance',
-      icon: require('../../assets/images/setting.png'),
-      onPress: () => router.push('/theme-settings'),
+      title: "Theme & Appearance",
+      icon: require("../../assets/images/setting.png"),
+      onPress: () => router.push("/theme-settings"),
     },
     {
-      title: 'Help & Support',
-      icon: require('../../assets/images/comment.png'),
-      onPress: () => router.push('/help-support'),
+      title: "Help & Support",
+      icon: require("../../assets/images/comment.png"),
+      onPress: () => router.push("/help-support"),
     },
     {
-      title: 'Firebase Test',
-      icon: require('../../assets/images/setting.png'),
-      onPress: () => router.push('/firebase-test'),
+      title: "Firebase Test",
+      icon: require("../../assets/images/setting.png"),
+      onPress: () => router.push("/firebase-test"),
     },
     {
-      title: 'Responsive Test',
-      icon: require('../../assets/images/setting.png'),
-      onPress: () => router.push('/responsive-test'),
+      title: "Responsive Test",
+      icon: require("../../assets/images/setting.png"),
+      onPress: () => router.push("/responsive-test"),
     },
   ];
 
@@ -80,7 +87,9 @@ export default function SettingsScreen() {
     return (
       <View className="flex-1 bg-white items-center justify-center">
         <Text className="text-gray-500 text-lg">Loading settings...</Text>
-        <Text className="text-gray-400 text-sm mt-2">Please wait while we load your information</Text>
+        <Text className="text-gray-400 text-sm mt-2">
+          Please wait while we load your information
+        </Text>
       </View>
     );
   }
@@ -92,22 +101,19 @@ export default function SettingsScreen() {
         <View className="items-center">
           <View className="w-20 h-20 bg-white rounded-full items-center justify-center mb-3">
             <Image
-              source={require('../../assets/images/user-profile.webp')}
+              source={require("../../assets/images/user-profile.webp")}
               className="w-16 h-16 rounded-full"
               resizeMode="cover"
             />
           </View>
-          <Text
-            className="text-white text-xl"
-            style={{ fontWeight: '700' }}
-          >
-            {currentUser?.displayName || currentUser?.name || 'User'}
+          <Text className="text-white text-xl" style={{ fontWeight: "700" }}>
+            {currentUser?.displayName || currentUser?.name || "User"}
           </Text>
           <Text className="text-blue-100 text-sm mt-1">
-            {currentUser?.email || 'No email set'}
+            {currentUser?.email || "No email set"}
           </Text>
           <Text className="text-blue-200 text-xs mt-2">
-            {currentUser?.status || 'I Love IraChat'}
+            {currentUser?.status || "I Love IraChat"}
           </Text>
         </View>
       </View>
@@ -123,12 +129,12 @@ export default function SettingsScreen() {
             <Image
               source={option.icon}
               className="w-6 h-6 mr-4"
-              style={{ tintColor: '#6B7280' }}
+              style={{ tintColor: "#6B7280" }}
               resizeMode="contain"
             />
             <Text
               className="text-gray-800 text-base flex-1"
-              style={{ fontWeight: '500' }}
+              style={{ fontWeight: "500" }}
             >
               {option.title}
             </Text>
@@ -141,7 +147,7 @@ export default function SettingsScreen() {
       <View className="px-4 py-4 border-t border-gray-200">
         <View className="items-center mb-6">
           <Image
-            source={require('../../assets/images/LOGO.png')}
+            source={require("../../assets/images/LOGO.png")}
             className="w-16 h-16 mb-2"
             resizeMode="contain"
           />
@@ -158,7 +164,7 @@ export default function SettingsScreen() {
         >
           <Text
             className="text-white text-center text-base"
-            style={{ fontWeight: '600' }}
+            style={{ fontWeight: "600" }}
           >
             Logout
           </Text>

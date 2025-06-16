@@ -1,61 +1,81 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged 
-} from 'firebase/auth';
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  serverTimestamp 
-} from 'firebase/firestore';
-import { auth, db } from '../src/services/firebaseSimple';
-import FirebaseSetupChecker from '../src/components/FirebaseSetupChecker';
+} from "firebase/auth";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  serverTimestamp,
+} from "firebase/firestore";
+import { useState } from "react";
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import FirebaseSetupChecker from "../src/components/FirebaseSetupChecker";
+import { auth } from "../src/config/firebaseAuth";
+import { db } from "../src/services/firebaseSimple";
 
 export default function FirebaseTestScreen() {
   const router = useRouter();
-  const [testEmail, setTestEmail] = useState('test@irachat.com');
-  const [testPassword, setTestPassword] = useState('testpassword123');
-  const [testMessage, setTestMessage] = useState('Hello Firebase!');
+  const [testEmail, setTestEmail] = useState("test@irachat.com");
+  const [testPassword, setTestPassword] = useState("testpassword123");
+  const [testMessage, setTestMessage] = useState("Hello Firebase!");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<string[]>([]);
 
   const addResult = (message: string, success: boolean = true) => {
     const timestamp = new Date().toLocaleTimeString();
-    const icon = success ? '✅' : '❌';
-    setResults(prev => [`${icon} ${timestamp}: ${message}`, ...prev]);
+    const icon = success ? "✅" : "❌";
+    setResults((prev) => [`${icon} ${timestamp}: ${message}`, ...prev]);
   };
 
   const testFirebaseAuth = async () => {
     setLoading(true);
     try {
       // Test user creation
-      addResult('Testing user creation...');
-      const userCredential = await createUserWithEmailAndPassword(auth, testEmail, testPassword);
+      addResult("Testing user creation...");
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        testEmail,
+        testPassword,
+      );
       addResult(`User created successfully: ${userCredential.user.email}`);
 
       // Test sign out
-      addResult('Testing sign out...');
+      addResult("Testing sign out...");
       await signOut(auth);
-      addResult('User signed out successfully');
+      addResult("User signed out successfully");
 
       // Test sign in
-      addResult('Testing sign in...');
-      const signInCredential = await signInWithEmailAndPassword(auth, testEmail, testPassword);
+      addResult("Testing sign in...");
+      const signInCredential = await signInWithEmailAndPassword(
+        auth,
+        testEmail,
+        testPassword,
+      );
       addResult(`User signed in successfully: ${signInCredential.user.email}`);
-
     } catch (error: any) {
-      if (error.code === 'auth/email-already-in-use') {
+      if (error.code === "auth/email-already-in-use") {
         // Email exists, try to sign in
         try {
-          addResult('Email exists, trying to sign in...');
-          const signInCredential = await signInWithEmailAndPassword(auth, testEmail, testPassword);
-          addResult(`User signed in successfully: ${signInCredential.user.email}`);
+          addResult("Email exists, trying to sign in...");
+          const signInCredential = await signInWithEmailAndPassword(
+            auth,
+            testEmail,
+            testPassword,
+          );
+          addResult(
+            `User signed in successfully: ${signInCredential.user.email}`,
+          );
         } catch (signInError: any) {
           addResult(`Sign in failed: ${signInError.message}`, false);
         }
@@ -71,19 +91,18 @@ export default function FirebaseTestScreen() {
     setLoading(true);
     try {
       // Test writing to Firestore
-      addResult('Testing Firestore write...');
-      const docRef = await addDoc(collection(db, 'test_messages'), {
+      addResult("Testing Firestore write...");
+      const docRef = await addDoc(collection(db, "test_messages"), {
         message: testMessage,
         timestamp: serverTimestamp(),
-        testId: Date.now()
+        testId: Date.now(),
       });
       addResult(`Document written with ID: ${docRef.id}`);
 
       // Test reading from Firestore
-      addResult('Testing Firestore read...');
-      const querySnapshot = await getDocs(collection(db, 'test_messages'));
+      addResult("Testing Firestore read...");
+      const querySnapshot = await getDocs(collection(db, "test_messages"));
       addResult(`Read ${querySnapshot.size} documents from Firestore`);
-
     } catch (error: any) {
       addResult(`Firestore test failed: ${error.message}`, false);
     } finally {
@@ -92,19 +111,19 @@ export default function FirebaseTestScreen() {
   };
 
   const testAuthStateListener = () => {
-    addResult('Setting up auth state listener...');
+    addResult("Setting up auth state listener...");
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         addResult(`Auth state: User is signed in (${user.email})`);
       } else {
-        addResult('Auth state: User is signed out');
+        addResult("Auth state: User is signed out");
       }
     });
 
     // Clean up after 5 seconds
     setTimeout(() => {
       unsubscribe();
-      addResult('Auth state listener removed');
+      addResult("Auth state listener removed");
     }, 5000);
   };
 
@@ -112,32 +131,34 @@ export default function FirebaseTestScreen() {
     setResults([]);
   };
 
-  const TestButton = ({ 
-    title, 
-    onPress, 
-    icon, 
-    disabled = false 
-  }: { 
-    title: string; 
-    onPress: () => void; 
-    icon: string; 
-    disabled?: boolean; 
+  const TestButton = ({
+    title,
+    onPress,
+    icon,
+    disabled = false,
+  }: {
+    title: string;
+    onPress: () => void;
+    icon: string;
+    disabled?: boolean;
   }) => (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
       className={`flex-row items-center py-3 px-4 rounded-lg mb-3 ${
-        disabled || loading ? 'bg-gray-200' : 'bg-blue-500'
+        disabled || loading ? "bg-gray-200" : "bg-blue-500"
       }`}
     >
-      <Ionicons 
-        name={icon as any} 
-        size={20} 
-        color={disabled || loading ? '#9CA3AF' : 'white'} 
+      <Ionicons
+        name={icon as any}
+        size={20}
+        color={disabled || loading ? "#9CA3AF" : "white"}
       />
-      <Text className={`ml-3 font-medium ${
-        disabled || loading ? 'text-gray-500' : 'text-white'
-      }`}>
+      <Text
+        className={`ml-3 font-medium ${
+          disabled || loading ? "text-gray-500" : "text-white"
+        }`}
+      >
         {title}
       </Text>
     </TouchableOpacity>
@@ -169,7 +190,7 @@ export default function FirebaseTestScreen() {
           <Text className="text-lg font-semibold text-gray-800 mb-3">
             Test Configuration
           </Text>
-          
+
           <Text className="text-gray-600 text-sm mb-2">Test Email:</Text>
           <TextInput
             value={testEmail}
@@ -237,7 +258,7 @@ export default function FirebaseTestScreen() {
           <Text className="text-lg font-semibold text-gray-800 mb-3">
             Test Results
           </Text>
-          
+
           {results.length === 0 ? (
             <Text className="text-gray-500 text-center py-4">
               No test results yet. Run a test to see results here.
@@ -245,8 +266,8 @@ export default function FirebaseTestScreen() {
           ) : (
             <ScrollView className="max-h-64">
               {results.map((result, index) => (
-                <Text 
-                  key={index} 
+                <Text
+                  key={index}
                   className="text-sm text-gray-700 py-1 font-mono"
                 >
                   {result}

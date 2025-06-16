@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
-import Slider from '@react-native-community/slider';
-import { Audio } from 'expo-av';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import Slider from "@react-native-community/slider";
+import { Audio } from "expo-av";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Text, TouchableOpacity, View } from "react-native";
 
 interface VoiceMessagePlayerProps {
   uri: string;
@@ -10,12 +10,16 @@ interface VoiceMessagePlayerProps {
   isOwnMessage?: boolean;
 }
 
-export default function VoiceMessagePlayer({ uri, duration, isOwnMessage = false }: VoiceMessagePlayerProps) {
+export default function VoiceMessagePlayer({
+  uri,
+  duration,
+  isOwnMessage = false,
+}: VoiceMessagePlayerProps) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const waveformAnim = useRef(new Animated.Value(0)).current;
   const positionInterval = useRef<number | null>(null);
 
@@ -53,7 +57,7 @@ export default function VoiceMessagePlayer({ uri, duration, isOwnMessage = false
           duration: 300,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   };
 
@@ -74,14 +78,14 @@ export default function VoiceMessagePlayer({ uri, duration, isOwnMessage = false
           if (status.isLoaded && status.positionMillis !== undefined) {
             const currentPosition = status.positionMillis / 1000;
             setPosition(currentPosition);
-            
+
             // Auto-stop when finished
             if (currentPosition >= duration) {
               await stopPlayback();
             }
           }
         } catch (error) {
-          console.error('Error getting sound status:', error);
+          console.error("Error getting sound status:", error);
         }
       }
     }, 100);
@@ -99,12 +103,12 @@ export default function VoiceMessagePlayer({ uri, duration, isOwnMessage = false
       setIsLoading(true);
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri },
-        { shouldPlay: false }
+        { shouldPlay: false },
       );
       setSound(newSound);
       return newSound;
     } catch (error) {
-      console.error('Error loading sound:', error);
+      console.error("Error loading sound:", error);
       return null;
     } finally {
       setIsLoading(false);
@@ -126,7 +130,7 @@ export default function VoiceMessagePlayer({ uri, duration, isOwnMessage = false
         setIsPlaying(true);
       }
     } catch (error) {
-      console.error('Error playing/pausing sound:', error);
+      console.error("Error playing/pausing sound:", error);
     }
   };
 
@@ -139,7 +143,7 @@ export default function VoiceMessagePlayer({ uri, duration, isOwnMessage = false
         setPosition(0);
       }
     } catch (error) {
-      console.error('Error stopping sound:', error);
+      console.error("Error stopping sound:", error);
     }
   };
 
@@ -151,27 +155,35 @@ export default function VoiceMessagePlayer({ uri, duration, isOwnMessage = false
         setPosition(value);
       }
     } catch (error) {
-      console.error('Error seeking sound:', error);
+      console.error("Error seeking sound:", error);
     }
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const WaveformBar = ({ height, animated = false }: { height: number; animated?: boolean }) => (
+  const WaveformBar = ({
+    height,
+    animated = false,
+  }: {
+    height: number;
+    animated?: boolean;
+  }) => (
     <Animated.View
       className={`w-1 rounded-full mx-0.5 ${
-        isOwnMessage ? 'bg-white' : 'bg-blue-500'
+        isOwnMessage ? "bg-white" : "bg-blue-500"
       }`}
       style={{
         height,
-        opacity: animated ? waveformAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0.3, 1],
-        }) : 0.3,
+        opacity: animated
+          ? waveformAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.3, 1],
+            })
+          : 0.3,
       }}
     />
   );
@@ -179,39 +191,43 @@ export default function VoiceMessagePlayer({ uri, duration, isOwnMessage = false
   const progress = duration > 0 ? position / duration : 0;
 
   return (
-    <View className={`flex-row items-center py-2 px-3 rounded-lg max-w-xs ${
-      isOwnMessage ? 'bg-blue-500' : 'bg-gray-100'
-    }`}>
+    <View
+      className={`flex-row items-center py-2 px-3 rounded-lg max-w-xs ${
+        isOwnMessage ? "bg-blue-500" : "bg-gray-100"
+      }`}
+    >
       {/* Play/Pause Button */}
       <TouchableOpacity
         onPress={playPause}
         disabled={isLoading}
         className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${
-          isOwnMessage ? 'bg-white bg-opacity-20' : 'bg-blue-500'
+          isOwnMessage ? "bg-white bg-opacity-20" : "bg-blue-500"
         }`}
       >
         {isLoading ? (
           <Animated.View
             style={{
-              transform: [{
-                rotate: waveformAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0deg', '360deg'],
-                })
-              }]
+              transform: [
+                {
+                  rotate: waveformAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ["0deg", "360deg"],
+                  }),
+                },
+              ],
             }}
           >
-            <Ionicons 
-              name="refresh" 
-              size={16} 
-              color={isOwnMessage ? 'white' : 'white'} 
+            <Ionicons
+              name="refresh"
+              size={16}
+              color={isOwnMessage ? "white" : "white"}
             />
           </Animated.View>
         ) : (
-          <Ionicons 
-            name={isPlaying ? "pause" : "play"} 
-            size={16} 
-            color={isOwnMessage ? 'white' : 'white'} 
+          <Ionicons
+            name={isPlaying ? "pause" : "play"}
+            size={16}
+            color={isOwnMessage ? "white" : "white"}
           />
         )}
       </TouchableOpacity>
@@ -230,22 +246,24 @@ export default function VoiceMessagePlayer({ uri, duration, isOwnMessage = false
       </View>
 
       {/* Duration */}
-      <Text className={`text-xs ${
-        isOwnMessage ? 'text-white' : 'text-gray-600'
-      }`}>
+      <Text
+        className={`text-xs ${isOwnMessage ? "text-white" : "text-gray-600"}`}
+      >
         {formatTime(position)} / {formatTime(duration)}
       </Text>
 
       {/* Progress Slider (Hidden but functional) */}
       <View className="absolute bottom-0 left-0 right-0 opacity-0">
         <Slider
-          style={{ width: '100%', height: 20 }}
+          style={{ width: "100%", height: 20 }}
           minimumValue={0}
           maximumValue={duration}
           value={position}
           onValueChange={seekTo}
-          minimumTrackTintColor={isOwnMessage ? 'white' : '#3B82F6'}
-          maximumTrackTintColor={isOwnMessage ? 'rgba(255,255,255,0.3)' : '#E5E7EB'}
+          minimumTrackTintColor={isOwnMessage ? "white" : "#3B82F6"}
+          maximumTrackTintColor={
+            isOwnMessage ? "rgba(255,255,255,0.3)" : "#E5E7EB"
+          }
           // thumbStyle={{ width: 0, height: 0 }} // Remove unsupported property
         />
       </View>

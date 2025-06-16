@@ -1,37 +1,40 @@
 // Individual update card component for vertical media updates
-import { Ionicons } from '@expo/vector-icons';
-import { Video } from 'expo-av';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { Video } from "expo-av";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
-    Animated,
-    BackHandler,
-    Dimensions,
-    Image,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { Markdown } from 'react-native-markdown-display';
-import { useAccessibility } from '../hooks/useAccessibility';
-import { useAnalytics } from '../hooks/useAnalytics';
-import { useDoubleTap } from '../hooks/useDoubleTap';
-import { useMentionNotifications } from '../hooks/useMentionNotifications';
-import { useVideoPlayer } from '../hooks/useVideoPlayer';
-import { Update } from '../types';
-import { formatNumber } from '../utils/formatNumber';
-import { parseMentions, replaceMentionsWithLinks } from '../utils/parseMentions';
+  Animated,
+  BackHandler,
+  Dimensions,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Markdown } from "react-native-markdown-display";
+import { useAccessibility } from "../hooks/useAccessibility";
+import { useAnalytics } from "../hooks/useAnalytics";
+import { useDoubleTap } from "../hooks/useDoubleTap";
+import { useMentionNotifications } from "../hooks/useMentionNotifications";
+import { useVideoPlayer } from "../hooks/useVideoPlayer";
+import { Update } from "../types";
+import { formatNumber } from "../utils/formatNumber";
 import {
-    fontSize,
-    hp,
-    isMediumDevice,
-    isSmallDevice,
-    platformSpecific,
-    spacing,
-    wp
-} from '../utils/responsive';
+  parseMentions,
+  replaceMentionsWithLinks,
+} from "../utils/parseMentions";
+import {
+  fontSize,
+  hp,
+  isMediumDevice,
+  isSmallDevice,
+  platformSpecific,
+  spacing,
+  wp,
+} from "../utils/responsive";
 
 interface UpdateCardProps {
   update: Update;
@@ -45,7 +48,7 @@ interface UpdateCardProps {
   currentUserId?: string;
 }
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const HEADER_HEIGHT = 100; // Approximate header height
 const TAB_BAR_HEIGHT = 65; // Tab bar height
 const AVAILABLE_HEIGHT = SCREEN_HEIGHT - HEADER_HEIGHT - TAB_BAR_HEIGHT;
@@ -62,7 +65,9 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
   currentUserId,
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const { trackView, trackEngagement } = useAnalytics({ currentUserId: currentUserId || '' });
+  const { trackView, trackEngagement } = useAnalytics({
+    currentUserId: currentUserId || "",
+  });
   const { settings } = useAccessibility();
 
   const {
@@ -84,26 +89,30 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
   const handleDoubleTap = useDoubleTap(() => {
     onLike(update.id);
     trackEngagement({
-      type: 'like',
+      type: "like",
       contentId: update.id,
-      contentType: 'update',
+      contentType: "update",
     });
   });
 
   const { sendMentionNotifications } = useMentionNotifications({
-    currentUserId: currentUserId || '',
+    currentUserId: currentUserId || "",
   });
 
   const handleMentionPress = useCallback(
     (userId: string) => {
       onProfilePress(userId);
     },
-    [onProfilePress]
+    [onProfilePress],
   );
 
   const processedCaption = useMemo(() => {
-    const mentions = parseMentions(update.caption || '');
-    return replaceMentionsWithLinks(update.caption || '', mentions, handleMentionPress);
+    const mentions = parseMentions(update.caption || "");
+    return replaceMentionsWithLinks(
+      update.caption || "",
+      mentions,
+      handleMentionPress,
+    );
   }, [update.caption, handleMentionPress]);
 
   useEffect(() => {
@@ -115,21 +124,24 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
       }).start();
 
       trackView({
-        type: 'update',
+        type: "update",
         contentId: update.id,
       });
 
       // Add back button handler for Android
-      if (Platform.OS === 'android') {
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-          if (isActive) {
-            if (isPlaying) {
-              pauseVideo();
+      if (Platform.OS === "android") {
+        const backHandler = BackHandler.addEventListener(
+          "hardwareBackPress",
+          () => {
+            if (isActive) {
+              if (isPlaying) {
+                pauseVideo();
+              }
+              return true;
             }
-            return true;
-          }
-          return false;
-        });
+            return false;
+          },
+        );
 
         return () => backHandler.remove();
       }
@@ -163,7 +175,7 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
         <Video
           ref={videoRef}
           style={styles.media}
-          resizeMode={'cover' as any}
+          resizeMode={"cover" as any}
           isLooping
           shouldPlay={isActive && settings.autoplayVideos}
           isMuted={isMuted}
@@ -174,25 +186,29 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
 
         {isBuffering && (
           <View style={styles.bufferingContainer}>
-            <Ionicons name="hourglass-outline" size={styles.bufferingIcon.width} color="white" />
+            <Ionicons
+              name="hourglass-outline"
+              size={styles.bufferingIcon.width}
+              color="white"
+            />
           </View>
         )}
 
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.8)']}
+          colors={["transparent", "rgba(0,0,0,0.8)"]}
           style={styles.gradient}
         />
 
         <View style={styles.contentContainer}>
           <TouchableOpacity
             style={styles.userInfo}
-            onPress={() => onProfilePress(update.user?.id || '')}
+            onPress={() => onProfilePress(update.user?.id || "")}
           >
             <Image
-              source={{ uri: update.user?.avatar || '' }}
+              source={{ uri: update.user?.avatar || "" }}
               style={styles.profilePic}
             />
-            <Text style={styles.username}>{update.user?.name || ''}</Text>
+            <Text style={styles.username}>{update.user?.name || ""}</Text>
           </TouchableOpacity>
 
           <Markdown
@@ -201,8 +217,8 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
               link: styles.mentionLink,
             }}
             onLinkPress={(url) => {
-              if (url.startsWith('user:')) {
-                const userId = url.replace('user:', '');
+              if (url.startsWith("user:")) {
+                const userId = url.replace("user:", "");
                 handleMentionPress(userId);
                 return false;
               }
@@ -218,9 +234,9 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
               onPress={() => onLike(update.id)}
             >
               <Ionicons
-                name={update.isLiked ? 'heart' : 'heart-outline'}
+                name={update.isLiked ? "heart" : "heart-outline"}
                 size={24}
-                color={update.isLiked ? '#ff2d55' : 'white'}
+                color={update.isLiked ? "#ff2d55" : "white"}
               />
               <Text style={styles.actionText}>
                 {formatNumber(update.likeCount || 0)}
@@ -251,12 +267,9 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
               <Ionicons name="download-outline" size={24} color="white" />
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={toggleMute}
-            >
+            <TouchableOpacity style={styles.actionButton} onPress={toggleMute}>
               <Ionicons
-                name={isMuted ? 'volume-mute' : 'volume-high'}
+                name={isMuted ? "volume-mute" : "volume-high"}
                 size={24}
                 color="white"
               />
@@ -275,40 +288,40 @@ const styles = StyleSheet.create({
   },
   mediaContainer: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: "black",
   },
   media: {
     ...StyleSheet.absoluteFillObject,
   },
   loadingContainer: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   bufferingContainer: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
   gradient: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
     height: hp(50),
   },
   contentContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: platformSpecific.bottomPadding,
     left: 0,
     right: 0,
     padding: spacing.md,
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: spacing.sm,
   },
   profilePic: {
@@ -318,33 +331,33 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   username: {
-    color: 'white',
+    color: "white",
     fontSize: fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   caption: {
-    color: 'white',
+    color: "white",
     fontSize: fontSize.sm,
     marginBottom: spacing.md,
     lineHeight: fontSize.sm * 1.5,
   },
   mentionLink: {
-    color: '#1DA1F2',
-    textDecorationLine: 'none',
+    color: "#1DA1F2",
+    textDecorationLine: "none",
     fontSize: fontSize.sm,
   },
   actionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: spacing.sm,
   },
   actionButton: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: spacing.xs,
   },
   actionText: {
-    color: 'white',
+    color: "white",
     fontSize: fontSize.xs,
     marginTop: spacing.xs,
   },

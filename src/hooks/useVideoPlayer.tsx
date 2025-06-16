@@ -1,7 +1,7 @@
-import { Video } from 'expo-av';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState } from 'react-native';
-import { useAnalytics } from './useAnalytics';
+import { Video } from "expo-av";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AppState } from "react-native";
+import { useAnalytics } from "./useAnalytics";
 
 interface UseVideoPlayerProps {
   uri: string;
@@ -26,7 +26,9 @@ export const useVideoPlayer = ({
   const [isBuffering, setIsBuffering] = useState(false);
   const [isBackground, setIsBackground] = useState(false);
   const videoRef = useRef<Video>(null);
-  const { trackPerformance } = useAnalytics({ currentUserId: currentUserId || '' });
+  const { trackPerformance } = useAnalytics({
+    currentUserId: currentUserId || "",
+  });
 
   const loadVideo = useCallback(async () => {
     try {
@@ -43,38 +45,41 @@ export const useVideoPlayer = ({
             progressUpdateIntervalMillis: 100,
             positionMillis: 0,
           },
-          false
+          false,
         );
 
         const loadTime = Date.now() - startTime;
         trackPerformance({
-          name: 'video_load_time',
+          name: "video_load_time",
           value: loadTime,
-          unit: 'ms',
-          context: { uri }
+          unit: "ms",
+          context: { uri },
         });
 
         onLoad?.();
       }
     } catch (error) {
-      console.error('Error loading video:', error);
+      console.error("Error loading video:", error);
       onError?.(error as Error);
     } finally {
       setIsLoading(false);
     }
   }, [uri, isActive, isMuted, isBackground, onError, onLoad, trackPerformance]);
 
-  const handlePlaybackStatusUpdate = useCallback((playbackStatus: any) => {
-    setStatus(playbackStatus);
-    setIsBuffering(playbackStatus.isBuffering);
-    onPlaybackStatusUpdate?.(playbackStatus);
+  const handlePlaybackStatusUpdate = useCallback(
+    (playbackStatus: any) => {
+      setStatus(playbackStatus);
+      setIsBuffering(playbackStatus.isBuffering);
+      onPlaybackStatusUpdate?.(playbackStatus);
 
-    // Auto-restart video when it ends
-    if (playbackStatus.didJustFinish) {
-      videoRef.current?.setPositionAsync(0);
-      videoRef.current?.playAsync();
-    }
-  }, [onPlaybackStatusUpdate]);
+      // Auto-restart video when it ends
+      if (playbackStatus.didJustFinish) {
+        videoRef.current?.setPositionAsync(0);
+        videoRef.current?.playAsync();
+      }
+    },
+    [onPlaybackStatusUpdate],
+  );
 
   const togglePlayPause = useCallback(async () => {
     if (!videoRef.current) return;
@@ -86,7 +91,7 @@ export const useVideoPlayer = ({
         await videoRef.current.playAsync();
       }
     } catch (error) {
-      console.error('Error toggling play/pause:', error);
+      console.error("Error toggling play/pause:", error);
       onError?.(error as Error);
     }
   }, [status?.isPlaying, onError]);
@@ -99,26 +104,29 @@ export const useVideoPlayer = ({
       await videoRef.current.setIsMutedAsync(newMuteState);
       setIsMuted(newMuteState);
     } catch (error) {
-      console.error('Error toggling mute:', error);
+      console.error("Error toggling mute:", error);
       onError?.(error as Error);
     }
   }, [isMuted, onError]);
 
-  const seekTo = useCallback(async (position: number) => {
-    if (!videoRef.current) return;
+  const seekTo = useCallback(
+    async (position: number) => {
+      if (!videoRef.current) return;
 
-    try {
-      await videoRef.current.setPositionAsync(position);
-    } catch (error) {
-      console.error('Error seeking video:', error);
-      onError?.(error as Error);
-    }
-  }, [onError]);
+      try {
+        await videoRef.current.setPositionAsync(position);
+      } catch (error) {
+        console.error("Error seeking video:", error);
+        onError?.(error as Error);
+      }
+    },
+    [onError],
+  );
 
   // Handle app state changes
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      setIsBackground(nextAppState === 'background');
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      setIsBackground(nextAppState === "background");
     });
 
     return () => {
@@ -157,4 +165,4 @@ export const useVideoPlayer = ({
     loadVideo,
     handleError: onError,
   };
-}; 
+};

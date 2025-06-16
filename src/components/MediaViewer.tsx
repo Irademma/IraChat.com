@@ -1,26 +1,26 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Video } from 'expo-av';
-import React, { useEffect, useRef, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { Video } from "expo-av";
+import React, { useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Image,
-    PanResponder,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { useResponsive } from '../hooks/useResponsive';
-import { colors } from '../theme/colors';
+  Animated,
+  Dimensions,
+  Image,
+  PanResponder,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useResponsive } from "../hooks/useResponsive";
+import { colors } from "../theme/colors";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface MediaViewerProps {
   media: Array<{
     url: string;
-    type: 'image' | 'video' | 'file';
+    type: "image" | "video" | "file";
     caption?: string;
     fileType?: string;
     fileSize?: string;
@@ -91,7 +91,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
           ]).start();
         }
       },
-    })
+    }),
   ).current;
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   }, [showControls]);
 
   const handleVideoPress = async () => {
-    if (media[currentIndex].type === 'video') {
+    if (media[currentIndex].type === "video") {
       if (isPlaying) {
         await videoRef.current?.pauseAsync();
       } else {
@@ -113,12 +113,12 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
     }
   };
 
-  const handleSwipe = (direction: 'left' | 'right') => {
+  const handleSwipe = (direction: "left" | "right") => {
     if (
-      (direction === 'left' && currentIndex < media.length - 1) ||
-      (direction === 'right' && currentIndex > 0)
+      (direction === "left" && currentIndex < media.length - 1) ||
+      (direction === "right" && currentIndex > 0)
     ) {
-      setCurrentIndex((prev) => prev + (direction === 'left' ? 1 : -1));
+      setCurrentIndex((prev) => prev + (direction === "left" ? 1 : -1));
     }
   };
 
@@ -126,7 +126,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
     const currentMedia = media[currentIndex];
 
     switch (currentMedia.type) {
-      case 'image':
+      case "image":
         return (
           <Image
             source={{ uri: currentMedia.url }}
@@ -134,7 +134,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
             resizeMode="contain"
           />
         );
-      case 'video':
+      case "video":
         return (
           <TouchableOpacity
             style={styles.videoContainer}
@@ -145,7 +145,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
               ref={videoRef}
               source={{ uri: currentMedia.url }}
               style={styles.mediaContent}
-              resizeMode={'contain' as any}
+              resizeMode={"contain" as any}
               isLooping
               shouldPlay={isPlaying}
               isMuted={!isPlaying}
@@ -157,7 +157,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
             )}
           </TouchableOpacity>
         );
-      case 'file':
+      case "file":
         return (
           <View style={styles.fileContainer}>
             <Ionicons
@@ -178,22 +178,22 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
 
   const getFileIcon = (fileType?: string) => {
     switch (fileType?.toLowerCase()) {
-      case 'pdf':
-        return 'document-text';
-      case 'doc':
-      case 'docx':
-        return 'document';
-      case 'xls':
-      case 'xlsx':
-        return 'grid';
-      case 'ppt':
-      case 'pptx':
-        return 'easel';
-      case 'zip':
-      case 'rar':
-        return 'archive';
+      case "pdf":
+        return "document-text";
+      case "doc":
+      case "docx":
+        return "document";
+      case "xls":
+      case "xlsx":
+        return "grid";
+      case "ppt":
+      case "pptx":
+        return "easel";
+      case "zip":
+      case "rar":
+        return "archive";
       default:
-        return 'document';
+        return "document";
     }
   };
 
@@ -248,7 +248,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
               {currentIndex > 0 && (
                 <TouchableOpacity
                   style={[styles.navButton, styles.leftButton]}
-                  onPress={() => handleSwipe('right')}
+                  onPress={() => handleSwipe("right")}
                 >
                   <Ionicons
                     name="chevron-back"
@@ -260,7 +260,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
               {currentIndex < media.length - 1 && (
                 <TouchableOpacity
                   style={[styles.navButton, styles.rightButton]}
-                  onPress={() => handleSwipe('left')}
+                  onPress={() => handleSwipe("left")}
                 >
                   <Ionicons
                     name="chevron-forward"
@@ -284,39 +284,39 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   mediaContent: {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
   },
   videoContainer: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   playButton: {
-    position: 'absolute',
+    position: "absolute",
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
-    paddingTop: Platform.OS === 'ios' ? 48 : 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingTop: Platform.OS === "ios" ? 48 : 16,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
   },
   closeButton: {
     padding: 8,
@@ -325,28 +325,28 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   captionContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     padding: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
   },
   caption: {
     color: colors.text,
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   navButton: {
-    position: 'absolute',
-    top: '50%',
+    position: "absolute",
+    top: "50%",
     transform: [{ translateY: -20 }],
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   leftButton: {
     left: 16,
@@ -356,20 +356,20 @@ const styles = StyleSheet.create({
   },
   fileContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 32,
   },
   fileName: {
     color: colors.text,
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: "500",
     marginTop: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   fileInfo: {
     color: colors.textSecondary,
     fontSize: 14,
     marginTop: 8,
   },
-}); 
+});

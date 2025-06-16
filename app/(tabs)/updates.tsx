@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useRef, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useCallback, useRef, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -9,10 +9,10 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
-} from 'react-native';
+  View,
+} from "react-native";
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 // Complete update data structure
 interface Update {
@@ -20,7 +20,7 @@ interface Update {
   username: string;
   userProfilePic: string;
   mediaUrl: string;
-  mediaType: 'photo' | 'video';
+  mediaType: "photo" | "video";
   caption: string;
   likesCount: number;
   commentsCount: number;
@@ -39,75 +39,11 @@ interface Update {
   }>;
 }
 
-// Sample updates for demonstration
-const mockUpdates: Update[] = [
-  {
-    id: '1',
-    username: '@john_doe',
-    userProfilePic: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-    mediaUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400',
-    mediaType: 'photo',
-    caption: 'Beautiful sunset at the beach! 🌅 #nature #sunset',
-    likesCount: 42,
-    commentsCount: 8,
-    sharesCount: 12,
-    downloadsCount: 5,
-    isLiked: false,
-    isShared: false,
-    isDownloaded: false,
-    userId: 'user1',
-    timestamp: '2 hours ago',
-    comments: [
-      { id: 'c1', username: '@jane_smith', text: 'Amazing view! 😍', timestamp: '1h ago' },
-      { id: 'c2', username: '@mike_wilson', text: 'Where is this?', timestamp: '45m ago' }
-    ]
-  },
-  {
-    id: '2',
-    username: '@sarah_jones',
-    userProfilePic: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150',
-    mediaUrl: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?w=400',
-    mediaType: 'photo',
-    caption: 'Coffee time ☕ Perfect way to start the day!',
-    likesCount: 28,
-    commentsCount: 3,
-    sharesCount: 7,
-    downloadsCount: 2,
-    isLiked: true,
-    isShared: false,
-    isDownloaded: false,
-    userId: 'user2',
-    timestamp: '4 hours ago',
-    comments: [
-      { id: 'c3', username: '@coffee_lover', text: 'Looks delicious! ☕', timestamp: '3h ago' }
-    ]
-  },
-  {
-    id: '3',
-    username: '@travel_buddy',
-    userProfilePic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    mediaUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400',
-    mediaType: 'photo',
-    caption: 'Mountain hiking adventure! 🏔️ #hiking #adventure #nature',
-    likesCount: 67,
-    commentsCount: 15,
-    sharesCount: 23,
-    downloadsCount: 11,
-    isLiked: false,
-    isShared: true,
-    isDownloaded: false,
-    userId: 'user3',
-    timestamp: '6 hours ago',
-    comments: [
-      { id: 'c4', username: '@hiker_pro', text: 'Epic trail! Which mountain?', timestamp: '5h ago' },
-      { id: 'c5', username: '@nature_lover', text: 'Breathtaking view! 🤩', timestamp: '4h ago' }
-    ]
-  }
-];
+// Real updates will be loaded from Firebase
 
 export default function UpdatesScreen() {
   const [refreshing, setRefreshing] = useState(false);
-  const [updates, setUpdates] = useState<Update[]>(mockUpdates);
+  const [updates, setUpdates] = useState<Update[]>([]);
   const flatListRef = useRef<FlatList>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -116,50 +52,54 @@ export default function UpdatesScreen() {
 
   // Interaction handlers
   const handleLike = useCallback((updateId: string) => {
-    setUpdates(prevUpdates =>
-      prevUpdates.map(update =>
+    setUpdates((prevUpdates) =>
+      prevUpdates.map((update) =>
         update.id === updateId
           ? {
               ...update,
               isLiked: !update.isLiked,
-              likesCount: update.isLiked ? update.likesCount - 1 : update.likesCount + 1
+              likesCount: update.isLiked
+                ? update.likesCount - 1
+                : update.likesCount + 1,
             }
-          : update
-      )
+          : update,
+      ),
     );
   }, []);
 
   const handleShare = useCallback((updateId: string) => {
-    setUpdates(prevUpdates =>
-      prevUpdates.map(update =>
+    setUpdates((prevUpdates) =>
+      prevUpdates.map((update) =>
         update.id === updateId
           ? {
               ...update,
               isShared: !update.isShared,
-              sharesCount: update.isShared ? update.sharesCount - 1 : update.sharesCount + 1
+              sharesCount: update.isShared
+                ? update.sharesCount - 1
+                : update.sharesCount + 1,
             }
-          : update
-      )
+          : update,
+      ),
     );
   }, []);
 
   const handleDownload = useCallback((updateId: string) => {
-    setUpdates(prevUpdates =>
-      prevUpdates.map(update =>
+    setUpdates((prevUpdates) =>
+      prevUpdates.map((update) =>
         update.id === updateId
           ? {
               ...update,
               isDownloaded: true,
-              downloadsCount: update.downloadsCount + 1
+              downloadsCount: update.downloadsCount + 1,
             }
-          : update
-      )
+          : update,
+      ),
     );
   }, []);
 
   const handleComment = useCallback((updateId: string) => {
     // In a real app, this would open a comment modal
-    console.log('Opening comments for update:', updateId);
+    console.log("Opening comments for update:", updateId);
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -175,20 +115,24 @@ export default function UpdatesScreen() {
   const handleCreateUpdate = useCallback(async () => {
     try {
       // Import ImagePicker dynamically
-      const ImagePicker = await import('expo-image-picker');
+      const ImagePicker = await import("expo-image-picker");
 
       // Request permissions
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-      if (status !== 'granted') {
-        console.log('Permission denied');
-        Alert.alert('Permission Required', 'Please grant camera roll permissions to upload photos.');
+      if (status !== "granted") {
+        console.log("Permission denied");
+        Alert.alert(
+          "Permission Required",
+          "Please grant camera roll permissions to upload photos.",
+        );
         return;
       }
 
-      // Launch image picker
+      // Launch image picker with correct MediaTypes
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: 'all' as any,
+        mediaTypes: ["images", "videos"],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -197,25 +141,33 @@ export default function UpdatesScreen() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
 
-        console.log('📤 Uploading media to Firebase Storage...');
+        console.log("📤 Uploading media to Firebase Storage...");
 
         // Import media service
-        const { uploadUpdateMedia, getMediaType } = await import('../../src/services/mediaService');
+        const { uploadUpdateMedia, getMediaType } = await import(
+          "../../src/services/mediaService"
+        );
 
         // Upload media to Firebase Storage
         const detectedType = getMediaType(asset.uri);
-        const mediaType: 'photo' | 'video' = detectedType === 'video' ? 'video' : 'photo';
-        const uploadResult = await uploadUpdateMedia(asset.uri, 'current_user', mediaType);
+        const mediaType: "photo" | "video" =
+          detectedType === "video" ? "video" : "photo";
+        const uploadResult = await uploadUpdateMedia(
+          asset.uri,
+          "current_user",
+          mediaType,
+        );
 
         if (uploadResult.success && uploadResult.url) {
           // Create new update with uploaded media URL
           const newUpdate: Update = {
             id: `update_${Date.now()}`,
-            username: '@current_user',
-            userProfilePic: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+            username: "@current_user",
+            userProfilePic:
+              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
             mediaUrl: uploadResult.url,
             mediaType: mediaType,
-            caption: 'New update!',
+            caption: "New update!",
             likesCount: 0,
             commentsCount: 0,
             sharesCount: 0,
@@ -223,33 +175,34 @@ export default function UpdatesScreen() {
             isLiked: false,
             isShared: false,
             isDownloaded: false,
-            userId: 'current_user',
-            timestamp: 'Just now',
-            comments: []
+            userId: "current_user",
+            timestamp: "Just now",
+            comments: [],
           };
 
           // Add to updates list
-          setUpdates(prevUpdates => [newUpdate, ...prevUpdates]);
-          console.log('✅ New update created and uploaded successfully');
-          Alert.alert('Success', 'Your update has been posted successfully!');
+          setUpdates((prevUpdates) => [newUpdate, ...prevUpdates]);
+          console.log("✅ New update created and uploaded successfully");
+          Alert.alert("Success", "Your update has been posted successfully!");
         } else {
-          console.error('❌ Failed to upload media:', uploadResult.error);
+          console.error("❌ Failed to upload media:", uploadResult.error);
           Alert.alert(
-            'Upload Failed',
-            'Failed to upload media to cloud storage. Your update will be saved locally.',
+            "Upload Failed",
+            "Failed to upload media to cloud storage. Your update will be saved locally.",
             [
-              { text: 'Cancel', style: 'cancel' },
+              { text: "Cancel", style: "cancel" },
               {
-                text: 'Save Locally',
+                text: "Save Locally",
                 onPress: () => {
                   // Fallback to local URI
                   const newUpdate: Update = {
                     id: `update_${Date.now()}`,
-                    username: '@current_user',
-                    userProfilePic: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+                    username: "@current_user",
+                    userProfilePic:
+                      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
                     mediaUrl: asset.uri,
                     mediaType: mediaType,
-                    caption: 'New update! (Local)',
+                    caption: "New update! (Local)",
                     likesCount: 0,
                     commentsCount: 0,
                     sharesCount: 0,
@@ -257,29 +210,37 @@ export default function UpdatesScreen() {
                     isLiked: false,
                     isShared: false,
                     isDownloaded: false,
-                    userId: 'current_user',
-                    timestamp: 'Just now',
-                    comments: []
+                    userId: "current_user",
+                    timestamp: "Just now",
+                    comments: [],
                   };
 
-                  setUpdates(prevUpdates => [newUpdate, ...prevUpdates]);
-                  console.log('⚠️ New update created with local media (upload failed)');
-                }
-              }
-            ]
+                  setUpdates((prevUpdates) => [newUpdate, ...prevUpdates]);
+                  console.log(
+                    "⚠️ New update created with local media (upload failed)",
+                  );
+                },
+              },
+            ],
           );
         }
       }
     } catch (error: any) {
-      console.error('❌ Error creating update:', error);
+      console.error("❌ Error creating update:", error);
 
       // Show user-friendly error message
-      if (error.message?.includes('permission')) {
-        Alert.alert('Permission Error', 'Please grant the necessary permissions to upload media.');
-      } else if (error.message?.includes('network')) {
-        Alert.alert('Network Error', 'Please check your internet connection and try again.');
+      if (error.message?.includes("permission")) {
+        Alert.alert(
+          "Permission Error",
+          "Please grant the necessary permissions to upload media.",
+        );
+      } else if (error.message?.includes("network")) {
+        Alert.alert(
+          "Network Error",
+          "Please check your internet connection and try again.",
+        );
       } else {
-        Alert.alert('Error', 'Failed to create update. Please try again.');
+        Alert.alert("Error", "Failed to create update. Please try again.");
       }
     }
   }, []);
@@ -288,7 +249,10 @@ export default function UpdatesScreen() {
     <View style={styles.updateCard}>
       {/* User Header */}
       <View style={styles.userHeader}>
-        <Image source={{ uri: item.userProfilePic }} style={styles.userAvatar} />
+        <Image
+          source={{ uri: item.userProfilePic }}
+          style={styles.userAvatar}
+        />
         <View style={styles.userInfo}>
           <Text style={styles.username}>{item.username}</Text>
           <Text style={styles.timestamp}>{item.timestamp}</Text>
@@ -298,7 +262,7 @@ export default function UpdatesScreen() {
       {/* Media Content */}
       <View style={styles.mediaContainer}>
         <Image source={{ uri: item.mediaUrl }} style={styles.mediaImage} />
-        {item.mediaType === 'video' && (
+        {item.mediaType === "video" && (
           <View style={styles.playButton}>
             <Ionicons name="play" size={24} color="white" />
           </View>
@@ -306,9 +270,7 @@ export default function UpdatesScreen() {
       </View>
 
       {/* Caption */}
-      {item.caption && (
-        <Text style={styles.caption}>{item.caption}</Text>
-      )}
+      {item.caption && <Text style={styles.caption}>{item.caption}</Text>}
 
       {/* Interaction Buttons */}
       <View style={styles.interactionRow}>
@@ -317,7 +279,7 @@ export default function UpdatesScreen() {
           onPress={() => handleLike(item.id)}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel={`${item.isLiked ? 'Unlike' : 'Like'} this update`}
+          accessibilityLabel={`${item.isLiked ? "Unlike" : "Like"} this update`}
         >
           <Ionicons
             name={item.isLiked ? "heart" : "heart-outline"}
@@ -425,34 +387,36 @@ export default function UpdatesScreen() {
         </View>
       ) : (
         <FlatList
-        ref={flatListRef}
-        data={updates}
-        renderItem={renderUpdateItem}
-        keyExtractor={(item) => item.id}
-        getItemLayout={(_data, index) => ({
-          length: 400, // Approximate height of each update item
-          offset: 416 * index, // 400 + 16 (separator height)
-          index,
-        })}
-        ListEmptyComponent={renderEmptyState}
-        showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={5}
-        windowSize={10}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={['#667eea']}
-            tintColor="#667eea"
-            accessibilityLabel="Pull to refresh updates"
-          />
-        }
-        contentContainerStyle={updates.length === 0 ? { flex: 1 } : { paddingBottom: 20 }}
-        accessible={true}
-        accessibilityLabel="Updates list"
-        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-      />
+          ref={flatListRef}
+          data={updates}
+          renderItem={renderUpdateItem}
+          keyExtractor={(item) => item.id}
+          getItemLayout={(_data, index) => ({
+            length: 400, // Approximate height of each update item
+            offset: 416 * index, // 400 + 16 (separator height)
+            index,
+          })}
+          ListEmptyComponent={renderEmptyState}
+          showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={5}
+          windowSize={10}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#667eea"]}
+              tintColor="#667eea"
+              accessibilityLabel="Pull to refresh updates"
+            />
+          }
+          contentContainerStyle={
+            updates.length === 0 ? { flex: 1 } : { paddingBottom: 20 }
+          }
+          accessible={true}
+          accessibilityLabel="Updates list"
+          ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+        />
       )}
 
       {/* Floating Action Button for Creating Updates */}
@@ -473,22 +437,22 @@ export default function UpdatesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: "#667eea", // Sky blue background as requested
   },
   updateCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     marginHorizontal: 16,
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   userHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
   },
   userAvatar: {
@@ -502,120 +466,120 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: "600",
+    color: "#1F2937",
   },
   timestamp: {
     fontSize: 12,
-    color: '#6B7280',
+    color: "#6B7280",
     marginTop: 2,
   },
   mediaContainer: {
-    position: 'relative',
+    position: "relative",
     marginBottom: 12,
   },
   mediaImage: {
-    width: '100%',
+    width: "100%",
     height: 300,
     borderRadius: 8,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   playButton: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
     transform: [{ translateX: -20 }, { translateY: -20 }],
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   caption: {
     fontSize: 14,
-    color: '#374151',
+    color: "#374151",
     lineHeight: 20,
     marginBottom: 12,
   },
   interactionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: "#F3F4F6",
   },
   interactionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 8,
     paddingHorizontal: 12,
   },
   interactionText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
     marginLeft: 4,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 32,
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#374151',
+    fontWeight: "600",
+    color: "#374151",
     marginTop: 16,
     marginBottom: 8,
   },
   emptyDescription: {
     fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
+    color: "#6B7280",
+    textAlign: "center",
     lineHeight: 24,
     marginBottom: 24,
   },
   refreshButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#667eea',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#667eea",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 24,
   },
   refreshButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 8,
   },
   fab: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
     right: 20,
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#667eea',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#667eea",
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 32,
   },
   loadingText: {
     fontSize: 16,
-    color: '#6B7280',
+    color: "#6B7280",
     marginTop: 12,
   },
 });

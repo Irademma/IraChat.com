@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 import {
   AccessibilityInfo,
   Animated,
@@ -8,11 +8,11 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
-} from 'react-native';
-import { colors } from '../theme/colors';
-import { Group } from '../types/groupChat';
-import { fontSize, hp, isSmallDevice, isTablet, wp } from '../utils/responsive';
+  View,
+} from "react-native";
+import { colors } from "../theme/colors";
+import { Group } from "../types/groupChat";
+import { fontSize, hp, isSmallDevice, isTablet, wp } from "../utils/responsive";
 
 interface GroupHeaderProps {
   group: Group;
@@ -37,7 +37,8 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
 }) => {
   const pulseAnim = React.useRef(new Animated.Value(1)).current;
   const typingAnim = React.useRef(new Animated.Value(0)).current;
-  const [isScreenReaderEnabled, setIsScreenReaderEnabled] = React.useState(false);
+  const [isScreenReaderEnabled, setIsScreenReaderEnabled] =
+    React.useState(false);
 
   React.useEffect(() => {
     const checkScreenReader = async () => {
@@ -61,7 +62,7 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
             duration: 1000,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       ).start();
     } else {
       pulseAnim.setValue(1);
@@ -82,7 +83,7 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
             duration: 1000,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       ).start();
     } else {
       typingAnim.setValue(0);
@@ -93,14 +94,17 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
     if (recordingMembers.length > 0) {
       return (
         <View style={styles.statusContainer}>
-          <Ionicons 
-            name="mic" 
+          <Ionicons
+            name="mic"
             size={isTablet() ? 20 : 16}
-            color={colors.error} 
+            color={colors.error}
             accessibilityLabel="Recording indicator"
           />
-          <Text 
-            style={[styles.statusText, isSmallDevice() && styles.statusTextSmall]}
+          <Text
+            style={[
+              styles.statusText,
+              isSmallDevice() && styles.statusTextSmall,
+            ]}
             numberOfLines={1}
           >
             {recordingMembers.length === 1
@@ -122,10 +126,20 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
               },
             ]}
           >
-            <Text style={[styles.typingDots, isSmallDevice() && styles.typingDotsSmall]}>...</Text>
+            <Text
+              style={[
+                styles.typingDots,
+                isSmallDevice() && styles.typingDotsSmall,
+              ]}
+            >
+              ...
+            </Text>
           </Animated.View>
-          <Text 
-            style={[styles.statusText, isSmallDevice() && styles.statusTextSmall]}
+          <Text
+            style={[
+              styles.statusText,
+              isSmallDevice() && styles.statusTextSmall,
+            ]}
             numberOfLines={1}
           >
             {typingMembers.length === 1
@@ -139,12 +153,21 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
     if (onlineMembers.length > 0) {
       return (
         <View style={styles.statusContainer}>
-          <View style={[styles.onlineIndicator, isSmallDevice() && styles.onlineIndicatorSmall]} />
+          <View
+            style={[
+              styles.onlineIndicator,
+              isSmallDevice() && styles.onlineIndicatorSmall,
+            ]}
+          />
           <Text
-            style={[styles.statusText, isSmallDevice() && styles.statusTextSmall]}
+            style={[
+              styles.statusText,
+              isSmallDevice() && styles.statusTextSmall,
+            ]}
             numberOfLines={1}
           >
-            {onlineMembers.length} {onlineMembers.length === 1 ? 'member' : 'members'} online
+            {onlineMembers.length}{" "}
+            {onlineMembers.length === 1 ? "member" : "members"} online
           </Text>
         </View>
       );
@@ -169,78 +192,85 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
     if (onlineMembers.length > 0) {
       labels.push(`${onlineMembers.length} members online`);
     }
-    return labels.join(', ');
+    return labels.join(", ");
   };
 
   return (
-    <View 
+    <View
       style={styles.container}
       accessible={isScreenReaderEnabled}
       accessibilityLabel={getAccessibilityLabel()}
       accessibilityRole="header"
     >
       <View style={styles.leftSection}>
-        <TouchableOpacity 
-          onPress={onBackPress} 
+        <TouchableOpacity
+          onPress={onBackPress}
           style={styles.backButton}
           accessibilityLabel="Go back"
           accessibilityRole="button"
         >
-          <Ionicons 
-            name="arrow-back" 
+          <Ionicons
+            name="arrow-back"
             size={isTablet() ? 28 : 24}
-            color={colors.text} 
+            color={colors.text}
           />
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          onPress={onInfoPress} 
+
+        <TouchableOpacity
+          onPress={onInfoPress}
           style={styles.groupInfo}
           accessibilityLabel={`View ${group.name} details`}
           accessibilityRole="button"
         >
           {group.photo ? (
-            <Image 
-              source={{ uri: group.photo }} 
+            <Image
+              source={{ uri: group.photo }}
               style={[
                 styles.groupPhoto,
                 isTablet() && styles.groupPhotoTablet,
-                isSmallDevice() && styles.groupPhotoSmall
+                isSmallDevice() && styles.groupPhotoSmall,
               ]}
             />
           ) : (
-            <View style={[
-              styles.groupPhotoPlaceholder,
-              isTablet() && styles.groupPhotoTablet,
-              isSmallDevice() && styles.groupPhotoSmall
-            ]}>
-              <Text style={[
-                styles.groupInitials,
-                isTablet() && styles.groupInitialsTablet,
-                isSmallDevice() && styles.groupInitialsSmall
-              ]}>
+            <View
+              style={[
+                styles.groupPhotoPlaceholder,
+                isTablet() && styles.groupPhotoTablet,
+                isSmallDevice() && styles.groupPhotoSmall,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.groupInitials,
+                  isTablet() && styles.groupInitialsTablet,
+                  isSmallDevice() && styles.groupInitialsSmall,
+                ]}
+              >
                 {group.name.substring(0, 2).toUpperCase()}
               </Text>
             </View>
           )}
           <View style={styles.groupDetails}>
-            <Text 
+            <Text
               style={[
                 styles.groupName,
                 isTablet() && styles.groupNameTablet,
-                isSmallDevice() && styles.groupNameSmall
+                isSmallDevice() && styles.groupNameSmall,
               ]}
               numberOfLines={1}
             >
               {group.name}
             </Text>
             <View style={styles.groupStatus}>
-              <Text style={[
-                styles.memberCount,
-                isTablet() && styles.memberCountTablet,
-                isSmallDevice() && styles.memberCountSmall
-              ]}>
-                {group.members.length} {group.members.length === 1 ? 'member' : 'members'}
+              <Text
+                style={[
+                  styles.memberCount,
+                  isTablet() && styles.memberCountTablet,
+                  isSmallDevice() && styles.memberCountSmall,
+                ]}
+              >
+                {group.members.length}{" "}
+                {group.members.length === 1 ? "member" : "members"}
               </Text>
               {renderStatusIndicator()}
             </View>
@@ -260,25 +290,27 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
               },
             ]}
           >
-            <Text style={[
-              styles.unreadCount,
-              isTablet() && styles.unreadCountTablet,
-              isSmallDevice() && styles.unreadCountSmall
-            ]}>
-              {unreadCount > 99 ? '99+' : unreadCount}
+            <Text
+              style={[
+                styles.unreadCount,
+                isTablet() && styles.unreadCountTablet,
+                isSmallDevice() && styles.unreadCountSmall,
+              ]}
+            >
+              {unreadCount > 99 ? "99+" : unreadCount}
             </Text>
           </Animated.View>
         )}
-        <TouchableOpacity 
-          onPress={onSettingsPress} 
+        <TouchableOpacity
+          onPress={onSettingsPress}
           style={styles.settingsButton}
           accessibilityLabel="Group settings"
           accessibilityRole="button"
         >
-          <Ionicons 
-            name="ellipsis-vertical" 
+          <Ionicons
+            name="ellipsis-vertical"
             size={isTablet() ? 28 : 24}
-            color={colors.text} 
+            color={colors.text}
           />
         </TouchableOpacity>
       </View>
@@ -288,9 +320,9 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: wp(3),
     paddingVertical: hp(1),
     backgroundColor: colors.background,
@@ -309,21 +341,21 @@ const styles = StyleSheet.create({
     }),
   },
   leftSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   rightSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   backButton: {
     padding: wp(2),
     marginRight: wp(2),
   },
   groupInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   groupPhoto: {
@@ -347,8 +379,8 @@ const styles = StyleSheet.create({
     height: wp(10),
     borderRadius: wp(5),
     backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: wp(3),
   },
   groupPhotoPlaceholderTablet: {
@@ -364,7 +396,7 @@ const styles = StyleSheet.create({
   groupInitials: {
     color: colors.background,
     fontSize: fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   groupInitialsTablet: {
     fontSize: fontSize.md,
@@ -377,7 +409,7 @@ const styles = StyleSheet.create({
   },
   groupName: {
     fontSize: fontSize.xl,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: hp(0.2),
   },
@@ -388,9 +420,9 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
   },
   groupStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
   },
   memberCount: {
     fontSize: fontSize.sm,
@@ -404,8 +436,8 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xs,
   },
   statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   statusText: {
     fontSize: fontSize.sm,
@@ -416,8 +448,8 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xs,
   },
   typingIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   typingDots: {
     fontSize: fontSize.xl,
@@ -447,8 +479,8 @@ const styles = StyleSheet.create({
     borderRadius: wp(3),
     minWidth: wp(6),
     height: wp(6),
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: wp(2),
     paddingHorizontal: wp(1.5),
   },
@@ -465,7 +497,7 @@ const styles = StyleSheet.create({
   unreadCount: {
     color: colors.background,
     fontSize: fontSize.xs,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   unreadCountTablet: {
     fontSize: fontSize.xxs,
@@ -475,4 +507,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GroupHeader; 
+export default GroupHeader;

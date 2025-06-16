@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 // This is a fallback for web and Android where the tab bar is generally opaque.
 export default function TabBarBackground() {
@@ -9,8 +9,8 @@ export default function TabBarBackground() {
       style={[
         StyleSheet.absoluteFill,
         {
-          backgroundColor: '#FFFFFF',
-        }
+          backgroundColor: "#FFFFFF",
+        },
       ]}
     />
   );

@@ -1,10 +1,10 @@
-import { DarkTheme, DefaultTheme } from '@react-navigation/native';
-import React, { createContext, useContext, useState } from 'react';
-import { useColorScheme } from 'react-native';
-import { Colors } from '../constants/Colors';
+import { DarkTheme, DefaultTheme } from "@react-navigation/native";
+import React, { createContext, useContext, useState } from "react";
+import { useColorScheme } from "react-native";
+import { Colors } from "../constants/Colors";
 
-type Theme = 'light' | 'dark' | 'system';
-type ColorScheme = 'light' | 'dark';
+type Theme = "light" | "dark" | "system";
+type ColorScheme = "light" | "dark";
 
 interface ThemeContextType {
   theme: Theme;
@@ -22,16 +22,17 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const systemColorScheme = useColorScheme();
-  const [theme, setTheme] = useState<Theme>('system');
+  const [theme, setTheme] = useState<Theme>("system");
 
-  const colorScheme: ColorScheme = theme === 'system'
-    ? (systemColorScheme ?? 'light')
-    : theme === 'dark'
-    ? 'dark'
-    : 'light';
+  const colorScheme: ColorScheme =
+    theme === "system"
+      ? (systemColorScheme ?? "light")
+      : theme === "dark"
+        ? "dark"
+        : "light";
 
   const colors = Colors[colorScheme];
-  const isDark = colorScheme === 'dark';
+  const isDark = colorScheme === "dark";
 
   // Create React Navigation compatible theme
   const navigationTheme = {
@@ -56,23 +57,21 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   };
 
   return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
 
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
 }
 
 // Hook for getting themed styles
 export function useThemedStyles<T>(
-  styleCreator: (colors: typeof Colors.light, isDark: boolean) => T
+  styleCreator: (colors: typeof Colors.light, isDark: boolean) => T,
 ): T {
   const { colors, isDark } = useTheme();
   return styleCreator(colors, isDark);
@@ -82,7 +81,7 @@ export function useThemedStyles<T>(
 export function getThemeColor(
   lightColor: string,
   darkColor: string,
-  isDark: boolean
+  isDark: boolean,
 ): string {
   return isDark ? darkColor : lightColor;
 }

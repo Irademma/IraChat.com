@@ -1,58 +1,67 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '../src/services/firebaseSimple';
-import { useRouter } from 'expo-router';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "../src/services/firebaseSimple";
+import { useRouter } from "expo-router";
 
 export default function CreateGroupScreen() {
-  const [groupName, setGroupName] = useState('');
-  const [groupDescription, setGroupDescription] = useState('');
+  const [groupName, setGroupName] = useState("");
+  const [groupDescription, setGroupDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleCreateGroup = async () => {
     if (!groupName.trim()) {
-      Alert.alert('Error', 'Please enter a group name');
+      Alert.alert("Error", "Please enter a group name");
       return;
     }
 
     setLoading(true);
     try {
-      await addDoc(collection(db, 'chats'), {
+      await addDoc(collection(db, "chats"), {
         name: groupName,
-        description: groupDescription.trim() || '',
+        description: groupDescription.trim() || "",
         isGroup: true,
         participants: [],
-        lastMessage: '',
+        lastMessage: "",
         lastMessageAt: serverTimestamp(),
         timestamp: serverTimestamp(),
       });
       router.back();
     } catch (error) {
-      console.error('Error creating group:', error);
-      Alert.alert('Error', 'Failed to create group. Please try again.');
+      console.error("Error creating group:", error);
+      Alert.alert("Error", "Failed to create group. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-white"
     >
       <View className="flex-1 px-6 py-8">
         {/* Header */}
         <View className="items-center mb-8">
           <Image
-            source={require('../assets/images/groups.png')}
+            source={require("../assets/images/groups.png")}
             className="w-16 h-16 mb-4"
-            style={{ tintColor: '#3B82F6' }}
+            style={{ tintColor: "#3B82F6" }}
             resizeMode="contain"
           />
           <Text
             className="text-xl text-gray-800 mb-2"
-            style={{ fontWeight: '700' }}
+            style={{ fontWeight: "700" }}
           >
             Create New Group
           </Text>
@@ -64,10 +73,7 @@ export default function CreateGroupScreen() {
         {/* Input Fields */}
         <View className="space-y-4 mb-6">
           <View>
-            <Text
-              className="text-gray-700 mb-2"
-              style={{ fontWeight: '500' }}
-            >
+            <Text className="text-gray-700 mb-2" style={{ fontWeight: "500" }}>
               Group Name *
             </Text>
             <TextInput
@@ -82,10 +88,7 @@ export default function CreateGroupScreen() {
           </View>
 
           <View>
-            <Text
-              className="text-gray-700 mb-2"
-              style={{ fontWeight: '500' }}
-            >
+            <Text className="text-gray-700 mb-2" style={{ fontWeight: "500" }}>
               Description (Optional)
             </Text>
             <TextInput
@@ -108,12 +111,12 @@ export default function CreateGroupScreen() {
           onPress={handleCreateGroup}
           disabled={loading || !groupName.trim()}
           className={`py-3 px-6 rounded-lg ${
-            loading || !groupName.trim() ? 'bg-gray-400' : 'bg-blue-500'
+            loading || !groupName.trim() ? "bg-gray-400" : "bg-blue-500"
           }`}
         >
           <Text
             className="text-white text-center text-base"
-            style={{ fontWeight: '600' }}
+            style={{ fontWeight: "600" }}
           >
             {loading ? "Creating Group..." : "Create Group"}
           </Text>

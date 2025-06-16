@@ -1,6 +1,9 @@
-import React from 'react';
-import { View, ViewStyle, ScrollView, Platform } from 'react-native';
-import { useResponsiveDimensions, useResponsiveSpacing } from '../../hooks/useResponsiveDimensions';
+import React from "react";
+import { View, ViewStyle, ScrollView, Platform } from "react-native";
+import {
+  useResponsiveDimensions,
+  useResponsiveSpacing,
+} from "../../hooks/useResponsiveDimensions";
 
 interface ResponsiveLayoutProps {
   children: React.ReactNode;
@@ -16,7 +19,7 @@ interface ResponsiveLayoutProps {
 export function ResponsiveLayout({
   children,
   style,
-  className = '',
+  className = "",
   scrollable = false,
   centered = false,
   maxWidth = false,
@@ -30,27 +33,30 @@ export function ResponsiveLayout({
     flex: 1,
     ...(padding && { padding: spacing.containerPadding }),
     ...(centered && {
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
     }),
     ...(maxWidth && {
-      maxWidth: isSmall ? '100%' : isMedium ? 600 : 800,
-      alignSelf: 'center',
-      width: '100%',
+      maxWidth: isSmall ? "100%" : isMedium ? 600 : 800,
+      alignSelf: "center",
+      width: "100%",
     }),
-    ...(safeArea && Platform.OS === 'web' && {
-      paddingTop: 20, // Add top padding for web
-    }),
+    ...(safeArea &&
+      Platform.OS === "web" && {
+        paddingTop: 20, // Add top padding for web
+      }),
     ...style,
   };
 
   const responsiveClassName = [
     className,
     // Add responsive classes based on device type
-    isSmall ? 'mobile' : '',
-    isMedium ? 'tablet' : '',
-    isDesktop ? 'desktop' : '',
-  ].filter(Boolean).join(' ');
+    isSmall ? "mobile" : "",
+    isMedium ? "tablet" : "",
+    isDesktop ? "desktop" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   if (scrollable) {
     return (
@@ -90,7 +96,7 @@ export function ResponsiveGrid({
   columns,
   spacing,
   style,
-  className = '',
+  className = "",
 }: ResponsiveGridProps) {
   const { isSmall, isMedium } = useResponsiveDimensions();
   const responsiveSpacing = useResponsiveSpacing();
@@ -99,8 +105,8 @@ export function ResponsiveGrid({
   const gridSpacing = spacing || responsiveSpacing.itemSpacing;
 
   const gridStyle: ViewStyle = {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginHorizontal: -gridSpacing / 2,
     ...style,
   };
@@ -137,25 +143,28 @@ interface ResponsiveCardProps {
 export function ResponsiveCard({
   children,
   style,
-  className = '',
+  className = "",
   padding = true,
   shadow = true,
 }: ResponsiveCardProps) {
   const { isSmall } = useResponsiveDimensions();
   const spacing = useResponsiveSpacing();
 
-  const shadowProps = Platform.OS === 'web' ? {
-    boxShadow: shadow ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none',
-  } : {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: shadow ? 0.1 : 0,
-    shadowRadius: 4,
-    elevation: shadow ? 3 : 0,
-  } as any;
+  const shadowProps =
+    Platform.OS === "web"
+      ? {
+          boxShadow: shadow ? "0 2px 8px rgba(0, 0, 0, 0.1)" : "none",
+        }
+      : ({
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: shadow ? 0.1 : 0,
+          shadowRadius: 4,
+          elevation: shadow ? 3 : 0,
+        } as any);
 
   const cardStyle: ViewStyle = {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: isSmall ? 12 : 16,
     ...(padding && { padding: spacing.containerPadding }),
     ...shadowProps,
@@ -171,13 +180,13 @@ export function ResponsiveCard({
 
 // Responsive Spacing Component
 interface ResponsiveSpacingProps {
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
   horizontal?: boolean;
   vertical?: boolean;
 }
 
 export function ResponsiveSpacing({
-  size = 'md',
+  size = "md",
   horizontal = false,
   vertical = true,
 }: ResponsiveSpacingProps) {
@@ -205,14 +214,14 @@ interface ResponsiveContainerProps {
 export function ResponsiveContainer({
   children,
   style,
-  className = '',
+  className = "",
 }: ResponsiveContainerProps) {
   const { isSmall, isMedium } = useResponsiveDimensions();
 
   const containerStyle: ViewStyle = {
-    width: '100%',
-    maxWidth: isSmall ? '100%' : isMedium ? 600 : 800,
-    alignSelf: 'center',
+    width: "100%",
+    maxWidth: isSmall ? "100%" : isMedium ? 600 : 800,
+    alignSelf: "center",
     ...style,
   };
 

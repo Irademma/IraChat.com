@@ -1,14 +1,14 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
   View,
   TextInput,
   TouchableOpacity,
   Animated,
   Platform,
-  KeyboardAvoidingView
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from './ThemeProvider';
+  KeyboardAvoidingView,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "./ThemeProvider";
 
 interface ChatInputProps {
   onSend: (type: string, content: string) => void;
@@ -19,9 +19,9 @@ interface ChatInputProps {
 export default function ChatInput({
   onSend,
   placeholder = "Type a message...",
-  disabled = false
+  disabled = false,
 }: ChatInputProps) {
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const { colors } = useTheme();
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -43,8 +43,8 @@ export default function ChatInput({
         }),
       ]).start();
 
-      onSend('text', text.trim());
-      setText('');
+      onSend("text", text.trim());
+      setText("");
     }
   };
 
@@ -75,9 +75,12 @@ export default function ChatInput({
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="bg-white border-t border-gray-200 px-4 py-3"
-      style={{ backgroundColor: colors.background, borderTopColor: colors.border }}
+      style={{
+        backgroundColor: colors.background,
+        borderTopColor: colors.border,
+      }}
     >
       <View className="flex-row items-end space-x-3">
         {/* Text Input Container */}
@@ -116,7 +119,7 @@ export default function ChatInput({
             onPress={handleSend}
             disabled={!canSend}
             className={`w-11 h-11 rounded-full items-center justify-center ${
-              canSend ? 'bg-primary-500' : 'bg-gray-300'
+              canSend ? "bg-primary-500" : "bg-gray-300"
             }`}
             style={{
               backgroundColor: canSend ? colors.primary : colors.textMuted,
@@ -125,7 +128,7 @@ export default function ChatInput({
             <Ionicons
               name="send"
               size={20}
-              color={canSend ? '#FFFFFF' : colors.background}
+              color={canSend ? "#FFFFFF" : colors.background}
             />
           </TouchableOpacity>
         </Animated.View>

@@ -1,28 +1,33 @@
 // Firebase service for vertical media updates functionality
 import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDocs,
-    increment,
-    limit,
-    onSnapshot,
-    orderBy,
-    query,
-    serverTimestamp,
-    startAfter,
-    updateDoc,
-    where
-} from 'firebase/firestore';
-import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { Comment, Update } from '../types';
-import { db, storage } from './firebaseSimple';
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  increment,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  startAfter,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+} from "firebase/storage";
+import { Comment, Update } from "../types";
+import { db, storage } from "./firebaseSimple";
 
 // Collections
-const UPDATES_COLLECTION = 'updates';
-const COMMENTS_COLLECTION = 'comments';
-const LIKES_COLLECTION = 'likes';
+const UPDATES_COLLECTION = "updates";
+const COMMENTS_COLLECTION = "comments";
+const LIKES_COLLECTION = "likes";
 
 // ===== UPDATE OPERATIONS =====
 
@@ -31,7 +36,7 @@ export const createUpdate = async (updateData: {
   username: string;
   userAvatar?: string;
   mediaFile: any; // File or blob
-  mediaType: 'photo' | 'video';
+  mediaType: "photo" | "video";
   caption?: string;
   musicUrl?: string;
   musicTitle?: string;
@@ -50,12 +55,12 @@ export const createUpdate = async (updateData: {
     const updateDoc = {
       userId: updateData.userId,
       username: updateData.username,
-      userAvatar: updateData.userAvatar || '',
+      userAvatar: updateData.userAvatar || "",
       mediaUrl,
       mediaType: updateData.mediaType,
-      caption: updateData.caption || '',
-      musicUrl: updateData.musicUrl || '',
-      musicTitle: updateData.musicTitle || '',
+      caption: updateData.caption || "",
+      musicUrl: updateData.musicUrl || "",
+      musicTitle: updateData.musicTitle || "",
       timestamp: serverTimestamp(),
       createdAt: new Date().toISOString(),
       expiresAt: serverTimestamp(),
@@ -68,21 +73,21 @@ export const createUpdate = async (updateData: {
     const docRef = await addDoc(collection(db, UPDATES_COLLECTION), updateDoc);
     return docRef.id;
   } catch (error) {
-    console.error('Error creating update:', error);
+    console.error("Error creating update:", error);
     throw error;
   }
 };
 
 export const getUpdates = async (
   limitCount: number = 10,
-  lastDoc?: any
+  lastDoc?: any,
 ): Promise<{ updates: Update[]; lastVisible: any }> => {
   try {
     let q = query(
       collection(db, UPDATES_COLLECTION),
-      where('expiresAt', '>', new Date()), // Only get non-expired updates
-      orderBy('timestamp', 'desc'),
-      limit(limitCount)
+      where("expiresAt", ">", new Date()), // Only get non-expired updates
+      orderBy("timestamp", "desc"),
+      limit(limitCount),
     );
 
     if (lastDoc) {
@@ -106,7 +111,7 @@ export const getUpdates = async (
 
     return { updates, lastVisible };
   } catch (error) {
-    console.error('Error fetching updates:', error);
+    console.error("Error fetching updates:", error);
     throw error;
   }
 };
@@ -115,14 +120,17 @@ export const incrementUpdateViews = async (updateId: string): Promise<void> => {
   try {
     const updateRef = doc(db, UPDATES_COLLECTION, updateId);
     await updateDoc(updateRef, {
-      views: increment(1)
+      views: increment(1),
     });
   } catch (error) {
-    console.error('Error incrementing views:', error);
+    console.error("Error incrementing views:", error);
   }
 };
 
-export const deleteUpdate = async (updateId: string, mediaUrl: string): Promise<void> => {
+export const deleteUpdate = async (
+  updateId: string,
+  mediaUrl: string,
+): Promise<void> => {
   try {
     // Delete media from storage
     const mediaRef = ref(storage, mediaUrl);
@@ -132,16 +140,22 @@ export const deleteUpdate = async (updateId: string, mediaUrl: string): Promise<
     await deleteDoc(doc(db, UPDATES_COLLECTION, updateId));
 
     // Delete associated comments and likes
-    const commentsQuery = query(collection(db, COMMENTS_COLLECTION), where('updateId', '==', updateId));
-    const likesQuery = query(collection(db, LIKES_COLLECTION), where('updateId', '==', updateId));
+    const commentsQuery = query(
+      collection(db, COMMENTS_COLLECTION),
+      where("updateId", "==", updateId),
+    );
+    const likesQuery = query(
+      collection(db, LIKES_COLLECTION),
+      where("updateId", "==", updateId),
+    );
 
     const [commentsSnapshot, likesSnapshot] = await Promise.all([
       getDocs(commentsQuery),
-      getDocs(likesQuery)
+      getDocs(likesQuery),
     ]);
 
     const deletePromises: Promise<void>[] = [];
-    
+
     commentsSnapshot.forEach((doc) => {
       deletePromises.push(deleteDoc(doc.ref));
     });
@@ -152,19 +166,22 @@ export const deleteUpdate = async (updateId: string, mediaUrl: string): Promise<
 
     await Promise.all(deletePromises);
   } catch (error) {
-    console.error('Error deleting update:', error);
+    console.error("Error deleting update:", error);
     throw error;
   }
 };
 
 // ===== LIKE OPERATIONS =====
 
-export const toggleLike = async (updateId: string, userId: string): Promise<boolean> => {
+export const toggleLike = async (
+  updateId: string,
+  userId: string,
+): Promise<boolean> => {
   try {
     const likesQuery = query(
       collection(db, LIKES_COLLECTION),
-      where('updateId', '==', updateId),
-      where('userId', '==', userId)
+      where("updateId", "==", updateId),
+      where("userId", "==", userId),
     );
 
     const querySnapshot = await getDocs(likesQuery);
@@ -175,11 +192,11 @@ export const toggleLike = async (updateId: string, userId: string): Promise<bool
       await addDoc(collection(db, LIKES_COLLECTION), {
         updateId,
         userId,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
       });
 
       await updateDoc(updateRef, {
-        likes: increment(1)
+        likes: increment(1),
       });
 
       return true; // Liked
@@ -189,29 +206,32 @@ export const toggleLike = async (updateId: string, userId: string): Promise<bool
       await deleteDoc(likeDoc.ref);
 
       await updateDoc(updateRef, {
-        likes: increment(-1)
+        likes: increment(-1),
       });
 
       return false; // Unliked
     }
   } catch (error) {
-    console.error('Error toggling like:', error);
+    console.error("Error toggling like:", error);
     throw error;
   }
 };
 
-export const checkIfLiked = async (updateId: string, userId: string): Promise<boolean> => {
+export const checkIfLiked = async (
+  updateId: string,
+  userId: string,
+): Promise<boolean> => {
   try {
     const likesQuery = query(
       collection(db, LIKES_COLLECTION),
-      where('updateId', '==', updateId),
-      where('userId', '==', userId)
+      where("updateId", "==", updateId),
+      where("userId", "==", userId),
     );
 
     const querySnapshot = await getDocs(likesQuery);
     return !querySnapshot.empty;
   } catch (error) {
-    console.error('Error checking like status:', error);
+    console.error("Error checking like status:", error);
     return false;
   }
 };
@@ -230,24 +250,27 @@ export const addComment = async (commentData: {
       updateId: commentData.updateId,
       userId: commentData.userId,
       username: commentData.username,
-      userAvatar: commentData.userAvatar || '',
+      userAvatar: commentData.userAvatar || "",
       text: commentData.text,
       timestamp: serverTimestamp(),
       createdAt: new Date().toISOString(),
       likes: 0,
     };
 
-    const docRef = await addDoc(collection(db, COMMENTS_COLLECTION), commentDoc);
+    const docRef = await addDoc(
+      collection(db, COMMENTS_COLLECTION),
+      commentDoc,
+    );
 
     // Increment comment count on update
     const updateRef = doc(db, UPDATES_COLLECTION, commentData.updateId);
     await updateDoc(updateRef, {
-      comments: increment(1)
+      comments: increment(1),
     });
 
     return docRef.id;
   } catch (error) {
-    console.error('Error adding comment:', error);
+    console.error("Error adding comment:", error);
     throw error;
   }
 };
@@ -256,8 +279,8 @@ export const getComments = async (updateId: string): Promise<Comment[]> => {
   try {
     const commentsQuery = query(
       collection(db, COMMENTS_COLLECTION),
-      where('updateId', '==', updateId),
-      orderBy('timestamp', 'desc')
+      where("updateId", "==", updateId),
+      orderBy("timestamp", "desc"),
     );
 
     const querySnapshot = await getDocs(commentsQuery);
@@ -274,7 +297,7 @@ export const getComments = async (updateId: string): Promise<Comment[]> => {
 
     return comments;
   } catch (error) {
-    console.error('Error fetching comments:', error);
+    console.error("Error fetching comments:", error);
     throw error;
   }
 };
@@ -283,12 +306,12 @@ export const getComments = async (updateId: string): Promise<Comment[]> => {
 
 export const subscribeToComments = (
   updateId: string,
-  callback: (comments: Comment[]) => void
+  callback: (comments: Comment[]) => void,
 ): (() => void) => {
   const commentsQuery = query(
     collection(db, COMMENTS_COLLECTION),
-    where('updateId', '==', updateId),
-    orderBy('timestamp', 'desc')
+    where("updateId", "==", updateId),
+    orderBy("timestamp", "desc"),
   );
 
   return onSnapshot(commentsQuery, (querySnapshot) => {
@@ -311,7 +334,7 @@ export const cleanupExpiredUpdates = async (): Promise<void> => {
   try {
     const expiredQuery = query(
       collection(db, UPDATES_COLLECTION),
-      where('expiresAt', '<=', new Date())
+      where("expiresAt", "<=", new Date()),
     );
 
     const querySnapshot = await getDocs(expiredQuery);
@@ -325,6 +348,6 @@ export const cleanupExpiredUpdates = async (): Promise<void> => {
     await Promise.all(deletePromises);
     console.log(`Cleaned up ${deletePromises.length} expired updates`);
   } catch (error) {
-    console.error('Error cleaning up expired updates:', error);
+    console.error("Error cleaning up expired updates:", error);
   }
 };

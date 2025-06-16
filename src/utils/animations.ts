@@ -1,53 +1,53 @@
-import { Animated, Easing, Platform } from 'react-native';
+import { Animated, Easing, Platform } from "react-native";
 
 // Web-compatible animation utilities
 export const createWebSafeAnimation = (
   animatedValue: Animated.Value,
   toValue: number,
   duration: number = 300,
-  useNativeDriver: boolean = true
+  useNativeDriver: boolean = true,
 ) => {
   return Animated.timing(animatedValue, {
     toValue,
     duration,
-    useNativeDriver: Platform.OS !== 'web' && useNativeDriver,
+    useNativeDriver: Platform.OS !== "web" && useNativeDriver,
   });
 };
 
 export const createSpringAnimation = (
   animatedValue: Animated.Value,
   toValue: number,
-  useNativeDriver: boolean = true
+  useNativeDriver: boolean = true,
 ) => {
   // No spring animation - use simple timing instead
   return Animated.timing(animatedValue, {
     toValue,
     duration: 200,
-    useNativeDriver: Platform.OS !== 'web' && useNativeDriver,
+    useNativeDriver: Platform.OS !== "web" && useNativeDriver,
   });
 };
 
 export const createRotationAnimation = (
   animatedValue: Animated.Value,
   duration: number = 2000,
-  useNativeDriver: boolean = true
+  useNativeDriver: boolean = true,
 ) => {
   return Animated.loop(
     Animated.timing(animatedValue, {
       toValue: 1,
       duration,
-      useNativeDriver: Platform.OS !== 'web' && useNativeDriver,
-    })
+      useNativeDriver: Platform.OS !== "web" && useNativeDriver,
+    }),
   );
 };
 
 // Platform-specific animation configurations
 export const getAnimationConfig = () => {
   return {
-    useNativeDriver: Platform.OS !== 'web',
-    duration: Platform.OS === 'web' ? 200 : 300, // Shorter duration for web
-    tension: Platform.OS === 'web' ? 120 : 100,
-    friction: Platform.OS === 'web' ? 10 : 8,
+    useNativeDriver: Platform.OS !== "web",
+    duration: Platform.OS === "web" ? 200 : 300, // Shorter duration for web
+    tension: Platform.OS === "web" ? 120 : 100,
+    friction: Platform.OS === "web" ? 10 : 8,
   };
 };
 

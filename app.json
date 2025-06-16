@@ -3,83 +3,15 @@
     "name": "IraChat",
     "slug": "irachat",
     "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#667eea"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+
+    "assetBundlePatterns": ["**/*"],
     "platforms": ["ios", "android"],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "IraChat",
-      "buildNumber": "1.0.0",
-      "infoPlist": {
-        "NSCameraUsageDescription": "IraChat needs access to camera to take photos and videos for messaging",
-        "NSMicrophoneUsageDescription": "IraChat needs access to microphone to record voice messages",
-        "NSPhotoLibraryUsageDescription": "IraChat needs access to photo library to share images and videos"
-      }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#667eea"
-      },
-      "package": "IraChat.android",
-      "versionCode": 1,
-      "permissions": [
-        "CAMERA",
-        "RECORD_AUDIO",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "READ_CONTACTS",
-        "INTERNET",
-        "ACCESS_NETWORK_STATE",
-        "MODIFY_AUDIO_SETTINGS",
-        "WAKE_LOCK"
-      ]
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow IraChat to access your camera to take photos and videos for messaging"
-        }
-      ],
-      [
-        "expo-media-library",
-        {
-          "photosPermission": "Allow IraChat to access your photos to share images and videos",
-          "savePhotosPermission": "Allow IraChat to save photos and videos to your device"
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/notification.png",
-          "color": "#667eea"
-        }
-      ],
-      "@react-native-firebase/app",
-      [
-        "@react-native-firebase/auth",
-        {
-          "ios": {
-            "useFrameworks": "static"
-          }
-        }
-      ]
-    ],
+
+
     "experiments": {
       "typedRoutes": true
     },
-    "scheme": "irachat",
+
     "web": {
       "bundler": "metro"
     }

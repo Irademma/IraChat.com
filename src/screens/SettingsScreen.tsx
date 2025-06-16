@@ -1,57 +1,72 @@
-import { signOut } from 'firebase/auth';
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../redux/userSlice';
-import { auth } from '../services/firebaseSimple';
-import { RootState } from '../types';
+import { signOut } from "firebase/auth";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/userSlice";
+import { auth } from "../services/firebaseSimple";
+import { RootState } from "../types";
 
 export default function SettingsScreen() {
   const dispatch = useDispatch();
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            if (auth) {
               await signOut(auth);
-              dispatch(logout());
-            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert('Error', 'Failed to logout. Please try again.');
             }
-          },
+            dispatch(logout());
+          } catch (error) {
+            console.error("Logout error:", error);
+            Alert.alert("Error", "Failed to logout. Please try again.");
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const settingsOptions = [
     {
-      title: 'Account',
-      icon: require('../../assets/images/profile.png'),
-      onPress: () => Alert.alert('Coming Soon', 'Account settings will be available soon.'),
+      title: "Account",
+      icon: require("../../assets/images/profile.png"),
+      onPress: () =>
+        Alert.alert("Coming Soon", "Account settings will be available soon."),
     },
     {
-      title: 'Notifications',
-      icon: require('../../assets/images/notification.png'),
-      onPress: () => Alert.alert('Coming Soon', 'Notification settings will be available soon.'),
+      title: "Notifications",
+      icon: require("../../assets/images/notification.png"),
+      onPress: () =>
+        Alert.alert(
+          "Coming Soon",
+          "Notification settings will be available soon.",
+        ),
     },
     {
-      title: 'Privacy',
-      icon: require('../../assets/images/setting.png'),
-      onPress: () => Alert.alert('Coming Soon', 'Privacy settings will be available soon.'),
+      title: "Privacy",
+      icon: require("../../assets/images/setting.png"),
+      onPress: () =>
+        Alert.alert("Coming Soon", "Privacy settings will be available soon."),
     },
     {
-      title: 'Help & Support',
-      icon: require('../../assets/images/comment.png'),
-      onPress: () => Alert.alert('Help', 'For support, please contact us at support@irachat.com'),
+      title: "Help & Support",
+      icon: require("../../assets/images/comment.png"),
+      onPress: () =>
+        Alert.alert(
+          "Help",
+          "For support, please contact us at support@irachat.com",
+        ),
     },
   ];
 
@@ -62,22 +77,19 @@ export default function SettingsScreen() {
         <View className="items-center">
           <View className="w-20 h-20 bg-white rounded-full items-center justify-center mb-3">
             <Image
-              source={require('../../assets/images/user-profile.webp')}
+              source={require("../../assets/images/user-profile.webp")}
               className="w-16 h-16 rounded-full"
               resizeMode="cover"
             />
           </View>
-          <Text
-            className="text-white text-xl"
-            style={{ fontWeight: '700' }}
-          >
-            {currentUser?.displayName || currentUser?.name || 'User'}
+          <Text className="text-white text-xl" style={{ fontWeight: "700" }}>
+            {currentUser?.displayName || currentUser?.name || "User"}
           </Text>
           <Text className="text-blue-100 text-sm mt-1">
             {currentUser?.phoneNumber}
           </Text>
           <Text className="text-blue-200 text-xs mt-2">
-            {currentUser?.status || 'I Love IraChat'}
+            {currentUser?.status || "I Love IraChat"}
           </Text>
         </View>
       </View>
@@ -93,12 +105,12 @@ export default function SettingsScreen() {
             <Image
               source={option.icon}
               className="w-6 h-6 mr-4"
-              style={{ tintColor: '#6B7280' }}
+              style={{ tintColor: "#6B7280" }}
               resizeMode="contain"
             />
             <Text
               className="text-gray-800 text-base flex-1"
-              style={{ fontWeight: '500' }}
+              style={{ fontWeight: "500" }}
             >
               {option.title}
             </Text>
@@ -111,7 +123,7 @@ export default function SettingsScreen() {
       <View className="px-4 py-4 border-t border-gray-200">
         <View className="items-center mb-6">
           <Image
-            source={require('../../assets/images/LOGO.png')}
+            source={require("../../assets/images/LOGO.png")}
             className="w-16 h-16 mb-2"
             resizeMode="contain"
           />
@@ -128,7 +140,7 @@ export default function SettingsScreen() {
         >
           <Text
             className="text-white text-center text-base"
-            style={{ fontWeight: '600' }}
+            style={{ fontWeight: "600" }}
           >
             Logout
           </Text>

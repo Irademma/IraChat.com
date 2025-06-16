@@ -1,39 +1,46 @@
-import { signOut } from 'firebase/auth';
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../redux/userSlice';
-import { auth } from '../services/firebaseSimple';
-import { RootState } from '../types';
+import { signOut } from "firebase/auth";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/userSlice";
+import { auth } from "../services/firebaseSimple";
+import { RootState } from "../types";
 
 export default function ProfileScreen() {
   const dispatch = useDispatch();
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
   const handleEditProfile = () => {
-    Alert.alert('Coming Soon', 'Profile editing will be available soon.');
+    Alert.alert("Coming Soon", "Profile editing will be available soon.");
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut(auth);
-              dispatch(logout());
-            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert('Error', 'Failed to logout. Please try again.');
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            if (auth) {
+              if (auth) {
+                await signOut(auth);
+              }
             }
-          },
+            dispatch(logout());
+          } catch (error) {
+            console.error("Logout error:", error);
+            Alert.alert("Error", "Failed to logout. Please try again.");
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
@@ -51,23 +58,25 @@ export default function ProfileScreen() {
             ) : (
               <Text
                 className="text-blue-500 text-2xl"
-                style={{ fontWeight: '700' }}
+                style={{ fontWeight: "700" }}
               >
-                {(currentUser?.name || currentUser?.displayName || 'U').charAt(0).toUpperCase()}
+                {(currentUser?.name || currentUser?.displayName || "U")
+                  .charAt(0)
+                  .toUpperCase()}
               </Text>
             )}
           </View>
           <Text
             className="text-white text-xl mb-1"
-            style={{ fontWeight: '700' }}
+            style={{ fontWeight: "700" }}
           >
-            {currentUser?.name || currentUser?.displayName || 'User'}
+            {currentUser?.name || currentUser?.displayName || "User"}
           </Text>
           <Text className="text-blue-100 text-sm">
             {currentUser?.phoneNumber}
           </Text>
           <Text className="text-blue-200 text-xs mt-2 text-center">
-            {currentUser?.status || 'I Love IraChat'}
+            {currentUser?.status || "I Love IraChat"}
           </Text>
         </View>
       </View>
@@ -79,14 +88,14 @@ export default function ProfileScreen() {
           className="flex-row items-center py-4 px-4 bg-gray-50 rounded-lg mb-3"
         >
           <Image
-            source={require('../../assets/images/profile.png')}
+            source={require("../../assets/images/profile.png")}
             className="w-6 h-6 mr-4"
-            style={{ tintColor: '#6B7280' }}
+            style={{ tintColor: "#6B7280" }}
             resizeMode="contain"
           />
           <Text
             className="text-gray-800 text-base flex-1"
-            style={{ fontWeight: '500' }}
+            style={{ fontWeight: "500" }}
           >
             Edit Profile
           </Text>
@@ -94,18 +103,23 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => Alert.alert('Coming Soon', 'Privacy settings will be available soon.')}
+          onPress={() =>
+            Alert.alert(
+              "Coming Soon",
+              "Privacy settings will be available soon.",
+            )
+          }
           className="flex-row items-center py-4 px-4 bg-gray-50 rounded-lg mb-3"
         >
           <Image
-            source={require('../../assets/images/setting.png')}
+            source={require("../../assets/images/setting.png")}
             className="w-6 h-6 mr-4"
-            style={{ tintColor: '#6B7280' }}
+            style={{ tintColor: "#6B7280" }}
             resizeMode="contain"
           />
           <Text
             className="text-gray-800 text-base flex-1"
-            style={{ fontWeight: '500' }}
+            style={{ fontWeight: "500" }}
           >
             Privacy
           </Text>
@@ -113,18 +127,23 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => Alert.alert('Coming Soon', 'Notification settings will be available soon.')}
+          onPress={() =>
+            Alert.alert(
+              "Coming Soon",
+              "Notification settings will be available soon.",
+            )
+          }
           className="flex-row items-center py-4 px-4 bg-gray-50 rounded-lg mb-3"
         >
           <Image
-            source={require('../../assets/images/notification.png')}
+            source={require("../../assets/images/notification.png")}
             className="w-6 h-6 mr-4"
-            style={{ tintColor: '#6B7280' }}
+            style={{ tintColor: "#6B7280" }}
             resizeMode="contain"
           />
           <Text
             className="text-gray-800 text-base flex-1"
-            style={{ fontWeight: '500' }}
+            style={{ fontWeight: "500" }}
           >
             Notifications
           </Text>
@@ -136,7 +155,7 @@ export default function ProfileScreen() {
       <View className="px-4 py-4 border-t border-gray-200">
         <View className="items-center mb-6">
           <Image
-            source={require('../../assets/images/LOGO.png')}
+            source={require("../../assets/images/LOGO.png")}
             className="w-12 h-12 mb-2"
             resizeMode="contain"
           />
@@ -150,7 +169,7 @@ export default function ProfileScreen() {
         >
           <Text
             className="text-white text-center text-base"
-            style={{ fontWeight: '600' }}
+            style={{ fontWeight: "600" }}
           >
             Logout
           </Text>

@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import NetInfo from '@react-native-community/netinfo';
-import { useCallback, useEffect, useState } from 'react';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from "@react-native-community/netinfo";
+import { useCallback, useEffect, useState } from "react";
 
 interface QueuedAction {
   id: string;
@@ -10,7 +10,7 @@ interface QueuedAction {
   retryCount: number;
 }
 
-const QUEUE_STORAGE_KEY = '@offline_queue';
+const QUEUE_STORAGE_KEY = "@offline_queue";
 const MAX_RETRY_COUNT = 3;
 
 export const useOfflineSupport = () => {
@@ -25,7 +25,7 @@ export const useOfflineSupport = () => {
         setQueue(JSON.parse(storedQueue));
       }
     } catch (error) {
-      console.error('Error loading offline queue:', error);
+      console.error("Error loading offline queue:", error);
     }
   }, []);
 
@@ -34,26 +34,32 @@ export const useOfflineSupport = () => {
       await AsyncStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(newQueue));
       setQueue(newQueue);
     } catch (error) {
-      console.error('Error saving offline queue:', error);
+      console.error("Error saving offline queue:", error);
     }
   }, []);
 
-  const addToQueue = useCallback(async (action: Omit<QueuedAction, 'id' | 'timestamp' | 'retryCount'>) => {
-    const newAction: QueuedAction = {
-      ...action,
-      id: Math.random().toString(36).substring(7),
-      timestamp: Date.now(),
-      retryCount: 0,
-    };
+  const addToQueue = useCallback(
+    async (action: Omit<QueuedAction, "id" | "timestamp" | "retryCount">) => {
+      const newAction: QueuedAction = {
+        ...action,
+        id: Math.random().toString(36).substring(7),
+        timestamp: Date.now(),
+        retryCount: 0,
+      };
 
-    const newQueue = [...queue, newAction];
-    await saveQueue(newQueue);
-  }, [queue, saveQueue]);
+      const newQueue = [...queue, newAction];
+      await saveQueue(newQueue);
+    },
+    [queue, saveQueue],
+  );
 
-  const removeFromQueue = useCallback(async (actionId: string) => {
-    const newQueue = queue.filter(action => action.id !== actionId);
-    await saveQueue(newQueue);
-  }, [queue, saveQueue]);
+  const removeFromQueue = useCallback(
+    async (actionId: string) => {
+      const newQueue = queue.filter((action) => action.id !== actionId);
+      await saveQueue(newQueue);
+    },
+    [queue, saveQueue],
+  );
 
   const processQueue = useCallback(async () => {
     if (!isOnline || isProcessing || queue.length === 0) return;
@@ -64,13 +70,13 @@ export const useOfflineSupport = () => {
     try {
       // Process the action based on its type
       switch (action.type) {
-        case 'LIKE_UPDATE':
+        case "LIKE_UPDATE":
           // Handle like action
           break;
-        case 'ADD_COMMENT':
+        case "ADD_COMMENT":
           // Handle comment action
           break;
-        case 'FOLLOW_USER':
+        case "FOLLOW_USER":
           // Handle follow action
           break;
         // Add more action types as needed
@@ -78,13 +84,11 @@ export const useOfflineSupport = () => {
 
       await removeFromQueue(action.id);
     } catch (error) {
-      console.error('Error processing queued action:', error);
-      
+      console.error("Error processing queued action:", error);
+
       if (action.retryCount < MAX_RETRY_COUNT) {
-        const newQueue = queue.map(q => 
-          q.id === action.id 
-            ? { ...q, retryCount: q.retryCount + 1 }
-            : q
+        const newQueue = queue.map((q) =>
+          q.id === action.id ? { ...q, retryCount: q.retryCount + 1 } : q,
         );
         await saveQueue(newQueue);
       } else {
@@ -98,7 +102,7 @@ export const useOfflineSupport = () => {
   useEffect(() => {
     loadQueue();
 
-    const unsubscribe = NetInfo.addEventListener(state => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
       setIsOnline(state.isConnected ?? false);
     });
 
@@ -121,4 +125,4 @@ export const useOfflineSupport = () => {
     removeFromQueue,
     processQueue,
   };
-}; 
+};

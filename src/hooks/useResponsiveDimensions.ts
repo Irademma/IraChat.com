@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Dimensions } from 'react-native';
+import { useEffect, useState } from "react";
+import { Dimensions } from "react-native";
 
 export interface ResponsiveDimensions {
   width: number;
@@ -12,21 +12,21 @@ export interface ResponsiveDimensions {
   isXXLarge: boolean;
   isTablet: boolean;
   isDesktop: boolean;
-  orientation: 'portrait' | 'landscape';
+  orientation: "portrait" | "landscape";
   scale: number;
   fontScale: number;
-  deviceType: 'phone' | 'tablet' | 'desktop';
+  deviceType: "phone" | "tablet" | "desktop";
   safeAreaPadding: number;
 }
 
 export function useResponsiveDimensions(): ResponsiveDimensions {
   const [dimensions, setDimensions] = useState(() => {
-    const { width, height, scale, fontScale } = Dimensions.get('window');
+    const { width, height, scale, fontScale } = Dimensions.get("window");
     return { width, height, scale, fontScale };
   });
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions({
         width: window.width,
         height: window.height,
@@ -41,25 +41,23 @@ export function useResponsiveDimensions(): ResponsiveDimensions {
   const { width, height, scale, fontScale } = dimensions;
 
   // Enhanced breakpoints for better device coverage
-  const isXSmall = width < 360;  // Very small phones
-  const isSmall = width >= 360 && width < 480;  // Small phones
-  const isMedium = width >= 480 && width < 768;  // Large phones/small tablets
-  const isLarge = width >= 768 && width < 1024;  // Tablets
-  const isXLarge = width >= 1024 && width < 1440;  // Small desktops
-  const isXXLarge = width >= 1440;  // Large desktops
+  const isXSmall = width < 360; // Very small phones
+  const isSmall = width >= 360 && width < 480; // Small phones
+  const isMedium = width >= 480 && width < 768; // Large phones/small tablets
+  const isLarge = width >= 768 && width < 1024; // Tablets
+  const isXLarge = width >= 1024 && width < 1440; // Small desktops
+  const isXXLarge = width >= 1440; // Large desktops
 
   // Legacy breakpoints for backward compatibility
   const isTablet = width >= 768 && width < 1024;
   const isDesktop = width >= 1024;
 
   // Orientation
-  const orientation = width > height ? 'landscape' : 'portrait';
+  const orientation = width > height ? "landscape" : "portrait";
 
   // Device type classification
-  const deviceType: 'phone' | 'tablet' | 'desktop' =
-    width < 768 ? 'phone' :
-    width < 1024 ? 'tablet' :
-    'desktop';
+  const deviceType: "phone" | "tablet" | "desktop" =
+    width < 768 ? "phone" : width < 1024 ? "tablet" : "desktop";
 
   // Safe area padding for very small devices
   const safeAreaPadding = isXSmall ? 8 : isSmall ? 12 : 16;
@@ -95,7 +93,16 @@ export function useResponsiveValue<T>(values: {
   desktop?: T;
   default: T;
 }): T {
-  const { isXSmall, isSmall, isMedium, isLarge, isXLarge, isXXLarge, isTablet, isDesktop } = useResponsiveDimensions();
+  const {
+    isXSmall,
+    isSmall,
+    isMedium,
+    isLarge,
+    isXLarge,
+    isXXLarge,
+    isTablet,
+    isDesktop,
+  } = useResponsiveDimensions();
 
   if (isXXLarge && values.xxlarge !== undefined) return values.xxlarge;
   if (isXLarge && values.xlarge !== undefined) return values.xlarge;
@@ -111,7 +118,8 @@ export function useResponsiveValue<T>(values: {
 
 // Enhanced responsive spacing with overlap prevention
 export function useResponsiveSpacing() {
-  const { isXSmall, isSmall, isMedium, isLarge, isXLarge, safeAreaPadding } = useResponsiveDimensions();
+  const { isXSmall, isSmall, isMedium, isLarge, isXLarge, safeAreaPadding } =
+    useResponsiveDimensions();
 
   return {
     // Base spacing that prevents overlaps
@@ -126,19 +134,28 @@ export function useResponsiveSpacing() {
     safeArea: safeAreaPadding,
 
     // Container spacing with minimum safe values
-    containerPadding: Math.max(safeAreaPadding, isXSmall ? 12 : isSmall ? 16 : isMedium ? 24 : 32),
+    containerPadding: Math.max(
+      safeAreaPadding,
+      isXSmall ? 12 : isSmall ? 16 : isMedium ? 24 : 32,
+    ),
     sectionSpacing: isXSmall ? 12 : isSmall ? 16 : isMedium ? 24 : 32,
     itemSpacing: isXSmall ? 6 : isSmall ? 8 : isMedium ? 12 : 16,
 
     // Button spacing with minimum touch targets
     buttonPadding: {
-      horizontal: Math.max(12, isXSmall ? 12 : isSmall ? 16 : isMedium ? 20 : 24),
+      horizontal: Math.max(
+        12,
+        isXSmall ? 12 : isSmall ? 16 : isMedium ? 20 : 24,
+      ),
       vertical: Math.max(10, isXSmall ? 10 : isSmall ? 12 : isMedium ? 14 : 16),
     },
 
     // Input spacing with accessibility compliance
     inputPadding: {
-      horizontal: Math.max(10, isXSmall ? 10 : isSmall ? 12 : isMedium ? 16 : 20),
+      horizontal: Math.max(
+        10,
+        isXSmall ? 10 : isSmall ? 12 : isMedium ? 16 : 20,
+      ),
       vertical: Math.max(10, isXSmall ? 10 : isSmall ? 12 : isMedium ? 14 : 16),
     },
 
@@ -155,7 +172,8 @@ export function useResponsiveSpacing() {
 
 // Enhanced responsive font sizes with overlap prevention
 export function useResponsiveFontSizes() {
-  const { isXSmall, isSmall, isMedium, isLarge, isXLarge, fontScale } = useResponsiveDimensions();
+  const { isXSmall, isSmall, isMedium, isLarge, isXLarge, fontScale } =
+    useResponsiveDimensions();
 
   const baseSizes = {
     xs: isXSmall ? 10 : isSmall ? 12 : isMedium ? 13 : 14,
@@ -163,34 +181,56 @@ export function useResponsiveFontSizes() {
     base: isXSmall ? 14 : isSmall ? 16 : isMedium ? 17 : isLarge ? 18 : 19,
     lg: isXSmall ? 16 : isSmall ? 18 : isMedium ? 20 : isLarge ? 22 : 24,
     xl: isXSmall ? 18 : isSmall ? 20 : isMedium ? 22 : isLarge ? 24 : 26,
-    '2xl': isXSmall ? 20 : isSmall ? 24 : isMedium ? 28 : isLarge ? 32 : 36,
-    '3xl': isXSmall ? 24 : isSmall ? 30 : isMedium ? 36 : isLarge ? 42 : 48,
-    '4xl': isXSmall ? 28 : isSmall ? 36 : isMedium ? 42 : isLarge ? 48 : 56,
+    "2xl": isXSmall ? 20 : isSmall ? 24 : isMedium ? 28 : isLarge ? 32 : 36,
+    "3xl": isXSmall ? 24 : isSmall ? 30 : isMedium ? 36 : isLarge ? 42 : 48,
+    "4xl": isXSmall ? 28 : isSmall ? 36 : isMedium ? 42 : isLarge ? 48 : 56,
   };
 
   // Apply font scale for accessibility with limits to prevent overflow
-  const scaledSizes = Object.entries(baseSizes).reduce((acc, [key, size]) => {
-    const scaledSize = Math.round(size * fontScale);
-    // Limit maximum font scale to prevent UI breaking
-    const maxScale = isXSmall ? 1.3 : isSmall ? 1.5 : 2.0;
-    const limitedSize = Math.min(scaledSize, size * maxScale);
-    acc[key as keyof typeof baseSizes] = limitedSize;
-    return acc;
-  }, {} as typeof baseSizes);
+  const scaledSizes = Object.entries(baseSizes).reduce(
+    (acc, [key, size]) => {
+      const scaledSize = Math.round(size * fontScale);
+      // Limit maximum font scale to prevent UI breaking
+      const maxScale = isXSmall ? 1.3 : isSmall ? 1.5 : 2.0;
+      const limitedSize = Math.min(scaledSize, size * maxScale);
+      acc[key as keyof typeof baseSizes] = limitedSize;
+      return acc;
+    },
+    {} as typeof baseSizes,
+  );
 
   return scaledSizes;
 }
 
 // Enhanced responsive layout values with overlap prevention
 export function useResponsiveLayout() {
-  const { isXSmall, isSmall, isMedium, isLarge, isXLarge, isDesktop, orientation, width, height, safeAreaPadding } = useResponsiveDimensions();
+  const {
+    isXSmall,
+    isSmall,
+    isMedium,
+    isLarge,
+    isXLarge,
+    isDesktop,
+    orientation,
+    width,
+    height,
+    safeAreaPadding,
+  } = useResponsiveDimensions();
 
   return {
     // Grid with better small device support
     gridColumns: isXSmall ? 1 : isSmall ? 1 : isMedium ? 2 : isLarge ? 3 : 4,
 
     // Container with safe margins
-    maxContentWidth: isXSmall ? '100%' : isSmall ? '100%' : isMedium ? 600 : isLarge ? 800 : 1200,
+    maxContentWidth: isXSmall
+      ? "100%"
+      : isSmall
+        ? "100%"
+        : isMedium
+          ? 600
+          : isLarge
+            ? 800
+            : 1200,
     contentPadding: Math.max(safeAreaPadding, isXSmall ? 8 : isSmall ? 12 : 16),
 
     // Navigation with minimum heights
@@ -198,14 +238,29 @@ export function useResponsiveLayout() {
     headerHeight: Math.max(44, isXSmall ? 44 : isSmall ? 56 : 64),
 
     // Modal with device-appropriate sizing
-    modalWidth: isXSmall ? '98%' : isSmall ? '95%' : isMedium ? '85%' : isLarge ? '70%' : '60%',
-    modalMaxWidth: isXSmall ? Math.min(width - 16, 350) : isSmall ? 400 : isMedium ? 500 : 600,
+    modalWidth: isXSmall
+      ? "98%"
+      : isSmall
+        ? "95%"
+        : isMedium
+          ? "85%"
+          : isLarge
+            ? "70%"
+            : "60%",
+    modalMaxWidth: isXSmall
+      ? Math.min(width - 16, 350)
+      : isSmall
+        ? 400
+        : isMedium
+          ? 500
+          : 600,
     modalMinHeight: Math.min(height * 0.3, 200),
     modalMaxHeight: height * 0.9,
 
     // Chat with responsive message sizing
-    chatListColumns: isDesktop && orientation === 'landscape' && width > 1200 ? 2 : 1,
-    messageMaxWidth: isXSmall ? '90%' : isSmall ? '85%' : '75%',
+    chatListColumns:
+      isDesktop && orientation === "landscape" && width > 1200 ? 2 : 1,
+    messageMaxWidth: isXSmall ? "90%" : isSmall ? "85%" : "75%",
     messageMinWidth: isXSmall ? 120 : 150,
 
     // Profile with scalable avatars

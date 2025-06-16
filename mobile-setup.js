@@ -1,18 +1,13 @@
-const fs = require('fs');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const { execSync } = require("child_process");
 
-console.log('📱 IraChat Mobile-Only Setup');
-console.log('🎯 Optimizing for Android & iOS only...\n');
+console.log("📱 IraChat Mobile-Only Setup");
+console.log("🎯 Optimizing for Android & iOS only...\n");
 
 // 1. Clean up any web-related files
-const webFiles = [
-  'public',
-  'web-build',
-  'dist',
-  '.expo/web'
-];
+const webFiles = ["public", "web-build", "dist", ".expo/web"];
 
-webFiles.forEach(file => {
+webFiles.forEach((file) => {
   try {
     if (fs.existsSync(file)) {
       fs.rmSync(file, { recursive: true, force: true });
@@ -168,33 +163,35 @@ For issues specific to IraChat mobile development:
 `;
 
 try {
-  fs.writeFileSync('MOBILE_GUIDE.md', mobileGuide.trim());
-  console.log('✅ Mobile development guide created');
+  fs.writeFileSync("MOBILE_GUIDE.md", mobileGuide.trim());
+  console.log("✅ Mobile development guide created");
 } catch (error) {
-  console.error('❌ Failed to create mobile guide:', error.message);
+  console.error("❌ Failed to create mobile guide:", error.message);
 }
 
 // 3. Create mobile-specific scripts
 const mobileScripts = {
-  "setup-android": "echo 'Setting up Android development environment...' && echo 'Please install Android Studio and set ANDROID_HOME'",
-  "setup-ios": "echo 'Setting up iOS development environment...' && echo 'Please install Xcode from App Store'",
-  "clean": "npx expo start --clear",
-  "reset": "rm -rf node_modules && npm install && npx expo start --clear"
+  "setup-android":
+    "echo 'Setting up Android development environment...' && echo 'Please install Android Studio and set ANDROID_HOME'",
+  "setup-ios":
+    "echo 'Setting up iOS development environment...' && echo 'Please install Xcode from App Store'",
+  clean: "npx expo start --clear",
+  reset: "rm -rf node_modules && npm install && npx expo start --clear",
 };
 
 try {
-  const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
   packageJson.scripts = { ...packageJson.scripts, ...mobileScripts };
-  fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2));
-  console.log('✅ Added mobile-specific scripts to package.json');
+  fs.writeFileSync("package.json", JSON.stringify(packageJson, null, 2));
+  console.log("✅ Added mobile-specific scripts to package.json");
 } catch (error) {
-  console.error('❌ Failed to update package.json:', error.message);
+  console.error("❌ Failed to update package.json:", error.message);
 }
 
-console.log('\n🎯 Mobile-Only Setup Complete!');
-console.log('\n📱 Next Steps:');
-console.log('1. Install Android Studio (for Android development)');
-console.log('2. Install Xcode (for iOS development - macOS only)');
-console.log('3. Run: npm start');
-console.log('4. Scan QR code with Expo Go app');
-console.log('\n📖 Read MOBILE_GUIDE.md for detailed setup instructions');
+console.log("\n🎯 Mobile-Only Setup Complete!");
+console.log("\n📱 Next Steps:");
+console.log("1. Install Android Studio (for Android development)");
+console.log("2. Install Xcode (for iOS development - macOS only)");
+console.log("3. Run: npm start");
+console.log("4. Scan QR code with Expo Go app");
+console.log("\n📖 Read MOBILE_GUIDE.md for detailed setup instructions");

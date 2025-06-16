@@ -1,15 +1,15 @@
-import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 import {
   Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
-} from 'react-native';
-import { colors } from '../theme/colors';
-import { GroupChat } from '../types/groupChat';
+  View,
+} from "react-native";
+import { colors } from "../theme/colors";
+import { GroupChat } from "../types/groupChat";
 
 interface GroupDetailsProps {
   group: GroupChat;
@@ -20,7 +20,7 @@ interface GroupDetailsProps {
     adminCount: number;
   };
   recentActivity: Array<{
-    type: 'message' | 'member' | 'media';
+    type: "message" | "member" | "media";
     timestamp: number;
     description: string;
   }>;
@@ -47,17 +47,17 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({
     </View>
   );
 
-  const renderActivityItem = (activity: typeof recentActivity[0]) => {
+  const renderActivityItem = (activity: (typeof recentActivity)[0]) => {
     const getActivityIcon = () => {
       switch (activity.type) {
-        case 'message':
-          return 'chatbubble';
-        case 'member':
-          return 'person';
-        case 'media':
-          return 'image';
+        case "message":
+          return "chatbubble";
+        case "member":
+          return "person";
+        case "media":
+          return "image";
         default:
-          return 'ellipsis-horizontal';
+          return "ellipsis-horizontal";
       }
     };
 
@@ -79,10 +79,7 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Image
-          source={{ uri: group.photo }}
-          style={styles.groupPhoto}
-        />
+        <Image source={{ uri: group.photo }} style={styles.groupPhoto} />
         <Text style={styles.groupName}>{group.name}</Text>
         <Text style={styles.groupDescription}>{group.description}</Text>
       </View>
@@ -99,10 +96,10 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({
       </View>
 
       <View style={styles.stats}>
-        {renderStatItem('people', 'Members', stats.memberCount)}
-        {renderStatItem('chatbubbles', 'Messages', stats.messageCount)}
-        {renderStatItem('images', 'Media', stats.mediaCount)}
-        {renderStatItem('shield-checkmark', 'Admins', stats.adminCount)}
+        {renderStatItem("people", "Members", stats.memberCount)}
+        {renderStatItem("chatbubbles", "Messages", stats.messageCount)}
+        {renderStatItem("images", "Media", stats.mediaCount)}
+        {renderStatItem("shield-checkmark", "Admins", stats.adminCount)}
       </View>
 
       <View style={styles.section}>
@@ -141,7 +138,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -154,24 +151,24 @@ const styles = StyleSheet.create({
   },
   groupName: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: colors.text,
     marginBottom: 8,
   },
   groupDescription: {
     fontSize: 16,
     color: colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
   },
   actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
   actionButton: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 12,
   },
   actionText: {
@@ -180,18 +177,18 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   stats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
   statItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   statValue: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: colors.text,
     marginTop: 4,
   },
@@ -208,19 +205,19 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   quickActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
   quickAction: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 16,
     backgroundColor: colors.surface,
     borderRadius: 8,
-    width: '45%',
+    width: "45%",
   },
   quickActionText: {
     marginTop: 8,
@@ -228,8 +225,8 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -244,4 +241,4 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textSecondary,
   },
-}); 
+});

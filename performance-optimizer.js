@@ -5,76 +5,84 @@
  * Adds performance optimizations to achieve maximum efficiency
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-console.log('🚀 Starting Performance Optimization for IraChat...\n');
+console.log("🚀 Starting Performance Optimization for IraChat...\n");
 
 // Performance optimizations to apply
 const optimizations = [
   {
-    file: 'app/(tabs)/index.tsx',
-    name: 'Chats Screen Memoization',
-    search: 'const renderItem = ({ item }: { item: Chat }) => (',
+    file: "app/(tabs)/index.tsx",
+    name: "Chats Screen Memoization",
+    search: "const renderItem = ({ item }: { item: Chat }) => (",
     replacement: `const renderItem = useCallback(({ item }: { item: Chat }) => (`,
-    addImport: 'useCallback'
+    addImport: "useCallback",
   },
   {
-    file: 'app/(tabs)/groups.tsx',
-    name: 'Groups Screen Memoization',
-    search: 'const renderItem = ({ item }: { item: Group }) => (',
+    file: "app/(tabs)/groups.tsx",
+    name: "Groups Screen Memoization",
+    search: "const renderItem = ({ item }: { item: Group }) => (",
     replacement: `const renderItem = useCallback(({ item }: { item: Group }) => (`,
-    addImport: 'useCallback'
+    addImport: "useCallback",
   },
   {
-    file: 'app/(tabs)/calls.tsx',
-    name: 'Calls Screen Memoization',
-    search: 'const renderItem = ({ item }: { item: Call }) => (',
+    file: "app/(tabs)/calls.tsx",
+    name: "Calls Screen Memoization",
+    search: "const renderItem = ({ item }: { item: Call }) => (",
     replacement: `const renderItem = useCallback(({ item }: { item: Call }) => (`,
-    addImport: 'useCallback'
-  }
+    addImport: "useCallback",
+  },
 ];
 
 function addPerformanceOptimizations() {
-  console.log('⚡ Adding Performance Optimizations...\n');
-  
-  optimizations.forEach(opt => {
+  console.log("⚡ Adding Performance Optimizations...\n");
+
+  optimizations.forEach((opt) => {
     if (fs.existsSync(opt.file)) {
-      let content = fs.readFileSync(opt.file, 'utf8');
-      
+      let content = fs.readFileSync(opt.file, "utf8");
+
       // Check if optimization is already applied
       if (content.includes(opt.replacement)) {
         console.log(`✅ ${opt.name}: Already optimized`);
         return;
       }
-      
+
       // Add import if needed
       if (opt.addImport && !content.includes(opt.addImport)) {
         const reactImportMatch = content.match(/import React.*from 'react';/);
         if (reactImportMatch) {
           const currentImport = reactImportMatch[0];
           if (!currentImport.includes(opt.addImport)) {
-            const newImport = currentImport.replace(
-              /import React(.*?)from 'react';/,
-              `import React$1, ${opt.addImport} } from 'react';`
-            ).replace(', }', ' }');
+            const newImport = currentImport
+              .replace(
+                /import React(.*?)from 'react';/,
+                `import React$1, ${opt.addImport} } from 'react';`,
+              )
+              .replace(", }", " }");
             content = content.replace(currentImport, newImport);
           }
         }
       }
-      
+
       // Apply optimization
       if (content.includes(opt.search)) {
         content = content.replace(opt.search, opt.replacement);
-        
+
         // Add closing bracket for useCallback
-        if (opt.replacement.includes('useCallback')) {
-          const renderItemEnd = content.indexOf(');', content.indexOf(opt.replacement));
+        if (opt.replacement.includes("useCallback")) {
+          const renderItemEnd = content.indexOf(
+            ");",
+            content.indexOf(opt.replacement),
+          );
           if (renderItemEnd !== -1) {
-            content = content.substring(0, renderItemEnd + 2) + ', [])' + content.substring(renderItemEnd + 2);
+            content =
+              content.substring(0, renderItemEnd + 2) +
+              ", [])" +
+              content.substring(renderItemEnd + 2);
           }
         }
-        
+
         fs.writeFileSync(opt.file, content);
         console.log(`✅ ${opt.name}: Applied successfully`);
       } else {
@@ -87,8 +95,8 @@ function addPerformanceOptimizations() {
 }
 
 function createPerformanceUtils() {
-  console.log('\n🛠️ Creating Performance Utilities...\n');
-  
+  console.log("\n🛠️ Creating Performance Utilities...\n");
+
   const performanceUtilsContent = `/**
  * Performance utilities for IraChat
  * Optimized for React Native performance
@@ -200,13 +208,13 @@ export default {
   useBatchUpdates,
 };`;
 
-  fs.writeFileSync('src/utils/performance.ts', performanceUtilsContent);
-  console.log('✅ Performance utilities created');
+  fs.writeFileSync("src/utils/performance.ts", performanceUtilsContent);
+  console.log("✅ Performance utilities created");
 }
 
 function createOptimizedComponents() {
-  console.log('\n🧩 Creating Optimized Components...\n');
-  
+  console.log("\n🧩 Creating Optimized Components...\n");
+
   const optimizedListContent = `import React, { memo, useCallback } from 'react';
 import { FlatList, FlatListProps } from 'react-native';
 
@@ -262,13 +270,13 @@ OptimizedList.displayName = 'OptimizedList';
 
 export default OptimizedList;`;
 
-  fs.writeFileSync('src/components/OptimizedList.tsx', optimizedListContent);
-  console.log('✅ OptimizedList component created');
+  fs.writeFileSync("src/components/OptimizedList.tsx", optimizedListContent);
+  console.log("✅ OptimizedList component created");
 }
 
 function addBundleOptimizations() {
-  console.log('\n📦 Adding Bundle Optimizations...\n');
-  
+  console.log("\n📦 Adding Bundle Optimizations...\n");
+
   // Create metro.config.js for better bundling
   const metroConfig = `const { getDefaultConfig } = require('expo/metro-config');
 
@@ -287,31 +295,31 @@ config.resolver.platforms = ['native', 'android', 'ios'];
 
 module.exports = config;`;
 
-  fs.writeFileSync('metro.config.js', metroConfig);
-  console.log('✅ Metro config optimized');
-  
+  fs.writeFileSync("metro.config.js", metroConfig);
+  console.log("✅ Metro config optimized");
+
   // Create babel.config.js optimizations
-  if (fs.existsSync('babel.config.js')) {
-    let babelConfig = fs.readFileSync('babel.config.js', 'utf8');
-    
-    if (!babelConfig.includes('react-native-reanimated')) {
+  if (fs.existsSync("babel.config.js")) {
+    let babelConfig = fs.readFileSync("babel.config.js", "utf8");
+
+    if (!babelConfig.includes("react-native-reanimated")) {
       babelConfig = babelConfig.replace(
-        'plugins: [',
+        "plugins: [",
         `plugins: [
-      'react-native-reanimated/plugin',`
+      'react-native-reanimated/plugin',`,
       );
-      
-      fs.writeFileSync('babel.config.js', babelConfig);
-      console.log('✅ Babel config optimized');
+
+      fs.writeFileSync("babel.config.js", babelConfig);
+      console.log("✅ Babel config optimized");
     } else {
-      console.log('✅ Babel config already optimized');
+      console.log("✅ Babel config already optimized");
     }
   }
 }
 
 function generatePerformanceReport() {
-  console.log('\n📊 Generating Performance Report...\n');
-  
+  console.log("\n📊 Generating Performance Report...\n");
+
   const report = `# 🚀 IraChat Performance Optimization Report
 
 ## ✅ Optimizations Applied
@@ -364,8 +372,8 @@ Your IraChat app is now **PERFECTLY OPTIMIZED** for maximum performance!
 
 **Your app is now production-ready with enterprise-level performance!** 🏆`;
 
-  fs.writeFileSync('PERFORMANCE_REPORT.md', report);
-  console.log('✅ Performance report generated');
+  fs.writeFileSync("PERFORMANCE_REPORT.md", report);
+  console.log("✅ Performance report generated");
 }
 
 // Run all optimizations
@@ -375,10 +383,10 @@ createOptimizedComponents();
 addBundleOptimizations();
 generatePerformanceReport();
 
-console.log('\n' + '='.repeat(60));
-console.log('🏆 PERFORMANCE OPTIMIZATION COMPLETE!');
-console.log('='.repeat(60));
-console.log('✨ Your IraChat app is now PERFECTLY OPTIMIZED!');
-console.log('🚀 Ready for production with maximum performance!');
-console.log('📊 Check PERFORMANCE_REPORT.md for details');
-console.log('='.repeat(60));
+console.log("\n" + "=".repeat(60));
+console.log("🏆 PERFORMANCE OPTIMIZATION COMPLETE!");
+console.log("=".repeat(60));
+console.log("✨ Your IraChat app is now PERFECTLY OPTIMIZED!");
+console.log("🚀 Ready for production with maximum performance!");
+console.log("📊 Check PERFORMANCE_REPORT.md for details");
+console.log("=".repeat(60));

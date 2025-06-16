@@ -1,6 +1,18 @@
-import React from 'react';
-import { View, ViewStyle, ScrollView, Text, Modal, TouchableOpacity } from 'react-native';
-import { useResponsiveDesign, useResponsiveSpacing, useResponsiveLayout, useResponsiveFontSizes } from '../../hooks/useResponsiveDesign';
+import React from "react";
+import {
+  View,
+  ViewStyle,
+  ScrollView,
+  Text,
+  Modal,
+  TouchableOpacity,
+} from "react-native";
+import {
+  useResponsiveDesign,
+  useResponsiveSpacing,
+  useResponsiveLayout,
+  useResponsiveFontSizes,
+} from "../../hooks/useResponsiveDesign";
 
 interface ResponsiveContainerProps {
   children: React.ReactNode;
@@ -15,7 +27,7 @@ interface ResponsiveContainerProps {
 export function ResponsiveContainer({
   children,
   style,
-  className = '',
+  className = "",
   scrollable = false,
   centered = false,
   maxWidth = false,
@@ -29,13 +41,13 @@ export function ResponsiveContainer({
     flex: 1,
     ...(padding && { padding: spacing.containerPadding }),
     ...(centered && {
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
     }),
     ...(maxWidth && {
       maxWidth: layout.maxContentWidth as any,
-      alignSelf: 'center' as 'center',
-      width: '100%',
+      alignSelf: "center" as "center",
+      width: "100%",
     }),
     ...style,
   };
@@ -43,13 +55,15 @@ export function ResponsiveContainer({
   const responsiveClassName = [
     className,
     // Add responsive classes based on device type
-    deviceType === 'mobile' ? 'mobile' : '',
-    deviceType === 'tablet' ? 'tablet' : '',
-    deviceType === 'desktop' ? 'desktop' : '',
-    breakpoints.isSmall ? 'small' : '',
-    breakpoints.isMedium ? 'medium' : '',
-    breakpoints.isLarge ? 'large' : '',
-  ].filter(Boolean).join(' ');
+    deviceType === "mobile" ? "mobile" : "",
+    deviceType === "tablet" ? "tablet" : "",
+    deviceType === "desktop" ? "desktop" : "",
+    breakpoints.isSmall ? "small" : "",
+    breakpoints.isMedium ? "medium" : "",
+    breakpoints.isLarge ? "large" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   if (scrollable) {
     return (
@@ -88,7 +102,7 @@ export function ResponsiveGrid({
   columns,
   spacing,
   style,
-  className = '',
+  className = "",
 }: ResponsiveGridProps) {
   const { breakpoints } = useResponsiveDesign();
   const responsiveSpacing = useResponsiveSpacing();
@@ -98,8 +112,8 @@ export function ResponsiveGrid({
   const gridSpacing = spacing || responsiveSpacing.itemSpacing;
 
   const gridStyle: ViewStyle = {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginHorizontal: -gridSpacing / 2,
     ...style,
   };
@@ -127,8 +141,8 @@ export function ResponsiveGrid({
 // Responsive Text Component
 interface ResponsiveTextProps {
   children: React.ReactNode;
-  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
-  weight?: 'normal' | 'medium' | 'semibold' | 'bold';
+  size?: "xs" | "sm" | "base" | "lg" | "xl" | "2xl" | "3xl" | "4xl";
+  weight?: "normal" | "medium" | "semibold" | "bold";
   style?: any;
   className?: string;
   numberOfLines?: number;
@@ -136,19 +150,19 @@ interface ResponsiveTextProps {
 
 export function ResponsiveText({
   children,
-  size = 'base',
-  weight = 'normal',
+  size = "base",
+  weight = "normal",
   style,
-  className = '',
+  className = "",
   numberOfLines,
 }: ResponsiveTextProps) {
   const fontSizes = useResponsiveFontSizes();
 
   const fontWeightMap = {
-    normal: '400',
-    medium: '500',
-    semibold: '600',
-    bold: '700',
+    normal: "400",
+    medium: "500",
+    semibold: "600",
+    bold: "700",
   };
 
   const textStyle = {
@@ -158,11 +172,7 @@ export function ResponsiveText({
   };
 
   return (
-    <Text
-      style={textStyle}
-      className={className}
-      numberOfLines={numberOfLines}
-    >
+    <Text style={textStyle} className={className} numberOfLines={numberOfLines}>
       {children}
     </Text>
   );
@@ -170,13 +180,13 @@ export function ResponsiveText({
 
 // Responsive Spacing Component
 interface ResponsiveSpacingProps {
-  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl';
+  size?: "xs" | "sm" | "base" | "lg" | "xl";
   horizontal?: boolean;
   vertical?: boolean;
 }
 
 export function ResponsiveSpacing({
-  size = 'base',
+  size = "base",
   horizontal = false,
   vertical = true,
 }: ResponsiveSpacingProps) {
@@ -218,7 +228,7 @@ export function ResponsiveModal({
   onClose,
   title,
   style,
-  className = '',
+  className = "",
 }: ResponsiveModalProps) {
   const { breakpoints } = useResponsiveDesign();
   const layout = useResponsiveLayout();
@@ -226,18 +236,18 @@ export function ResponsiveModal({
 
   const modalStyle: ViewStyle = {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   };
 
   const contentStyle: ViewStyle = {
     width: layout.modalWidth as any,
     maxWidth: layout.modalMaxWidth as any,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: breakpoints.isSmall ? 12 : 16,
     padding: spacing.containerPadding,
-    maxHeight: '80%',
+    maxHeight: "80%",
     ...style,
   };
 
@@ -248,11 +258,7 @@ export function ResponsiveModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <TouchableOpacity
-        style={modalStyle}
-        activeOpacity={1}
-        onPress={onClose}
-      >
+      <TouchableOpacity style={modalStyle} activeOpacity={1} onPress={onClose}>
         <TouchableOpacity
           style={contentStyle}
           className={className}
@@ -260,7 +266,11 @@ export function ResponsiveModal({
           onPress={(e) => e.stopPropagation()}
         >
           {title && (
-            <ResponsiveText size="lg" weight="bold" style={{ marginBottom: spacing.sectionSpacing }}>
+            <ResponsiveText
+              size="lg"
+              weight="bold"
+              style={{ marginBottom: spacing.sectionSpacing }}
+            >
               {title}
             </ResponsiveText>
           )}

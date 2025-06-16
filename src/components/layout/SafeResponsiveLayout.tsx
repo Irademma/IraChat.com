@@ -1,7 +1,11 @@
-import React from 'react';
-import { View, ScrollView, Platform, StatusBar } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useResponsiveDimensions, useResponsiveSpacing, useResponsiveLayout } from '../../hooks/useResponsiveDimensions';
+import React from "react";
+import { View, ScrollView, Platform, StatusBar } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  useResponsiveDimensions,
+  useResponsiveSpacing,
+  useResponsiveLayout,
+} from "../../hooks/useResponsiveDimensions";
 
 interface SafeResponsiveLayoutProps {
   children: React.ReactNode;
@@ -21,7 +25,7 @@ export function SafeResponsiveLayout({
   scrollable = false,
   padding = true,
   safeArea = true,
-  backgroundColor = 'white',
+  backgroundColor = "white",
   style,
 }: SafeResponsiveLayoutProps) {
   const { width, height, isXSmall, deviceType } = useResponsiveDimensions();
@@ -38,10 +42,12 @@ export function SafeResponsiveLayout({
   };
 
   // Content padding
-  const contentPadding = padding ? {
-    paddingHorizontal: spacing.containerPadding,
-    paddingVertical: spacing.sectionSpacing,
-  } : {};
+  const contentPadding = padding
+    ? {
+        paddingHorizontal: spacing.containerPadding,
+        paddingVertical: spacing.sectionSpacing,
+      }
+    : {};
 
   // Container styles
   const containerStyle = {
@@ -55,9 +61,9 @@ export function SafeResponsiveLayout({
   // Content wrapper styles
   const contentStyle = {
     flex: 1,
-    width: '100%' as const,
-    maxWidth: (maxWidth ? layout.maxContentWidth : '100%') as any,
-    alignSelf: (centered ? 'center' : 'stretch') as 'center' | 'stretch',
+    width: "100%" as const,
+    maxWidth: (maxWidth ? layout.maxContentWidth : "100%") as any,
+    alignSelf: (centered ? "center" : "stretch") as "center" | "stretch",
     ...contentPadding,
   };
 
@@ -65,7 +71,7 @@ export function SafeResponsiveLayout({
   const safeContentStyle = {
     ...contentStyle,
     minWidth: isXSmall ? Math.min(width - 32, 280) : undefined,
-    overflow: 'hidden' as const,
+    overflow: "hidden" as const,
   };
 
   if (scrollable) {
@@ -88,9 +94,7 @@ export function SafeResponsiveLayout({
 
   return (
     <View style={containerStyle}>
-      <View style={safeContentStyle}>
-        {children}
-      </View>
+      <View style={safeContentStyle}>{children}</View>
     </View>
   );
 }
@@ -98,11 +102,11 @@ export function SafeResponsiveLayout({
 // Responsive container for specific content types
 export function ResponsiveContainer({
   children,
-  type = 'default',
+  type = "default",
   style,
 }: {
   children: React.ReactNode;
-  type?: 'default' | 'card' | 'modal' | 'form' | 'list';
+  type?: "default" | "card" | "modal" | "form" | "list";
   style?: any;
 }) {
   const { isXSmall, isSmall } = useResponsiveDimensions();
@@ -111,49 +115,51 @@ export function ResponsiveContainer({
 
   const getContainerStyle = () => {
     const baseStyle = {
-      width: '100%',
-      overflow: 'hidden' as const,
+      width: "100%",
+      overflow: "hidden" as const,
     };
 
     switch (type) {
-      case 'card':
+      case "card":
         return {
           ...baseStyle,
-          backgroundColor: 'white',
+          backgroundColor: "white",
           borderRadius: layout.borderRadius,
           padding: layout.cardPadding,
           margin: layout.cardMargin,
-          ...(Platform.OS === 'web' ? {
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          } : {
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 3,
-          } as any),
+          ...(Platform.OS === "web"
+            ? {
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              }
+            : ({
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
+              } as any)),
         };
 
-      case 'modal':
+      case "modal":
         return {
           ...baseStyle,
-          backgroundColor: 'white',
+          backgroundColor: "white",
           borderRadius: layout.borderRadius,
           padding: spacing.containerPadding,
           maxWidth: layout.modalMaxWidth,
           maxHeight: layout.modalMaxHeight,
           minHeight: layout.modalMinHeight,
-          alignSelf: 'center' as 'center',
+          alignSelf: "center" as "center",
         };
 
-      case 'form':
+      case "form":
         return {
           ...baseStyle,
           padding: spacing.containerPadding,
           gap: spacing.itemSpacing,
         };
 
-      case 'list':
+      case "list":
         return {
           ...baseStyle,
           paddingHorizontal: isXSmall ? 8 : spacing.containerPadding,
@@ -167,11 +173,7 @@ export function ResponsiveContainer({
     }
   };
 
-  return (
-    <View style={[getContainerStyle(), style]}>
-      {children}
-    </View>
-  );
+  return <View style={[getContainerStyle(), style]}>{children}</View>;
 }
 
 // Responsive grid component
@@ -193,17 +195,24 @@ export function ResponsiveGrid({
   const safeSpacing = isXSmall ? Math.min(gridSpacing, 8) : gridSpacing;
 
   return (
-    <View style={[{
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      marginHorizontal: -safeSpacing / 2,
-    }, style]}>
+    <View
+      style={[
+        {
+          flexDirection: "row",
+          flexWrap: "wrap",
+          marginHorizontal: -safeSpacing / 2,
+        },
+        style,
+      ]}
+    >
       {React.Children.map(children, (child, index) => (
-        <View style={{
-          width: `${100 / effectiveColumns}%`,
-          paddingHorizontal: safeSpacing / 2,
-          marginBottom: safeSpacing,
-        }}>
+        <View
+          style={{
+            width: `${100 / effectiveColumns}%`,
+            paddingHorizontal: safeSpacing / 2,
+            marginBottom: safeSpacing,
+          }}
+        >
           {child}
         </View>
       ))}
@@ -213,20 +222,22 @@ export function ResponsiveGrid({
 
 // Responsive spacer component
 export function ResponsiveSpacer({
-  size = 'md',
+  size = "md",
   horizontal = false,
 }: {
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
   horizontal?: boolean;
 }) {
   const spacing = useResponsiveSpacing();
   const spaceValue = spacing[size];
 
   return (
-    <View style={{
-      width: horizontal ? spaceValue : undefined,
-      height: horizontal ? undefined : spaceValue,
-    }} />
+    <View
+      style={{
+        width: horizontal ? spaceValue : undefined,
+        height: horizontal ? undefined : spaceValue,
+      }}
+    />
   );
 }
 

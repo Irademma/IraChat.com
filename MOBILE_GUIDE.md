@@ -3,6 +3,7 @@
 ## 🚀 Quick Start
 
 ### For Android:
+
 ```bash
 npm run android
 # or
@@ -10,13 +11,15 @@ npm run dev:android
 ```
 
 ### For iOS:
+
 ```bash
 npm run ios
-# or  
+# or
 npm run dev:ios
 ```
 
 ### For Both Platforms:
+
 ```bash
 npm start
 # Then scan QR code with Expo Go app
@@ -25,6 +28,7 @@ npm start
 ## 📋 Prerequisites
 
 ### Android Development:
+
 1. **Android Studio** - Download from developer.android.com
 2. **Android SDK** - Install via Android Studio
 3. **Java Development Kit (JDK)** - Version 11 or higher
@@ -33,6 +37,7 @@ npm start
    - Add platform-tools to PATH
 
 ### iOS Development (macOS only):
+
 1. **Xcode** - Download from App Store
 2. **Xcode Command Line Tools**
 3. **iOS Simulator** - Included with Xcode
@@ -41,11 +46,13 @@ npm start
 ## 🔧 Setup Instructions
 
 ### 1. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 2. Setup Android (Windows/Mac/Linux)
+
 ```bash
 # Install Android Studio
 # Set ANDROID_HOME environment variable
@@ -53,6 +60,7 @@ npm install
 ```
 
 ### 3. Setup iOS (macOS only)
+
 ```bash
 # Install Xcode from App Store
 # Install CocoaPods
@@ -63,6 +71,7 @@ cd ios && pod install && cd ..
 ```
 
 ### 4. Start Development
+
 ```bash
 # Start Metro bundler
 npm start
@@ -75,11 +84,13 @@ npm run ios      # For iOS
 ## 📱 Testing on Physical Devices
 
 ### Using Expo Go (Easiest):
+
 1. Install Expo Go from App Store/Play Store
 2. Run `npm start`
 3. Scan QR code with Expo Go
 
 ### Using Development Build:
+
 1. Run `npm run dev:android` or `npm run dev:ios`
 2. Install development build on device
 3. Better performance and native features
@@ -98,11 +109,13 @@ npm run ios      # For iOS
 ## 🚀 Build for Production
 
 ### Android APK:
+
 ```bash
 npm run build:android
 ```
 
 ### iOS IPA:
+
 ```bash
 npm run build:ios
 ```
@@ -118,11 +131,13 @@ npm run build:ios
 ## 🐛 Troubleshooting
 
 ### Android Issues:
+
 - **SDK not found**: Set ANDROID_HOME correctly
 - **Build fails**: Clear cache with `npx expo start --clear`
 - **Device not detected**: Enable USB debugging
 
 ### iOS Issues:
+
 - **Build fails**: Run `pod install` in ios directory
 - **Simulator not starting**: Restart Xcode
 - **Certificate issues**: Check Apple Developer account
@@ -130,6 +145,7 @@ npm run build:ios
 ## 📞 Support
 
 For issues specific to IraChat mobile development:
+
 1. Check this guide first
 2. Clear cache: `npx expo start --clear`
 3. Reinstall dependencies: `rm -rf node_modules && npm install`

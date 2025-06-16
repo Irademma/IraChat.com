@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
 
 interface Author {
   _id: string;
@@ -49,27 +49,41 @@ export default function PostCard({
   };
 
   const handleComment = () => {
-    Alert.alert('Comments', 'Comment functionality coming soon!');
+    Alert.alert("Comments", "Comment functionality coming soon!");
   };
 
   const handleShare = () => {
-    Alert.alert('Share', 'Share functionality coming soon!');
+    Alert.alert("Share", "Share functionality coming soon!");
   };
 
   const handleMoreOptions = () => {
     Alert.alert(
-      'Post Options',
-      owner ? 'What would you like to do?' : 'Report this post?',
+      "Post Options",
+      owner ? "What would you like to do?" : "Report this post?",
       owner
         ? [
-            { text: 'Edit', onPress: () => Alert.alert('Edit', 'Edit functionality coming soon!') },
-            { text: 'Delete', style: 'destructive', onPress: () => Alert.alert('Delete', 'Delete functionality coming soon!') },
-            { text: 'Cancel', style: 'cancel' },
+            {
+              text: "Edit",
+              onPress: () =>
+                Alert.alert("Edit", "Edit functionality coming soon!"),
+            },
+            {
+              text: "Delete",
+              style: "destructive",
+              onPress: () =>
+                Alert.alert("Delete", "Delete functionality coming soon!"),
+            },
+            { text: "Cancel", style: "cancel" },
           ]
         : [
-            { text: 'Report', style: 'destructive', onPress: () => Alert.alert('Report', 'Report functionality coming soon!') },
-            { text: 'Cancel', style: 'cancel' },
-          ]
+            {
+              text: "Report",
+              style: "destructive",
+              onPress: () =>
+                Alert.alert("Report", "Report functionality coming soon!"),
+            },
+            { text: "Cancel", style: "cancel" },
+          ],
     );
   };
 
@@ -77,9 +91,11 @@ export default function PostCard({
     try {
       const date = new Date(dateString);
       const now = new Date();
-      const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+      const diffInMinutes = Math.floor(
+        (now.getTime() - date.getTime()) / (1000 * 60),
+      );
 
-      if (diffInMinutes < 1) return 'Just now';
+      if (diffInMinutes < 1) return "Just now";
       if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
 
       const diffInHours = Math.floor(diffInMinutes / 60);
@@ -90,7 +106,7 @@ export default function PostCard({
 
       return date.toLocaleDateString();
     } catch {
-      return 'Just now';
+      return "Just now";
     }
   };
 
@@ -118,14 +134,12 @@ export default function PostCard({
           <View className="flex-1">
             <Text
               className="text-gray-800 text-base"
-              style={{ fontWeight: '600' }}
+              style={{ fontWeight: "600" }}
             >
               {author.name}
             </Text>
             <View className="flex-row items-center">
-              <Text className="text-gray-500 text-sm">
-                @{author.username}
-              </Text>
+              <Text className="text-gray-500 text-sm">@{author.username}</Text>
               <Text className="text-gray-400 text-sm mx-1">•</Text>
               <Text className="text-gray-500 text-sm">
                 {formatTime(createdAt)}
@@ -135,7 +149,7 @@ export default function PostCard({
                   <Text className="text-gray-400 text-sm mx-1">•</Text>
                   <Text
                     className="text-blue-500 text-sm"
-                    style={{ fontWeight: '500' }}
+                    style={{ fontWeight: "500" }}
                   >
                     You
                   </Text>
@@ -153,9 +167,7 @@ export default function PostCard({
 
       {/* Content */}
       <View className="mb-4">
-        <Text className="text-gray-800 text-base leading-6">
-          {content}
-        </Text>
+        <Text className="text-gray-800 text-base leading-6">{content}</Text>
       </View>
 
       {/* Actions */}
@@ -165,11 +177,15 @@ export default function PostCard({
           onPress={handleLike}
           className="flex-row items-center flex-1"
         >
-          <Text className={`text-lg mr-2 ${isLiked ? 'text-red-500' : 'text-gray-400'}`}>
-            {isLiked ? '❤️' : '🤍'}
+          <Text
+            className={`text-lg mr-2 ${isLiked ? "text-red-500" : "text-gray-400"}`}
+          >
+            {isLiked ? "❤️" : "🤍"}
           </Text>
-          <Text className={`text-sm ${isLiked ? 'text-red-500' : 'text-gray-500'}`}>
-            {likesCount > 0 ? likesCount : 'Like'}
+          <Text
+            className={`text-sm ${isLiked ? "text-red-500" : "text-gray-500"}`}
+          >
+            {likesCount > 0 ? likesCount : "Like"}
           </Text>
         </TouchableOpacity>
 
@@ -180,7 +196,7 @@ export default function PostCard({
         >
           <Text className="text-gray-400 text-lg mr-2">💬</Text>
           <Text className="text-gray-500 text-sm">
-            {comments.length > 0 ? comments.length : 'Comment'}
+            {comments.length > 0 ? comments.length : "Comment"}
           </Text>
         </TouchableOpacity>
 

@@ -1,14 +1,14 @@
-import { Easing, Platform } from 'react-native';
-import { colors } from '../theme/colors';
+import { Easing, Platform } from "react-native";
+import { colors } from "../theme/colors";
 
 // Gradient configurations
 export const gradients = {
-  primary: ['#87CEEB', '#B0E0E6'],
-  secondary: ['#E0F7FA', '#B2EBF2'],
-  success: ['#A5D6A7', '#81C784'],
-  error: ['#EF9A9A', '#E57373'],
-  warning: ['#FFE082', '#FFD54F'],
-  info: ['#90CAF9', '#64B5F6'],
+  primary: ["#87CEEB", "#B0E0E6"],
+  secondary: ["#E0F7FA", "#B2EBF2"],
+  success: ["#A5D6A7", "#81C784"],
+  error: ["#EF9A9A", "#E57373"],
+  warning: ["#FFE082", "#FFD54F"],
+  info: ["#90CAF9", "#64B5F6"],
 };
 
 // Shadow configurations
@@ -52,7 +52,7 @@ export const shadows = {
 export const blurConfig = {
   light: Platform.select({
     ios: {
-      blurType: 'light',
+      blurType: "light",
       blurAmount: 5,
     },
     android: {
@@ -61,7 +61,7 @@ export const blurConfig = {
   }),
   medium: Platform.select({
     ios: {
-      blurType: 'regular',
+      blurType: "regular",
       blurAmount: 10,
     },
     android: {
@@ -70,7 +70,7 @@ export const blurConfig = {
   }),
   heavy: Platform.select({
     ios: {
-      blurType: 'dark',
+      blurType: "dark",
       blurAmount: 15,
     },
     android: {
@@ -126,23 +126,23 @@ export const transitions = {
 // Haptic feedback configurations
 export const hapticFeedback = {
   light: Platform.select({
-    ios: 'light',
-    android: 'soft',
+    ios: "light",
+    android: "soft",
   }),
   medium: Platform.select({
-    ios: 'medium',
-    android: 'medium',
+    ios: "medium",
+    android: "medium",
   }),
   heavy: Platform.select({
-    ios: 'heavy',
-    android: 'hard',
+    ios: "heavy",
+    android: "hard",
   }),
 };
 
 // Loading configurations
 export const loadingConfig = {
   spinner: {
-    size: 'large',
+    size: "large",
     color: colors.primary,
   },
   skeleton: {
@@ -178,19 +178,19 @@ export const toastConfig = {
 // Modal configurations
 export const modalConfig = {
   default: {
-    animationType: 'slide',
+    animationType: "slide",
     transparent: true,
-    presentationStyle: 'overFullScreen',
+    presentationStyle: "overFullScreen",
   },
   bottomSheet: {
-    animationType: 'slide',
+    animationType: "slide",
     transparent: true,
-    presentationStyle: 'overFullScreen',
+    presentationStyle: "overFullScreen",
   },
   alert: {
-    animationType: 'fade',
+    animationType: "fade",
     transparent: true,
-    presentationStyle: 'overFullScreen',
+    presentationStyle: "overFullScreen",
   },
 };
 
@@ -233,18 +233,18 @@ export const pressConfig = {
 
 // Scroll configurations
 export const scrollConfig = {
-  decelerationRate: 'normal',
+  decelerationRate: "normal",
   showsVerticalScrollIndicator: false,
   showsHorizontalScrollIndicator: false,
   bounces: true,
-  overScrollMode: 'always',
+  overScrollMode: "always",
 };
 
 // Keyboard configurations
 export const keyboardConfig = {
   behavior: Platform.select({
-    ios: 'padding',
-    android: 'height',
+    ios: "padding",
+    android: "height",
   }),
   keyboardVerticalOffset: Platform.select({
     ios: 0,
@@ -254,8 +254,8 @@ export const keyboardConfig = {
 
 // Status bar configurations
 export const statusBarConfig = {
-  backgroundColor: 'transparent',
-  barStyle: 'dark-content',
+  backgroundColor: "transparent",
+  barStyle: "dark-content",
   translucent: true,
 };
 
@@ -268,7 +268,7 @@ export const navigationConfig = {
   },
   headerTintColor: colors.text,
   headerTitleStyle: {
-    fontWeight: '600',
+    fontWeight: "600",
   },
   headerBackTitleVisible: false,
-}; 
+};

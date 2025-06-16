@@ -1,4 +1,3 @@
-
 export interface ParsedMention {
   userId: string;
   username: string;
@@ -14,7 +13,7 @@ export const parseMentions = (caption: string): ParsedMention[] => {
   while ((match = mentionRegex.exec(caption)) !== null) {
     mentions.push({
       username: match[1],
-      userId: '', // Will be populated when we have user data
+      userId: "", // Will be populated when we have user data
       startIndex: match.index,
       endIndex: match.index + match[0].length,
     });
@@ -26,13 +25,15 @@ export const parseMentions = (caption: string): ParsedMention[] => {
 export const replaceMentionsWithLinks = (
   caption: string,
   mentions: ParsedMention[],
-  onMentionPress: (userId: string) => void
+  onMentionPress: (userId: string) => void,
 ): { text: string; mentions: ParsedMention[] } => {
   let processedCaption = caption;
   const processedMentions: ParsedMention[] = [];
 
   // Sort mentions by start index in reverse order to avoid index shifting
-  const sortedMentions = [...mentions].sort((a, b) => b.startIndex - a.startIndex);
+  const sortedMentions = [...mentions].sort(
+    (a, b) => b.startIndex - a.startIndex,
+  );
 
   for (const mention of sortedMentions) {
     const mentionText = `@${mention.username}`;
@@ -48,4 +49,4 @@ export const replaceMentionsWithLinks = (
     text: processedCaption,
     mentions: processedMentions,
   };
-}; 
+};

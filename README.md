@@ -5,12 +5,14 @@ A fully functional, modern React Native messaging application built with Expo, F
 ## ✨ Features
 
 ### 🔐 Authentication
+
 - **Email/Password Registration & Login**
 - **Secure Firebase Authentication**
 - **Automatic session management**
 - **User profile creation**
 
 ### 💬 Messaging
+
 - **Real-time messaging** with Firebase Firestore
 - **Individual and group chats**
 - **Message timestamps** with smart formatting
@@ -18,6 +20,7 @@ A fully functional, modern React Native messaging application built with Expo, F
 - **Message history** with infinite scroll
 
 ### 🎨 Modern UI/UX
+
 - **Beautiful, responsive design** with NativeWind/Tailwind CSS
 - **Tab navigation** with custom icons
 - **Smooth animations** and transitions
@@ -25,6 +28,7 @@ A fully functional, modern React Native messaging application built with Expo, F
 - **Cross-platform compatibility** (iOS, Android, Web)
 
 ### 📱 Navigation
+
 - **Bottom tab navigation** for main screens
 - **Stack navigation** for chat flows
 - **Deep linking** support
@@ -33,6 +37,7 @@ A fully functional, modern React Native messaging application built with Expo, F
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - npm or yarn
 - Expo CLI
@@ -41,23 +46,27 @@ A fully functional, modern React Native messaging application built with Expo, F
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd IraChat
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Firebase Setup**
+
    - Create a Firebase project at [Firebase Console](https://console.firebase.google.com)
    - Enable Authentication (Email/Password)
    - Enable Firestore Database
    - Update `app/services/firebase.ts` with your Firebase config
 
 4. **Start the development server**
+
    ```bash
    npm start
    ```
@@ -119,6 +128,7 @@ IraChat/
 ## 🔧 Configuration
 
 ### Firebase Configuration
+
 Update `app/services/firebase.ts` with your Firebase project credentials:
 
 ```typescript
@@ -128,17 +138,19 @@ const firebaseConfig = {
   projectId: "your-project-id",
   storageBucket: "your-project.appspot.com",
   messagingSenderId: "your-sender-id",
-  appId: "your-app-id"
+  appId: "your-app-id",
 };
 ```
 
 ## 📱 App Screens
 
 1. **Authentication Flow**
+
    - Login Screen
    - Registration Screen
 
 2. **Main App (Tab Navigation)**
+
    - Chats List
    - Profile
    - Settings
@@ -151,6 +163,7 @@ const firebaseConfig = {
 ## 🎨 Design System
 
 The app uses a consistent design system with:
+
 - **Primary Color**: Blue (#3B82F6)
 - **Typography**: System fonts with proper hierarchy
 - **Spacing**: Consistent padding and margins
@@ -161,6 +174,7 @@ The app uses a consistent design system with:
 ### Building for Production
 
 1. **Configure app.json**
+
    ```json
    {
      "expo": {
@@ -173,6 +187,7 @@ The app uses a consistent design system with:
    ```
 
 2. **Build for Android**
+
    ```bash
    expo build:android
    ```

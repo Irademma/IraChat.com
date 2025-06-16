@@ -1,87 +1,94 @@
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useDispatch } from 'react-redux';
-import PhoneNumberInput from '../../src/components/ui/PhoneNumberInput';
-import ProfilePicturePicker from '../../src/components/ui/ProfilePicturePicker';
-import { setUser } from '../../src/redux/userSlice';
-import { createUserAccount } from '../../src/services/authService';
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useDispatch } from "react-redux";
+import PhoneNumberInput from "../../src/components/ui/PhoneNumberInput";
+import ProfilePicturePicker from "../../src/components/ui/ProfilePicturePicker";
+import { setUser } from "../../src/redux/userSlice";
+import { createUserAccount } from "../../src/services/authService";
 
 export default function RegisterScreen() {
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [countryCode, setCountryCode] = useState('+256'); // Default to Uganda
-  const [bio, setBio] = useState('');
-  const [profilePicture, setProfilePicture] = useState('');
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [countryCode, setCountryCode] = useState("+256"); // Default to Uganda
+  const [bio, setBio] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
   const dispatch = useDispatch();
 
-
-
   // Create account directly without SMS verification
   const createAccount = async () => {
-    console.log('Creating account for:', countryCode + phoneNumber);
+    console.log("Creating account for:", countryCode + phoneNumber);
 
     // Clear any previous errors
-    setError('');
+    setError("");
 
     // Validation
     if (!name.trim()) {
-      const errorMsg = 'Please enter your name';
+      const errorMsg = "Please enter your name";
       setError(errorMsg);
-      Alert.alert('Error', errorMsg);
+      Alert.alert("Error", errorMsg);
       return;
     }
 
     if (name.trim().length < 2) {
-      const errorMsg = 'Name must be at least 2 characters long';
+      const errorMsg = "Name must be at least 2 characters long";
       setError(errorMsg);
-      Alert.alert('Error', errorMsg);
+      Alert.alert("Error", errorMsg);
       return;
     }
 
     if (!username.trim()) {
-      const errorMsg = 'Please enter a username';
+      const errorMsg = "Please enter a username";
       setError(errorMsg);
-      Alert.alert('Error', errorMsg);
+      Alert.alert("Error", errorMsg);
       return;
     }
 
     if (username.trim().length < 3) {
-      const errorMsg = 'Username must be at least 3 characters long';
+      const errorMsg = "Username must be at least 3 characters long";
       setError(errorMsg);
-      Alert.alert('Error', errorMsg);
+      Alert.alert("Error", errorMsg);
       return;
     }
 
     // Username validation (must start with @ and contain only lowercase letters)
-    if (!username.startsWith('@')) {
-      const errorMsg = 'Username must start with @';
+    if (!username.startsWith("@")) {
+      const errorMsg = "Username must start with @";
       setError(errorMsg);
-      Alert.alert('Error', errorMsg);
+      Alert.alert("Error", errorMsg);
       return;
     }
 
     const usernameWithoutAt = username.slice(1); // Remove @ symbol
     const usernameRegex = /^[a-z]+$/;
     if (!usernameRegex.test(usernameWithoutAt)) {
-      const errorMsg = 'Username can only contain lowercase letters after @';
+      const errorMsg = "Username can only contain lowercase letters after @";
       setError(errorMsg);
-      Alert.alert('Error', errorMsg);
+      Alert.alert("Error", errorMsg);
       return;
     }
 
     if (!phoneNumber.trim()) {
-      const errorMsg = 'Please enter your phone number';
+      const errorMsg = "Please enter your phone number";
       setError(errorMsg);
-      Alert.alert('Error', errorMsg);
+      Alert.alert("Error", errorMsg);
       return;
     }
 
-    const fullPhoneNumber = countryCode + phoneNumber.replace(/\D/g, '');
+    const fullPhoneNumber = countryCode + phoneNumber.replace(/\D/g, "");
 
     setLoading(true);
     try {
@@ -90,73 +97,88 @@ export default function RegisterScreen() {
         name: name.trim(),
         username: username.trim(),
         phoneNumber: fullPhoneNumber,
-        bio: bio.trim() || 'I Love IraChat',
-        avatar: profilePicture
+        bio: bio.trim() || "I Love IraChat",
+        avatar: profilePicture,
       });
 
       if (!result.success || !result.user) {
         throw new Error(result.message);
       }
 
-      // Update Redux store
+      // Update Redux store immediately and force state sync
       dispatch(setUser(result.user));
 
-      console.log('✅ Account created successfully:', result.user.name);
+      // Force immediate state update by dispatching multiple times if needed
+      setTimeout(() => {
+        if (result.user) {
+          dispatch(setUser(result.user));
+        }
+      }, 0);
+
+      console.log("✅ Account created successfully:", result.user.name);
+      console.log("🔄 Redux state updated with user:", result.user.id);
 
       // Clear form
-      setName('');
-      setUsername('');
-      setPhoneNumber('');
-      setBio('');
-      setProfilePicture('');
-      setError('');
+      setName("");
+      setUsername("");
+      setPhoneNumber("");
+      setBio("");
+      setProfilePicture("");
+      setError("");
 
-      // Wait a moment for auth state to be properly updated, then navigate
-      console.log('🎯 Account creation complete - waiting for auth state sync...');
+      // Navigate immediately with multiple strategies for reliability
+      console.log("🎯 Account creation complete - navigating to main tabs immediately");
+
+      // Strategy 1: Immediate push
+      router.push("/(tabs)");
+
+      // Strategy 2: Immediate replace as backup
+      router.replace("/(tabs)");
+
+      // Strategy 3: Delayed replace as final fallback
       setTimeout(() => {
-        console.log('🎯 Navigating to main tabs');
-        router.replace('/(tabs)');
-      }, 500); // Give 500ms for auth state to sync
-
+        router.replace("/(tabs)");
+      }, 50);
     } catch (error: any) {
-      console.error('❌ Create account failed:', error);
-      console.error('Error details:', error.message);
-      console.error('Error stack:', error.stack);
+      console.error("❌ Create account failed:", error);
+      console.error("Error details:", error.message);
+      console.error("Error stack:", error.stack);
 
       // Show specific error messages for phone/username conflicts
-      if (error.message.includes('phone number is already registered')) {
-        const errorMessage = 'This phone number is already registered. Each phone number can only have one account for security reasons.';
+      if (error.message.includes("phone number is already registered")) {
+        const errorMessage =
+          "This phone number is already registered. Each phone number can only have one account for security reasons.";
         setError(errorMessage);
         Alert.alert(
-          'Phone Number Already Registered',
-          'This phone number is already associated with an account. Each phone number can only have one account for security reasons.\n\nIf this is your phone number, please contact support.',
-          [{ text: 'OK', style: 'default' }]
+          "Phone Number Already Registered",
+          "This phone number is already associated with an account. Each phone number can only have one account for security reasons.\n\nIf this is your phone number, please contact support.",
+          [{ text: "OK", style: "default" }],
         );
-      } else if (error.message.includes('username is already taken')) {
-        const errorMessage = 'This username is already taken. Please choose a different username.';
+      } else if (error.message.includes("username is already taken")) {
+        const errorMessage =
+          "This username is already taken. Please choose a different username.";
         setError(errorMessage);
         Alert.alert(
-          'Username Taken',
-          'This username is already taken. Please choose a different username.',
-          [{ text: 'OK', style: 'default' }]
+          "Username Taken",
+          "This username is already taken. Please choose a different username.",
+          [{ text: "OK", style: "default" }],
         );
       } else {
         // Show the actual error message for debugging
-        const errorMessage = error.message || 'Failed to create account. Please try again.';
+        const errorMessage =
+          error.message || "Failed to create account. Please try again.";
         setError(errorMessage);
-        Alert.alert('Error', `Registration failed: ${errorMessage}`);
+        Alert.alert("Error", `Registration failed: ${errorMessage}`);
       }
     } finally {
       setLoading(false);
     }
   };
 
-
-
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, backgroundColor: 'white' }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1, backgroundColor: "white" }}
       accessible={true}
       accessibilityLabel="Create account screen"
     >
@@ -172,7 +194,7 @@ export default function RegisterScreen() {
           <View className="items-center mb-8">
             <Text
               className="text-2xl text-gray-800 mb-2"
-              style={{ fontWeight: '700' }}
+              style={{ fontWeight: "700" }}
               accessible={true}
               accessibilityRole="header"
               accessibilityLabel="Create Account heading"
@@ -187,8 +209,6 @@ export default function RegisterScreen() {
               Enter your details to get started with IraChat
             </Text>
           </View>
-
-
 
           {/* Error Message */}
           {/* Error Message */}
@@ -208,7 +228,8 @@ export default function RegisterScreen() {
                 size={120}
               />
               <Text className="text-gray-600 text-sm mt-3">
-                Add your profile photo by capturing a new photo or uploading from gallery
+                Add your profile photo by capturing a new photo or uploading
+                from gallery
               </Text>
             </View>
 
@@ -216,7 +237,7 @@ export default function RegisterScreen() {
             <View>
               <Text
                 className="text-gray-700 mb-2"
-                style={{ fontWeight: '500' }}
+                style={{ fontWeight: "500" }}
               >
                 Full Name
               </Text>
@@ -225,7 +246,7 @@ export default function RegisterScreen() {
                 value={name}
                 onChangeText={(text) => {
                   setName(text);
-                  if (error) setError('');
+                  if (error) setError("");
                 }}
                 className="border border-gray-300 px-4 py-3 rounded-lg text-base"
                 editable={!loading}
@@ -233,7 +254,7 @@ export default function RegisterScreen() {
                 autoComplete="name"
                 textContentType="name"
                 style={{
-                  borderColor: error && !name.trim() ? '#EF4444' : '#D1D5DB',
+                  borderColor: error && !name.trim() ? "#EF4444" : "#D1D5DB",
                 }}
                 accessible={true}
                 accessibilityLabel="Full name input field"
@@ -246,7 +267,7 @@ export default function RegisterScreen() {
             <View>
               <Text
                 className="text-gray-700 mb-2"
-                style={{ fontWeight: '500' }}
+                style={{ fontWeight: "500" }}
               >
                 Username
               </Text>
@@ -255,17 +276,19 @@ export default function RegisterScreen() {
                 value={username}
                 onChangeText={(text) => {
                   // Ensure it starts with @ and only contains lowercase letters
-                  let cleanText = text.toLowerCase().replace(/\s/g, '');
-                  if (!cleanText.startsWith('@')) {
-                    cleanText = '@' + cleanText.replace('@', '');
+                  let cleanText = text.toLowerCase().replace(/\s/g, "");
+                  if (!cleanText.startsWith("@")) {
+                    cleanText = "@" + cleanText.replace("@", "");
                   }
                   // Remove any non-letter characters after @
-                  const atIndex = cleanText.indexOf('@');
-                  const afterAt = cleanText.slice(atIndex + 1).replace(/[^a-z]/g, '');
-                  cleanText = '@' + afterAt;
+                  const atIndex = cleanText.indexOf("@");
+                  const afterAt = cleanText
+                    .slice(atIndex + 1)
+                    .replace(/[^a-z]/g, "");
+                  cleanText = "@" + afterAt;
 
                   setUsername(cleanText);
-                  if (error) setError('');
+                  if (error) setError("");
                 }}
                 className="border border-gray-300 px-4 py-3 rounded-lg text-base"
                 editable={!loading}
@@ -273,7 +296,8 @@ export default function RegisterScreen() {
                 autoCapitalize="none"
                 autoCorrect={false}
                 style={{
-                  borderColor: error && !username.trim() ? '#EF4444' : '#D1D5DB',
+                  borderColor:
+                    error && !username.trim() ? "#EF4444" : "#D1D5DB",
                 }}
               />
               <Text className="text-gray-500 text-xs mt-1">
@@ -285,7 +309,7 @@ export default function RegisterScreen() {
             <View>
               <Text
                 className="text-gray-700 mb-2"
-                style={{ fontWeight: '500' }}
+                style={{ fontWeight: "500" }}
               >
                 Phone Number
               </Text>
@@ -293,7 +317,7 @@ export default function RegisterScreen() {
                 value={phoneNumber}
                 onChangeText={(text) => {
                   setPhoneNumber(text);
-                  if (error) setError('');
+                  if (error) setError("");
                 }}
                 onCountryChange={setCountryCode}
                 placeholder="Enter phone number"
@@ -306,7 +330,7 @@ export default function RegisterScreen() {
             <View>
               <Text
                 className="text-gray-700 mb-2"
-                style={{ fontWeight: '500' }}
+                style={{ fontWeight: "500" }}
               >
                 Bio
               </Text>
@@ -317,7 +341,7 @@ export default function RegisterScreen() {
                   if (text.length <= 100) {
                     setBio(text);
                   }
-                  if (error) setError('');
+                  if (error) setError("");
                 }}
                 className="border border-gray-300 px-4 py-3 rounded-lg text-base"
                 editable={!loading}
@@ -327,7 +351,7 @@ export default function RegisterScreen() {
                 textAlignVertical="top"
                 maxLength={100}
                 style={{
-                  borderColor: '#D1D5DB',
+                  borderColor: "#D1D5DB",
                   minHeight: 80,
                 }}
               />
@@ -337,9 +361,16 @@ export default function RegisterScreen() {
             </View>
 
             {/* Development Notice */}
-            <View className="p-3 rounded-lg border" style={{ backgroundColor: '#F0F4FF', borderColor: '#C7D2FE' }}>
-              <Text className="text-xs text-center" style={{ color: '#4338CA' }}>
-                🚀 Development Mode: Account will be created instantly without SMS verification
+            <View
+              className="p-3 rounded-lg border"
+              style={{ backgroundColor: "#F0F4FF", borderColor: "#C7D2FE" }}
+            >
+              <Text
+                className="text-xs text-center"
+                style={{ color: "#4338CA" }}
+              >
+                🚀 Development Mode: Account will be created instantly without
+                SMS verification
               </Text>
             </View>
           </View>
@@ -349,10 +380,10 @@ export default function RegisterScreen() {
             onPress={createAccount}
             disabled={loading}
             className={`mt-6 py-3 px-6 rounded-lg ${
-              loading ? 'bg-gray-400' : 'bg-blue-500'
+              loading ? "bg-gray-400" : "bg-blue-500"
             }`}
             style={{
-              backgroundColor: loading ? '#9CA3AF' : '#3B82F6',
+              backgroundColor: loading ? "#9CA3AF" : "#3B82F6",
             }}
             accessible={true}
             accessibilityRole="button"
@@ -362,13 +393,11 @@ export default function RegisterScreen() {
           >
             <Text
               className="text-white text-center text-base"
-              style={{ fontWeight: '600' }}
+              style={{ fontWeight: "600" }}
             >
               {loading ? "Creating Account..." : "Create Account"}
             </Text>
           </TouchableOpacity>
-
-
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

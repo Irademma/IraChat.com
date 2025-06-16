@@ -1,14 +1,20 @@
-import React, { useState, useRef } from 'react';
-import { View, TextInput, TouchableOpacity, Alert, Animated } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
-import VoiceMessageRecorder from './VoiceMessageRecorder';
-import { useRouter } from 'expo-router';
+import { Ionicons } from "@expo/vector-icons";
+import * as DocumentPicker from "expo-document-picker";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import { useRef, useState } from "react";
+import {
+  Alert,
+  Animated,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import VoiceMessageRecorder from "./VoiceMessageRecorder";
 
 interface EnhancedChatInputProps {
   onSendMessage: (message: string) => void;
-  onSendMedia: (uri: string, type: 'image' | 'video') => void;
+  onSendMedia: (uri: string, type: "image" | "video") => void;
   onSendVoice: (uri: string, duration: number) => void;
   onSendFile: (uri: string, name: string, type: string) => void;
   placeholder?: string;
@@ -21,26 +27,26 @@ export default function EnhancedChatInput({
   onSendVoice,
   onSendFile,
   placeholder = "Type a message...",
-  chatId
+  chatId,
 }: EnhancedChatInputProps) {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const router = useRouter();
-  
+
   const attachmentMenuAnim = useRef(new Animated.Value(0)).current;
 
   const handleSend = () => {
     if (message.trim()) {
       onSendMessage(message.trim());
-      setMessage('');
+      setMessage("");
     }
   };
 
   const toggleAttachmentMenu = () => {
     const toValue = showAttachmentMenu ? 0 : 1;
     setShowAttachmentMenu(!showAttachmentMenu);
-    
+
     Animated.spring(attachmentMenuAnim, {
       toValue,
       useNativeDriver: true,
@@ -52,13 +58,16 @@ export default function EnhancedChatInput({
   const handleCamera = async () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Camera permission is required to take photos.');
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Camera permission is required to take photos.",
+        );
         return;
       }
 
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        mediaTypes: ["images", "videos"],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -66,19 +75,19 @@ export default function EnhancedChatInput({
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        onSendMedia(asset.uri, asset.type === 'video' ? 'video' : 'image');
+        onSendMedia(asset.uri, asset.type === "video" ? "video" : "image");
       }
     } catch (error) {
-      console.error('Error taking photo:', error);
-      Alert.alert('Error', 'Failed to take photo');
+      console.error("Error taking photo:", error);
+      Alert.alert("Error", "Failed to take photo");
     }
     setShowAttachmentMenu(false);
   };
 
   const handleGallery = () => {
     router.push({
-      pathname: '/media-gallery',
-      params: { chatId: chatId || '' }
+      pathname: "/media-gallery",
+      params: { chatId: chatId || "" },
     });
     setShowAttachmentMenu(false);
   };
@@ -86,23 +95,27 @@ export default function EnhancedChatInput({
   const handleDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: '*/*',
+        type: "*/*",
         copyToCacheDirectory: true,
       });
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        onSendFile(asset.uri, asset.name, asset.mimeType || 'application/octet-stream');
+        onSendFile(
+          asset.uri,
+          asset.name,
+          asset.mimeType || "application/octet-stream",
+        );
       }
     } catch (error) {
-      console.error('Error picking document:', error);
-      Alert.alert('Error', 'Failed to pick document');
+      console.error("Error picking document:", error);
+      Alert.alert("Error", "Failed to pick document");
     }
     setShowAttachmentMenu(false);
   };
 
   const handleLocation = () => {
-    Alert.alert('Location Sharing', 'Location sharing will be available soon');
+    Alert.alert("Location Sharing", "Location sharing will be available soon");
     setShowAttachmentMenu(false);
   };
 
@@ -111,22 +124,22 @@ export default function EnhancedChatInput({
     setShowVoiceRecorder(false);
   };
 
-  const AttachmentButton = ({ 
-    icon, 
-    label, 
-    onPress, 
-    color = '#3B82F6' 
-  }: { 
-    icon: string; 
-    label: string; 
-    onPress: () => void; 
-    color?: string; 
+  const AttachmentButton = ({
+    icon,
+    label,
+    onPress,
+    color = "#3B82F6",
+  }: {
+    icon: string;
+    label: string;
+    onPress: () => void;
+    color?: string;
   }) => (
     <TouchableOpacity
       onPress={onPress}
       className="items-center py-3 px-4 bg-white rounded-lg shadow-sm border border-gray-200"
     >
-      <View 
+      <View
         className="w-12 h-12 rounded-full items-center justify-center mb-2"
         style={{ backgroundColor: `${color}20` }}
       >
@@ -150,12 +163,14 @@ export default function EnhancedChatInput({
       {showAttachmentMenu && (
         <Animated.View
           style={{
-            transform: [{
-              translateY: attachmentMenuAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [100, 0],
-              })
-            }],
+            transform: [
+              {
+                translateY: attachmentMenuAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [100, 0],
+                }),
+              },
+            ],
             opacity: attachmentMenuAnim,
           }}
           className="px-4 py-3 bg-gray-50 border-b border-gray-200"
@@ -196,10 +211,10 @@ export default function EnhancedChatInput({
           onPress={toggleAttachmentMenu}
           className="w-10 h-10 items-center justify-center mr-2"
         >
-          <Ionicons 
-            name={showAttachmentMenu ? "close" : "add"} 
-            size={24} 
-            color="#6B7280" 
+          <Ionicons
+            name={showAttachmentMenu ? "close" : "add"}
+            size={24}
+            color="#6B7280"
           />
         </TouchableOpacity>
 

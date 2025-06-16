@@ -1,22 +1,36 @@
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
-import { collection, deleteDoc, doc, getDocs, query } from 'firebase/firestore';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Dimensions, FlatList, Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useDispatch } from 'react-redux';
-import { setChats } from '../redux/chatSlice';
-import { db, mockChatList } from '../services/firebaseSimple';
-import { Chat } from '../types';
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { collection, deleteDoc, doc, getDocs, query } from "firebase/firestore";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Dimensions,
+  FlatList,
+  Image,
+  Modal,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useDispatch } from "react-redux";
+import { setChats } from "../redux/chatSlice";
+import { auth, db } from "../services/firebaseSimple";
+import { Chat } from "../types";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 // New User Welcome Component for ChatsListScreen
 interface NewUserWelcomeProps {
   onStartMessaging: () => void;
 }
 
-const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({ onStartMessaging }) => {
+const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({
+  onStartMessaging,
+}) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const iconPulse = useRef(new Animated.Value(1)).current;
@@ -46,15 +60,15 @@ const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({ onStartMessaging }) => 
         <View
           className="w-32 h-32 rounded-full items-center justify-center mb-4"
           style={{
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            backgroundColor: "rgba(102, 126, 234, 0.1)",
             borderWidth: 2,
-            borderColor: 'rgba(102, 126, 234, 0.2)',
+            borderColor: "rgba(102, 126, 234, 0.2)",
           }}
         >
           <View
             className="w-24 h-24 rounded-full items-center justify-center"
             style={{
-              backgroundColor: 'rgba(102, 126, 234, 0.15)',
+              backgroundColor: "rgba(102, 126, 234, 0.15)",
             }}
           >
             <Ionicons name="chatbubbles" size={48} color="#667eea" />
@@ -65,7 +79,7 @@ const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({ onStartMessaging }) => 
         <View className="absolute -top-2 -right-2">
           <View
             className="w-6 h-6 rounded-full items-center justify-center"
-            style={{ backgroundColor: '#10B981' }}
+            style={{ backgroundColor: "#10B981" }}
           >
             <Ionicons name="heart" size={12} color="white" />
           </View>
@@ -73,7 +87,7 @@ const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({ onStartMessaging }) => 
         <View className="absolute -bottom-2 -left-2">
           <View
             className="w-6 h-6 rounded-full items-center justify-center"
-            style={{ backgroundColor: '#F59E0B' }}
+            style={{ backgroundColor: "#F59E0B" }}
           >
             <Ionicons name="star" size={12} color="white" />
           </View>
@@ -83,14 +97,14 @@ const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({ onStartMessaging }) => 
       {/* Welcome Text */}
       <Text
         className="text-2xl text-gray-800 text-center mb-3"
-        style={{ fontWeight: '700' }}
+        style={{ fontWeight: "700" }}
       >
         Start messaging with your people
       </Text>
 
       <Text className="text-gray-500 text-center text-base leading-6 mb-8">
-        Connect with friends and family who are already on IraChat.
-        Tap below to see your contacts and start your first conversation.
+        Connect with friends and family who are already on IraChat. Tap below to
+        see your contacts and start your first conversation.
       </Text>
 
       {/* Action Button */}
@@ -98,9 +112,9 @@ const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({ onStartMessaging }) => 
         onPress={onStartMessaging}
         className="px-8 py-4 rounded-full items-center justify-center"
         style={{
-          backgroundColor: '#667eea',
+          backgroundColor: "#667eea",
           elevation: 8,
-          shadowColor: '#667eea',
+          shadowColor: "#667eea",
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.3,
           shadowRadius: 8,
@@ -108,11 +122,13 @@ const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({ onStartMessaging }) => 
         activeOpacity={0.8}
       >
         <View className="flex-row items-center">
-          <Ionicons name="people" size={20} color="white" style={{ marginRight: 8 }} />
-          <Text
-            className="text-white text-base"
-            style={{ fontWeight: '600' }}
-          >
+          <Ionicons
+            name="people"
+            size={20}
+            color="white"
+            style={{ marginRight: 8 }}
+          />
+          <Text className="text-white text-base" style={{ fontWeight: "600" }}>
             Find Your Contacts
           </Text>
         </View>
@@ -130,10 +146,17 @@ export default function ChatsListScreen({ navigation }: any) {
   const router = useRouter();
   const [chats, setLocalChats] = useState<Chat[]>([]);
   const [filteredChats, setFilteredChats] = useState<Chat[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [fabOpen, setFabOpen] = useState(false);
   const [isLoadingChats, setIsLoadingChats] = useState(true);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+
+  // Delete functionality state
+  const [selectedChats, setSelectedChats] = useState<string[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingChats, setDeletingChats] = useState(false);
+  const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null);
   const nav = useNavigation();
   const dispatch = useDispatch();
 
@@ -147,11 +170,9 @@ export default function ChatsListScreen({ navigation }: any) {
   const groupFabTranslateY = useRef(new Animated.Value(60)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-
-
   useLayoutEffect(() => {
     nav.setOptions({
-      headerRight: () => null
+      headerRight: () => null,
     });
   }, [nav]);
 
@@ -205,7 +226,7 @@ export default function ChatsListScreen({ navigation }: any) {
             duration: 2000,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       ).start();
     };
 
@@ -214,20 +235,21 @@ export default function ChatsListScreen({ navigation }: any) {
     }
   }, [fabOpen]);
 
-  // FAB action handlers
+  // FAB action handlers - Optimized for immediate navigation
   const handleSelectContact = () => {
     animatePress(contactFabScale);
     toggleFab();
-    setTimeout(() => {
-      router.push('/contacts');
-    }, 200);
+
+    // Navigate immediately without delay for better UX
+    console.log("🚀 Opening contacts screen");
+    router.push("/contacts");
   };
 
   const handleCreateGroup = () => {
     animatePress(groupFabScale);
     toggleFab();
     setTimeout(() => {
-      navigation.navigate('CreateGroup');
+      navigation.navigate("CreateGroup");
     }, 200);
   };
 
@@ -236,83 +258,223 @@ export default function ChatsListScreen({ navigation }: any) {
     toggleFab();
   };
 
+  // Modern WhatsApp-style delete functionality
+  const handleLongPress = (chatId: string) => {
+    if (!isSelectionMode) {
+      setIsSelectionMode(true);
+      setSelectedChats([chatId]);
+    }
+  };
+
+  const handleChatSelection = (chatId: string) => {
+    if (isSelectionMode) {
+      setSelectedChats(prev =>
+        prev.includes(chatId)
+          ? prev.filter(id => id !== chatId)
+          : [...prev, chatId]
+      );
+    }
+  };
+
+  const exitSelectionMode = () => {
+    setIsSelectionMode(false);
+    setSelectedChats([]);
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedChats.length > 0) {
+      setShowDeleteModal(true);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setDeletingChats(true);
+    setShowDeleteModal(false);
+
+    try {
+      // Delete chats from Firebase
+      const deletePromises = selectedChats.map(chatId =>
+        deleteDoc(doc(db, "chats", chatId))
+      );
+
+      await Promise.all(deletePromises);
+
+      // Update local state
+      const updatedChats = chats.filter(chat => !selectedChats.includes(chat.id));
+      setLocalChats(updatedChats);
+      setFilteredChats(updatedChats);
+
+      // Exit selection mode
+      exitSelectionMode();
+
+      console.log(`✅ Deleted ${selectedChats.length} chat(s) successfully`);
+
+      // Show undo option briefly
+      Alert.alert(
+        "Chats Deleted",
+        `${selectedChats.length} chat(s) deleted successfully`,
+        [{ text: "OK" }]
+      );
+
+    } catch (error) {
+      console.error("❌ Error deleting chats:", error);
+      Alert.alert("Error", "Failed to delete chats. Please try again.");
+    } finally {
+      setDeletingChats(false);
+    }
+  };
+
   // Function to clear all chats from Firebase (DEVELOPMENT ONLY)
   const clearAllChats = async () => {
     try {
-      console.log('🗑️ [ChatsListScreen] Clearing all chats for testing...');
+      console.log("🗑️ [ChatsListScreen] Clearing all chats for testing...");
       Alert.alert(
-        '🚨 CLEAR ALL CHATS',
-        'This will DELETE ALL chats in the Firebase database!\n\nThis is for development/testing only.\n\nAre you absolutely sure?',
+        "🚨 CLEAR ALL CHATS",
+        "This will DELETE ALL chats in the Firebase database!\n\nThis is for development/testing only.\n\nAre you absolutely sure?",
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: "Cancel", style: "cancel" },
           {
-            text: 'DELETE ALL',
-            style: 'destructive',
+            text: "DELETE ALL",
+            style: "destructive",
             onPress: async () => {
               try {
-                console.log('🔥 [ChatsListScreen] Starting Firebase chat deletion...');
+                console.log(
+                  "🔥 [ChatsListScreen] Starting Firebase chat deletion...",
+                );
 
                 // Get all chats
-                const chatsQuery = query(collection(db, 'chats'));
+                const chatsQuery = query(collection(db, "chats"));
                 const chatsSnapshot = await getDocs(chatsQuery);
 
-                console.log(`📊 [ChatsListScreen] Found ${chatsSnapshot.docs.length} chats to delete`);
+                console.log(
+                  `📊 [ChatsListScreen] Found ${chatsSnapshot.docs.length} chats to delete`,
+                );
 
                 // Delete each chat document
-                const deletePromises = chatsSnapshot.docs.map(async (chatDoc) => {
-                  console.log(`🗑️ [ChatsListScreen] Deleting chat: ${chatDoc.id} (${chatDoc.data().name})`);
-                  await deleteDoc(doc(db, 'chats', chatDoc.id));
-                });
+                const deletePromises = chatsSnapshot.docs.map(
+                  async (chatDoc) => {
+                    console.log(
+                      `🗑️ [ChatsListScreen] Deleting chat: ${chatDoc.id} (${chatDoc.data().name})`,
+                    );
+                    await deleteDoc(doc(db, "chats", chatDoc.id));
+                  },
+                );
 
                 await Promise.all(deletePromises);
 
-                console.log('✅ [ChatsListScreen] All chats deleted successfully!');
-                Alert.alert('Success', `Deleted ${chatsSnapshot.docs.length} chats from Firebase!`);
+                console.log(
+                  "✅ [ChatsListScreen] All chats deleted successfully!",
+                );
+                Alert.alert(
+                  "Success",
+                  `Deleted ${chatsSnapshot.docs.length} chats from Firebase!`,
+                );
 
                 // Refresh the chat list
                 setLocalChats([]);
-
               } catch (error) {
-                console.error('❌ [ChatsListScreen] Error deleting chats:', error);
-                Alert.alert('Error', `Failed to delete chats: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.error(
+                  "❌ [ChatsListScreen] Error deleting chats:",
+                  error,
+                );
+                Alert.alert(
+                  "Error",
+                  `Failed to delete chats: ${error instanceof Error ? error.message : "Unknown error"}`,
+                );
               }
-            }
-          }
-        ]
+            },
+          },
+        ],
       );
     } catch (error) {
-      console.error('❌ [ChatsListScreen] Error in clearAllChats:', error);
+      console.error("❌ [ChatsListScreen] Error in clearAllChats:", error);
     }
   };
 
   useEffect(() => {
-    // Load mock chat data for demonstration
-    const loadMockChats = () => {
-      console.log('📥 [ChatsListScreen] Loading mock chat data...');
+    // Load real chat data from Firebase
+    const loadUserChats = async () => {
+      console.log("📥 [ChatsListScreen] Loading user chats from Firebase...");
+      setIsLoadingChats(true);
 
-      // Simulate loading delay for realistic experience
-      setTimeout(() => {
-        setLocalChats(mockChatList as any);
-        setFilteredChats(mockChatList as any);
-        dispatch(setChats(mockChatList as any));
+      try {
+        // Get current user ID
+        const currentUser = auth?.currentUser;
+        if (!currentUser) {
+          console.log("⚠️ No authenticated user, showing empty chat list");
+          setLocalChats([]);
+          setFilteredChats([]);
+          setIsLoadingChats(false);
+          setHasLoadedOnce(true);
+          return;
+        }
+
+        // Use real-time listener for user's chats
+        // Firebase functions are already imported at the top
+
+        if (!db) {
+          throw new Error("Firestore not initialized");
+        }
+
+        const chatsQuery = query(
+          collection(db, "chats"),
+          where("participants", "array-contains", currentUser.uid),
+          orderBy("lastMessageAt", "desc"),
+        );
+
+        const unsubscribe = onSnapshot(
+          chatsQuery,
+          (snapshot) => {
+            const chatsData = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            })) as Chat[];
+
+            console.log(
+              "✅ [ChatsListScreen] Real chats loaded:",
+              chatsData.length,
+            );
+            setLocalChats(chatsData);
+            setFilteredChats(chatsData);
+            dispatch(setChats(chatsData));
+            setIsLoadingChats(false);
+            setHasLoadedOnce(true);
+          },
+          (error) => {
+            console.error("❌ [ChatsListScreen] Error loading chats:", error);
+            setLocalChats([]);
+            setFilteredChats([]);
+            setIsLoadingChats(false);
+            setHasLoadedOnce(true);
+          },
+        );
+
+        // Return cleanup function
+        return unsubscribe;
+      } catch (error) {
+        console.error(
+          "❌ [ChatsListScreen] Error setting up chat listener:",
+          error,
+        );
+        setLocalChats([]);
+        setFilteredChats([]);
         setIsLoadingChats(false);
         setHasLoadedOnce(true);
-
-        console.log('✅ [ChatsListScreen] Mock chats loaded:', mockChatList.length);
-      }, 1000);
+      }
     };
 
-    loadMockChats();
+    loadUserChats();
   }, [dispatch]);
 
   // Search functionality
   useEffect(() => {
-    if (searchQuery.trim() === '') {
+    if (searchQuery.trim() === "") {
       setFilteredChats(chats);
     } else {
-      const filtered = chats.filter(chat =>
-        chat.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        chat.lastMessage?.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = chats.filter(
+        (chat) =>
+          chat.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          chat.lastMessage?.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredChats(filtered);
     }
@@ -325,66 +487,113 @@ export default function ChatsListScreen({ navigation }: any) {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'now';
+    if (minutes < 1) return "now";
     if (minutes < 60) return `${minutes}m`;
     if (hours < 24) return `${hours}h`;
-    if (days === 1) return 'yesterday';
+    if (days === 1) return "yesterday";
     if (days < 7) return `${days}d`;
     return date.toLocaleDateString();
   };
 
   const getMessagePreview = (item: any) => {
     switch (item.messageType) {
-      case 'image': return '📸 Photo';
-      case 'video': return '🎥 Video';
-      case 'audio': return '🎵 Audio message';
-      case 'document': return '📄 Document';
-      default: return item.lastMessage;
+      case "image":
+        return "📸 Photo";
+      case "video":
+        return "🎥 Video";
+      case "audio":
+        return "🎵 Audio message";
+      case "document":
+        return "📄 Document";
+      default:
+        return item.lastMessage;
     }
   };
 
-  const renderItem = ({ item, index }: { item: any; index: number }) => {
+  // Modern Chat Item Component with Delete Functionality
+  const ModernChatItem = ({ item }: { item: any }) => {
+    const isSelected = selectedChats.includes(item.id);
+
     return (
-      <Animated.View
-        style={{
-          opacity: 1,
-          transform: [{
-            translateY: 0,
-          }],
-        }}
-      >
+      <View style={{ position: 'relative' }}>
         <TouchableOpacity
           onPress={() => {
-            if (item.isGroup) {
-              // Navigate to group chat
-              console.log('Opening group chat:', item.name);
+            if (isSelectionMode) {
+              handleChatSelection(item.id);
+            } else if (item.isGroup) {
+              console.log("Opening group chat:", item.name);
             } else {
-              // Navigate to individual chat
-              router.push({
-                pathname: '/individual-chat',
+              console.log("🚀 Opening chat with:", item.name);
+              router.replace({
+                pathname: "/individual-chat",
                 params: {
                   contactId: item.id,
                   contactName: item.name,
                   contactAvatar: item.avatar,
                   contactIsOnline: item.isOnline.toString(),
-                  contactLastSeen: item.lastSeen?.getTime().toString() || ''
-                }
+                  contactLastSeen: item.lastSeen?.getTime().toString() || "",
+                },
               });
             }
           }}
-          className="flex-row items-center px-4 py-3 bg-white"
+          onLongPress={() => handleLongPress(item.id)}
+          className="flex-row items-center px-4 py-3"
           activeOpacity={0.7}
           style={{
+            backgroundColor: isSelected ? 'rgba(135, 206, 235, 0.1)' : 'white', // Light sky blue when selected
             borderBottomWidth: 1,
-            borderBottomColor: '#f3f4f6',
+            borderBottomColor: "#f3f4f6",
           }}
         >
+          {/* Selection Checkbox */}
+          {isSelectionMode && (
+            <View className="mr-3">
+              <View
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
+                  borderWidth: 2,
+                  borderColor: isSelected ? '#87CEEB' : '#d1d5db',
+                  backgroundColor: isSelected ? '#87CEEB' : 'transparent',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {isSelected && (
+                  <Ionicons name="checkmark" size={16} color="white" />
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Delete Button (visible in selection mode) */}
+          {isSelectionMode && (
+            <TouchableOpacity
+              onPress={() => {
+                setSelectedChats([item.id]);
+                setShowDeleteModal(true);
+              }}
+              style={{
+                position: 'absolute',
+                right: 16,
+                top: '50%',
+                transform: [{ translateY: -12 }],
+                backgroundColor: '#87CEEB',
+                borderRadius: 12,
+                padding: 8,
+                zIndex: 10,
+              }}
+            >
+              <Ionicons name="trash" size={16} color="white" />
+            </TouchableOpacity>
+          )}
           {/* Avatar with online indicator */}
           <View className="relative mr-3">
             <Image
               source={{ uri: item.avatar }}
               className="w-14 h-14 rounded-full"
-              style={{ backgroundColor: '#f3f4f6' }}
+              style={{ backgroundColor: "#f3f4f6" }}
             />
 
             {/* Online indicator */}
@@ -413,16 +622,14 @@ export default function ChatsListScreen({ navigation }: any) {
               {/* Typing indicator */}
               {item.isTyping && (
                 <View className="flex-row items-center ml-2">
-                  <Text className="text-sky-500 text-xs">
-                    ✍️
-                  </Text>
+                  <Text className="text-sky-500 text-xs">✍️</Text>
                 </View>
               )}
             </View>
 
             <View className="flex-row items-center">
               <Text
-                className={`flex-1 text-sm ${item.unreadCount > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'}`}
+                className={`flex-1 text-sm ${item.unreadCount > 0 ? "text-gray-900 font-medium" : "text-gray-500"}`}
                 numberOfLines={1}
               >
                 {getMessagePreview(item)}
@@ -440,35 +647,83 @@ export default function ChatsListScreen({ navigation }: any) {
               {item.unreadCount > 0 && (
                 <View className="bg-sky-500 rounded-full min-w-[20px] h-5 items-center justify-center px-1.5">
                   <Text className="text-white text-xs font-bold">
-                    {item.unreadCount > 99 ? '99+' : item.unreadCount}
+                    {item.unreadCount > 99 ? "99+" : item.unreadCount}
                   </Text>
                 </View>
               )}
 
               {item.unreadCount === 0 && !item.isTyping && (
                 <View className="flex-row items-center">
-                  {item.messageType === 'audio' && (
+                  {item.messageType === "audio" && (
                     <MaterialIcons name="mic" size={12} color="#9ca3af" />
                   )}
-                  {item.messageType === 'image' && (
+                  {item.messageType === "image" && (
                     <MaterialIcons name="photo" size={12} color="#9ca3af" />
                   )}
-                  {item.messageType === 'document' && (
-                    <MaterialIcons name="description" size={12} color="#9ca3af" />
+                  {item.messageType === "document" && (
+                    <MaterialIcons
+                      name="description"
+                      size={12}
+                      color="#9ca3af"
+                    />
                   )}
                 </View>
               )}
             </View>
           </View>
         </TouchableOpacity>
+      </View>
+    );
+  };
+
+  // Updated renderItem function
+  const renderItem = ({ item, index }: { item: any; index: number }) => {
+    return (
+      <Animated.View
+        style={{
+          opacity: 1,
+          transform: [{ translateY: 0 }],
+        }}
+      >
+        <ModernChatItem item={item} />
       </Animated.View>
     );
   };
 
-
-
   return (
     <View className="flex-1 bg-white">
+      {/* Selection Mode Header */}
+      {isSelectionMode && (
+        <View
+          style={{
+            backgroundColor: '#87CEEB',
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity onPress={exitSelectionMode} style={{ marginRight: 16 }}>
+              <Ionicons name="close" size={24} color="white" />
+            </TouchableOpacity>
+            <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>
+              {selectedChats.length} selected
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleDeleteSelected}
+            disabled={selectedChats.length === 0}
+            style={{
+              opacity: selectedChats.length === 0 ? 0.5 : 1,
+            }}
+          >
+            <Ionicons name="trash" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      )}
+
       {isLoadingChats ? (
         // Show loading state while fetching chats
         <View className="flex-1 items-center justify-center">
@@ -477,32 +732,36 @@ export default function ChatsListScreen({ navigation }: any) {
         </View>
       ) : chats.length === 0 ? (
         // Only show NewUserWelcome when we've confirmed there are no chats
-        <NewUserWelcome onStartMessaging={() => router.push('/contacts')} />
+        <NewUserWelcome onStartMessaging={() => router.push("/contacts")} />
       ) : (
         <View className="flex-1">
-          {/* Search Bar */}
-          <View className="px-4 py-3 bg-white border-b border-gray-200">
-            <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2">
-              <Ionicons name="search" size={20} color="#6b7280" />
-              <TextInput
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Search chats..."
-                className="flex-1 ml-3 text-base"
-                placeholderTextColor="#9ca3af"
-              />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close-circle" size={20} color="#6b7280" />
-                </TouchableOpacity>
-              )}
+          {/* Search Bar - Hidden in selection mode */}
+          {!isSelectionMode && (
+            <View className="px-4 py-3 bg-white border-b border-gray-200">
+              <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2">
+                <Ionicons name="search" size={20} color="#6b7280" />
+                <TextInput
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  placeholder="Search chats..."
+                  className="flex-1 ml-3 text-base"
+                  placeholderTextColor="#9ca3af"
+                />
+                {searchQuery.length > 0 && (
+                  <TouchableOpacity onPress={() => setSearchQuery("")}>
+                    <Ionicons name="close-circle" size={20} color="#6b7280" />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
-          </View>
+          )}
 
           {/* Chat list header */}
           <View className="px-4 py-2 bg-gray-50 border-b border-gray-200">
             <Text className="text-gray-600 text-sm font-medium">
-              {searchQuery ? `SEARCH RESULTS (${filteredChats.length})` : `RECENT CHATS (${chats.length})`}
+              {searchQuery
+                ? `SEARCH RESULTS (${filteredChats.length})`
+                : `RECENT CHATS (${chats.length})`}
             </Text>
           </View>
 
@@ -512,7 +771,7 @@ export default function ChatsListScreen({ navigation }: any) {
             renderItem={renderItem}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 100 }}
-            style={{ backgroundColor: '#ffffff' }}
+            style={{ backgroundColor: "#ffffff" }}
             bounces={false}
             overScrollMode="never"
             scrollEventThrottle={16}
@@ -535,12 +794,12 @@ export default function ChatsListScreen({ navigation }: any) {
       {fabOpen && (
         <Animated.View
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            backgroundColor: "rgba(0, 0, 0, 0.3)",
             opacity: overlayOpacity,
           }}
         >
@@ -553,17 +812,16 @@ export default function ChatsListScreen({ navigation }: any) {
       )}
 
       {/* Enhanced Multi-FAB System */}
-      <View style={{ position: 'absolute', bottom: 32, right: 24 }}>
-
+      <View style={{ position: "absolute", bottom: 32, right: 24 }}>
         {/* Contact Selection FAB */}
         <Animated.View
           style={{
-            position: 'absolute',
+            position: "absolute",
             bottom: 140,
             right: 0,
             transform: [
               { scale: contactFabScale },
-              { translateY: contactFabTranslateY }
+              { translateY: contactFabTranslateY },
             ],
             opacity: contactFabScale,
           }}
@@ -573,9 +831,9 @@ export default function ChatsListScreen({ navigation }: any) {
             className="w-14 h-14 rounded-full items-center justify-center"
             activeOpacity={0.8}
             style={{
-              backgroundColor: '#10B981', // Green for contacts
+              backgroundColor: "#10B981", // Green for contacts
               elevation: 10,
-              shadowColor: '#10B981',
+              shadowColor: "#10B981",
               shadowOffset: { width: 0, height: 5 },
               shadowOpacity: 0.4,
               shadowRadius: 10,
@@ -585,19 +843,24 @@ export default function ChatsListScreen({ navigation }: any) {
             <View
               className="absolute inset-0 rounded-full"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                backgroundColor: "rgba(255, 255, 255, 0.2)",
               }}
             />
 
-            <Ionicons name="person-add" size={22} color="white" style={{ opacity: 0.95 }} />
+            <Ionicons
+              name="person-add"
+              size={22}
+              color="white"
+              style={{ opacity: 0.95 }}
+            />
 
             {/* Subtle pulse ring */}
             <View
               className="absolute inset-0 rounded-full"
               style={{
-                backgroundColor: 'transparent',
+                backgroundColor: "transparent",
                 borderWidth: 1.5,
-                borderColor: 'rgba(16, 185, 129, 0.4)',
+                borderColor: "rgba(16, 185, 129, 0.4)",
                 transform: [{ scale: 1.15 }],
               }}
             />
@@ -607,12 +870,12 @@ export default function ChatsListScreen({ navigation }: any) {
         {/* Group Creation FAB */}
         <Animated.View
           style={{
-            position: 'absolute',
+            position: "absolute",
             bottom: 80,
             right: 0,
             transform: [
               { scale: groupFabScale },
-              { translateY: groupFabTranslateY }
+              { translateY: groupFabTranslateY },
             ],
             opacity: groupFabScale,
           }}
@@ -622,9 +885,9 @@ export default function ChatsListScreen({ navigation }: any) {
             className="w-14 h-14 rounded-full items-center justify-center"
             activeOpacity={0.8}
             style={{
-              backgroundColor: '#F59E0B', // Orange for groups
+              backgroundColor: "#F59E0B", // Orange for groups
               elevation: 10,
-              shadowColor: '#F59E0B',
+              shadowColor: "#F59E0B",
               shadowOffset: { width: 0, height: 5 },
               shadowOpacity: 0.4,
               shadowRadius: 10,
@@ -634,19 +897,24 @@ export default function ChatsListScreen({ navigation }: any) {
             <View
               className="absolute inset-0 rounded-full"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                backgroundColor: "rgba(255, 255, 255, 0.2)",
               }}
             />
 
-            <Ionicons name="people" size={22} color="white" style={{ opacity: 0.95 }} />
+            <Ionicons
+              name="people"
+              size={22}
+              color="white"
+              style={{ opacity: 0.95 }}
+            />
 
             {/* Subtle pulse ring */}
             <View
               className="absolute inset-0 rounded-full"
               style={{
-                backgroundColor: 'transparent',
+                backgroundColor: "transparent",
                 borderWidth: 1.5,
-                borderColor: 'rgba(245, 158, 11, 0.4)',
+                borderColor: "rgba(245, 158, 11, 0.4)",
                 transform: [{ scale: 1.15 }],
               }}
             />
@@ -661,7 +929,7 @@ export default function ChatsListScreen({ navigation }: any) {
               {
                 rotate: mainFabRotation.interpolate({
                   inputRange: [0, 1],
-                  outputRange: ['0deg', '45deg'],
+                  outputRange: ["0deg", "45deg"],
                 }),
               },
             ],
@@ -671,9 +939,9 @@ export default function ChatsListScreen({ navigation }: any) {
             onPress={handleMainFabPress}
             className="w-16 h-16 rounded-full items-center justify-center"
             style={{
-              backgroundColor: '#667eea',
+              backgroundColor: "#667eea",
               elevation: 12,
-              shadowColor: '#667eea',
+              shadowColor: "#667eea",
               shadowOffset: { width: 0, height: 6 },
               shadowOpacity: 0.4,
               shadowRadius: 12,
@@ -683,18 +951,23 @@ export default function ChatsListScreen({ navigation }: any) {
             <View
               className="absolute inset-0 rounded-full"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                backgroundColor: "rgba(255, 255, 255, 0.15)",
               }}
             />
 
             {/* Main icon */}
-            <Ionicons name="add" size={28} color="white" style={{ opacity: 0.95 }} />
+            <Ionicons
+              name="add"
+              size={28}
+              color="white"
+              style={{ opacity: 0.95 }}
+            />
 
             {/* Subtle highlight overlay */}
             <View
               className="absolute inset-0 rounded-full"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backgroundColor: "rgba(255, 255, 255, 0.08)",
               }}
             />
           </TouchableOpacity>
@@ -703,14 +976,131 @@ export default function ChatsListScreen({ navigation }: any) {
           <View
             className="absolute inset-0 rounded-full"
             style={{
-              backgroundColor: 'transparent',
+              backgroundColor: "transparent",
               borderWidth: 2,
-              borderColor: 'rgba(102, 126, 234, 0.3)',
+              borderColor: "rgba(102, 126, 234, 0.3)",
               transform: [{ scale: 1.2 }],
             }}
           />
         </Animated.View>
       </View>
+
+      {/* Modern Delete Confirmation Modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 20,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: 'white',
+              borderRadius: 16,
+              padding: 24,
+              width: '100%',
+              maxWidth: 320,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.25,
+              shadowRadius: 20,
+              elevation: 10,
+            }}
+          >
+            {/* Icon */}
+            <View style={{ alignItems: 'center', marginBottom: 16 }}>
+              <View
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 32,
+                  backgroundColor: 'rgba(135, 206, 235, 0.1)',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: 16,
+                }}
+              >
+                <Ionicons name="trash" size={32} color="#87CEEB" />
+              </View>
+
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: 'bold',
+                  color: '#1f2937',
+                  textAlign: 'center',
+                  marginBottom: 8,
+                }}
+              >
+                Delete {selectedChats.length === 1 ? 'Chat' : 'Chats'}?
+              </Text>
+
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: '#6b7280',
+                  textAlign: 'center',
+                  lineHeight: 22,
+                }}
+              >
+                {selectedChats.length === 1
+                  ? 'This chat will be permanently deleted. This action cannot be undone.'
+                  : `${selectedChats.length} chats will be permanently deleted. This action cannot be undone.`
+                }
+              </Text>
+            </View>
+
+            {/* Buttons */}
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity
+                onPress={() => setShowDeleteModal(false)}
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  paddingHorizontal: 24,
+                  borderRadius: 8,
+                  backgroundColor: '#f3f4f6',
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151' }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={confirmDelete}
+                disabled={deletingChats}
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  paddingHorizontal: 24,
+                  borderRadius: 8,
+                  backgroundColor: '#87CEEB',
+                  alignItems: 'center',
+                  opacity: deletingChats ? 0.7 : 1,
+                }}
+              >
+                {deletingChats ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: 'white' }}>
+                    Delete
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

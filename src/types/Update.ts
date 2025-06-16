@@ -2,13 +2,13 @@
  * Update/Story type definitions
  */
 
-import { User } from './index';
+import { User } from "./index";
 
 export interface Update {
   id: string;
   user: User;
   mediaUrl: string;
-  mediaType: 'image' | 'video';
+  mediaType: "image" | "video";
   caption?: string;
   timestamp: Date;
   expiresAt: Date;
@@ -38,7 +38,7 @@ export interface Comment {
   timestamp: Date;
   likesCount: number;
   isVisible: boolean;
-  
+
   // Optional properties for compatibility
   userAvatar?: string;
   username?: string;
@@ -70,7 +70,7 @@ export interface UpdateCardProps {
   currentUserId: string;
   onPress?: () => void;
   onLongPress?: () => void;
-  onMediaPress?: (mediaUrl: string, mediaType: 'image' | 'video') => void;
+  onMediaPress?: (mediaUrl: string, mediaType: "image" | "video") => void;
   onUserPress?: (user: User) => void;
   onLike?: (updateId: string) => void;
   onComment?: (updateId: string) => void;
@@ -79,14 +79,14 @@ export interface UpdateCardProps {
 
 export interface CreateUpdateData {
   mediaUrl: string;
-  mediaType: 'image' | 'video';
+  mediaType: "image" | "video";
   caption?: string;
   user: User;
 }
 
 export interface UpdateFilters {
   userId?: string;
-  mediaType?: 'image' | 'video';
+  mediaType?: "image" | "video";
   startDate?: Date;
   endDate?: Date;
   isVisible?: boolean;
@@ -112,8 +112,12 @@ export interface UpdateAnalytics {
 }
 
 // Utility types
-export type UpdateSortBy = 'timestamp' | 'likeCount' | 'commentCount' | 'viewCount';
-export type UpdateSortOrder = 'asc' | 'desc';
+export type UpdateSortBy =
+  | "timestamp"
+  | "likeCount"
+  | "commentCount"
+  | "viewCount";
+export type UpdateSortOrder = "asc" | "desc";
 
 export interface UpdateQuery {
   limit?: number;
@@ -132,11 +136,11 @@ export interface UpdateResponse {
 
 // Media processing types
 export interface MediaProcessingOptions {
-  quality?: 'low' | 'medium' | 'high';
+  quality?: "low" | "medium" | "high";
   maxWidth?: number;
   maxHeight?: number;
   compress?: boolean;
-  format?: 'jpeg' | 'png' | 'webp';
+  format?: "jpeg" | "png" | "webp";
 }
 
 export interface ProcessedMedia {
@@ -144,7 +148,7 @@ export interface ProcessedMedia {
   width: number;
   height: number;
   size: number;
-  type: 'image' | 'video';
+  type: "image" | "video";
   duration?: number; // for videos
   thumbnail?: string; // for videos
 }
@@ -152,7 +156,7 @@ export interface ProcessedMedia {
 // Story/Update creation flow types
 export interface UpdateDraft {
   mediaUri: string;
-  mediaType: 'image' | 'video';
+  mediaType: "image" | "video";
   caption?: string;
   filters?: string[];
   effects?: string[];
@@ -165,14 +169,14 @@ export interface UpdateDraft {
 }
 
 export interface UpdateCreationStep {
-  step: 'media' | 'edit' | 'caption' | 'publish';
+  step: "media" | "edit" | "caption" | "publish";
   data: UpdateDraft;
   isValid: boolean;
 }
 
 // Update interaction types
 export interface UpdateInteraction {
-  type: 'view' | 'like' | 'comment' | 'share';
+  type: "view" | "like" | "comment" | "share";
   updateId: string;
   userId: string;
   timestamp: Date;
@@ -181,7 +185,7 @@ export interface UpdateInteraction {
 
 export interface UpdateNotification {
   id: string;
-  type: 'like' | 'comment' | 'mention' | 'share';
+  type: "like" | "comment" | "mention" | "share";
   updateId: string;
   fromUserId: string;
   toUserId: string;
@@ -192,4 +196,3 @@ export interface UpdateNotification {
 
 // Export default
 export default Update;
-

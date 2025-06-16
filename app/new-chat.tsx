@@ -1,16 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Alert, Text, Image, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '../src/services/firebaseSimple';
-import { useRouter } from 'expo-router';
-import { Contact, getIraChatContacts, searchContacts } from '../src/services/contactsService';
-import ContactItem from '../src/components/ContactItem';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import ContactItem from "../src/components/ContactItem";
+import { Contact, getIraChatContacts } from "../src/services/contactsService";
+import { db } from "../src/services/firebaseSimple";
 
 export default function NewChatScreen() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [filteredContacts, setFilteredContacts] = useState<Contact[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -23,13 +32,14 @@ export default function NewChatScreen() {
 
   // Filter contacts based on search query
   useEffect(() => {
-    if (searchQuery.trim() === '') {
+    if (searchQuery.trim() === "") {
       setFilteredContacts(contacts);
     } else {
-      const filtered = contacts.filter(contact =>
-        contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        contact.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        contact.phoneNumber.includes(searchQuery)
+      const filtered = contacts.filter(
+        (contact) =>
+          contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          contact.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          contact.phoneNumber.includes(searchQuery),
       );
       setFilteredContacts(filtered);
     }
@@ -42,8 +52,8 @@ export default function NewChatScreen() {
       setContacts(iraChatContacts);
       setFilteredContacts(iraChatContacts);
     } catch (error) {
-      console.error('Error loading contacts:', error);
-      Alert.alert('Error', 'Failed to load contacts. Please try again.');
+      console.error("Error loading contacts:", error);
+      Alert.alert("Error", "Failed to load contacts. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -59,41 +69,44 @@ export default function NewChatScreen() {
     setCreating(true);
     try {
       // Create a new chat with the selected contact
-      const chatDoc = await addDoc(collection(db, 'chats'), {
+      const chatDoc = await addDoc(collection(db, "chats"), {
         name: contact.name,
         isGroup: false,
         participants: [contact.phoneNumber], // Add contact's phone number
-        lastMessage: '',
+        lastMessage: "",
         lastMessageAt: serverTimestamp(),
         timestamp: serverTimestamp(),
         contactInfo: {
           id: contact.id,
           name: contact.name,
           phoneNumber: contact.phoneNumber,
-          avatar: contact.avatar,
-          username: contact.username,
-          status: contact.status,
-          bio: contact.bio,
-        }
+          avatar: contact.avatar || "", // Ensure avatar is never undefined
+          username: contact.username || "",
+          status: contact.status || "I Love IraChat",
+          bio: contact.bio || "I Love IraChat",
+        },
       });
 
-      console.log('✅ Chat created successfully:', chatDoc.id);
+      console.log("✅ Chat created successfully:", chatDoc.id);
 
-      // Navigate to the new chat with contact name
-      router.replace(`/chat/${chatDoc.id}?name=${encodeURIComponent(contact.name)}&contactId=${contact.id}`);
+      // Navigate to the new chat with contact info
+      const params = new URLSearchParams({
+        name: contact.name,
+        contactId: contact.id,
+        phoneNumber: contact.phoneNumber,
+        avatar: contact.avatar || "",
+      });
+      router.replace(`/chat/${chatDoc.id}?${params.toString()}`);
     } catch (error) {
-      console.error('❌ Error creating chat:', error);
-      Alert.alert('Error', 'Failed to start conversation. Please try again.');
+      console.error("❌ Error creating chat:", error);
+      Alert.alert("Error", "Failed to start conversation. Please try again.");
     } finally {
       setCreating(false);
     }
   };
 
   const renderContactItem = ({ item }: { item: Contact }) => (
-    <ContactItem
-      contact={item}
-      onPress={createChatWithContact}
-    />
+    <ContactItem contact={item} onPress={createChatWithContact} />
   );
 
   const renderEmptyState = () => (
@@ -101,9 +114,9 @@ export default function NewChatScreen() {
       <View
         className="w-24 h-24 rounded-full items-center justify-center mb-6"
         style={{
-          backgroundColor: 'rgba(102, 126, 234, 0.1)',
+          backgroundColor: "rgba(102, 126, 234, 0.1)",
           borderWidth: 2,
-          borderColor: 'rgba(102, 126, 234, 0.2)',
+          borderColor: "rgba(102, 126, 234, 0.2)",
         }}
       >
         <Ionicons
@@ -114,22 +127,26 @@ export default function NewChatScreen() {
       </View>
       <Text
         className="text-gray-500 text-lg mb-2"
-        style={{ fontWeight: '500' }}
+        style={{ fontWeight: "500" }}
       >
-        {searchQuery ? 'No contacts found' : 'No IraChat contacts yet'}
+        {searchQuery ? "No contacts found" : "No IraChat contacts yet"}
       </Text>
       <Text className="text-gray-400 text-center leading-5">
         {searchQuery
-          ? 'Try searching with a different name or phone number'
-          : 'Your friends who use IraChat will appear here when they join'
-        }
+          ? "Try searching with a different name or phone number"
+          : "Your friends who use IraChat will appear here when they join"}
       </Text>
 
       {!searchQuery && (
         <TouchableOpacity
-          onPress={() => Alert.alert('Invite Friends', 'Share IraChat with your friends to start chatting!')}
+          onPress={() =>
+            Alert.alert(
+              "Invite Friends",
+              "Share IraChat with your friends to start chatting!",
+            )
+          }
           className="mt-6 px-6 py-3 rounded-full"
-          style={{ backgroundColor: '#667eea' }}
+          style={{ backgroundColor: "#667eea" }}
         >
           <Text className="text-white font-medium">Invite Friends</Text>
         </TouchableOpacity>
@@ -143,14 +160,19 @@ export default function NewChatScreen() {
       <View className="px-4 py-4 border-b border-gray-200">
         <Text
           className="text-xl text-gray-800 mb-3"
-          style={{ fontWeight: '700' }}
+          style={{ fontWeight: "700" }}
         >
           Select Contact
         </Text>
 
         {/* Search Bar */}
         <View className="flex-row items-center bg-gray-100 rounded-lg px-3 py-2">
-          <Ionicons name="search" size={20} color="#6B7280" style={{ marginRight: 12 }} />
+          <Ionicons
+            name="search"
+            size={20}
+            color="#6B7280"
+            style={{ marginRight: 12 }}
+          />
           <TextInput
             placeholder="Search by name, username, or phone..."
             value={searchQuery}
@@ -159,7 +181,7 @@ export default function NewChatScreen() {
             placeholderTextColor="#9CA3AF"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
               <Ionicons name="close-circle" size={20} color="#6B7280" />
             </TouchableOpacity>
           )}
@@ -182,7 +204,7 @@ export default function NewChatScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              colors={['#667eea']}
+              colors={["#667eea"]}
               tintColor="#667eea"
             />
           }
@@ -193,16 +215,19 @@ export default function NewChatScreen() {
       {/* Group Chat Option */}
       <View className="px-4 py-3 border-t border-gray-200">
         <TouchableOpacity
-          onPress={() => router.push('/create-group')}
+          onPress={() => router.push("/create-group")}
           disabled={creating}
           className="flex-row items-center py-3"
         >
-          <View className="w-12 h-12 rounded-full items-center justify-center mr-3" style={{ backgroundColor: '#667eea' }}>
+          <View
+            className="w-12 h-12 rounded-full items-center justify-center mr-3"
+            style={{ backgroundColor: "#667eea" }}
+          >
             <Ionicons name="people" size={20} color="white" />
           </View>
           <Text
             className="text-base"
-            style={{ fontWeight: '600', color: '#667eea' }}
+            style={{ fontWeight: "600", color: "#667eea" }}
           >
             Create Group Chat
           </Text>

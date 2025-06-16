@@ -11,8 +11,8 @@ interface Event {
 
 export interface RTCConfiguration {
   iceServers: RTCIceServer[];
-  iceTransportPolicy?: 'all' | 'relay';
-  bundlePolicy?: 'balanced' | 'max-compat' | 'max-bundle';
+  iceTransportPolicy?: "all" | "relay";
+  bundlePolicy?: "balanced" | "max-compat" | "max-bundle";
 }
 
 export interface RTCIceServer {
@@ -22,7 +22,7 @@ export interface RTCIceServer {
 }
 
 export interface RTCSessionDescription {
-  type: 'offer' | 'answer' | 'pranswer' | 'rollback';
+  type: "offer" | "answer" | "pranswer" | "rollback";
   sdp: string;
 }
 
@@ -47,11 +47,11 @@ export interface MediaStream {
 
 export interface MediaStreamTrack {
   id: string;
-  kind: 'audio' | 'video';
+  kind: "audio" | "video";
   label: string;
   enabled: boolean;
   muted: boolean;
-  readyState: 'live' | 'ended';
+  readyState: "live" | "ended";
   stop(): void;
   clone(): MediaStreamTrack;
   addEventListener(type: string, listener: EventListener): void;
@@ -61,15 +61,28 @@ export interface MediaStreamTrack {
 export interface RTCPeerConnection {
   localDescription: RTCSessionDescription | null;
   remoteDescription: RTCSessionDescription | null;
-  signalingState: 'stable' | 'have-local-offer' | 'have-remote-offer' | 'have-local-pranswer' | 'have-remote-pranswer' | 'closed';
-  iceConnectionState: 'new' | 'checking' | 'connected' | 'completed' | 'failed' | 'disconnected' | 'closed';
-  iceGatheringState: 'new' | 'gathering' | 'complete';
-  
+  signalingState:
+    | "stable"
+    | "have-local-offer"
+    | "have-remote-offer"
+    | "have-local-pranswer"
+    | "have-remote-pranswer"
+    | "closed";
+  iceConnectionState:
+    | "new"
+    | "checking"
+    | "connected"
+    | "completed"
+    | "failed"
+    | "disconnected"
+    | "closed";
+  iceGatheringState: "new" | "gathering" | "complete";
+
   onicecandidate: ((event: RTCPeerConnectionIceEvent) => void) | null;
   ontrack: ((event: RTCTrackEvent) => void) | null;
   onconnectionstatechange: (() => void) | null;
   oniceconnectionstatechange: (() => void) | null;
-  
+
   createOffer(options?: RTCOfferOptions): Promise<RTCSessionDescription>;
   createAnswer(options?: RTCAnswerOptions): Promise<RTCSessionDescription>;
   setLocalDescription(description: RTCSessionDescription): Promise<void>;
@@ -109,33 +122,48 @@ export interface RTCRtpSender {
 class MockRTCPeerConnectionImpl implements RTCPeerConnection {
   localDescription: RTCSessionDescription | null = null;
   remoteDescription: RTCSessionDescription | null = null;
-  signalingState: 'stable' | 'have-local-offer' | 'have-remote-offer' | 'have-local-pranswer' | 'have-remote-pranswer' | 'closed' = 'stable';
-  iceConnectionState: 'new' | 'checking' | 'connected' | 'completed' | 'failed' | 'disconnected' | 'closed' = 'new';
-  iceGatheringState: 'new' | 'gathering' | 'complete' = 'new';
-  
+  signalingState:
+    | "stable"
+    | "have-local-offer"
+    | "have-remote-offer"
+    | "have-local-pranswer"
+    | "have-remote-pranswer"
+    | "closed" = "stable";
+  iceConnectionState:
+    | "new"
+    | "checking"
+    | "connected"
+    | "completed"
+    | "failed"
+    | "disconnected"
+    | "closed" = "new";
+  iceGatheringState: "new" | "gathering" | "complete" = "new";
+
   onicecandidate: ((event: RTCPeerConnectionIceEvent) => void) | null = null;
   ontrack: ((event: RTCTrackEvent) => void) | null = null;
   onconnectionstatechange: (() => void) | null = null;
   oniceconnectionstatechange: (() => void) | null = null;
 
   async createOffer(): Promise<RTCSessionDescription> {
-    return { type: 'offer', sdp: 'mock-offer-sdp' };
+    return { type: "offer", sdp: "mock-offer-sdp" };
   }
 
   async createAnswer(): Promise<RTCSessionDescription> {
-    return { type: 'answer', sdp: 'mock-answer-sdp' };
+    return { type: "answer", sdp: "mock-answer-sdp" };
   }
 
   async setLocalDescription(description: RTCSessionDescription): Promise<void> {
     this.localDescription = description;
   }
 
-  async setRemoteDescription(description: RTCSessionDescription): Promise<void> {
+  async setRemoteDescription(
+    description: RTCSessionDescription,
+  ): Promise<void> {
     this.remoteDescription = description;
   }
 
   async addIceCandidate(candidate: RTCIceCandidate): Promise<void> {
-    console.log('Mock: Adding ICE candidate', candidate);
+    console.log("Mock: Adding ICE candidate", candidate);
   }
 
   addTrack(track: MediaStreamTrack, stream: MediaStream): RTCRtpSender {
@@ -143,17 +171,17 @@ class MockRTCPeerConnectionImpl implements RTCPeerConnection {
   }
 
   removeTrack(sender: RTCRtpSender): void {
-    console.log('Mock: Removing track', sender);
+    console.log("Mock: Removing track", sender);
   }
 
   close(): void {
-    this.signalingState = 'closed';
-    this.iceConnectionState = 'closed';
+    this.signalingState = "closed";
+    this.iceConnectionState = "closed";
   }
 }
 
 class MockMediaStreamImpl implements MediaStream {
-  id: string = 'mock-stream-id';
+  id: string = "mock-stream-id";
   active: boolean = true;
 
   getTracks(): MediaStreamTrack[] {
@@ -169,11 +197,11 @@ class MockMediaStreamImpl implements MediaStream {
   }
 
   addTrack(track: MediaStreamTrack): void {
-    console.log('Mock: Adding track', track);
+    console.log("Mock: Adding track", track);
   }
 
   removeTrack(track: MediaStreamTrack): void {
-    console.log('Mock: Removing track', track);
+    console.log("Mock: Removing track", track);
   }
 
   clone(): MediaStream {
@@ -181,21 +209,20 @@ class MockMediaStreamImpl implements MediaStream {
   }
 
   addEventListener(type: string, listener: EventListener): void {
-    console.log('Mock: Adding event listener', type);
+    console.log("Mock: Adding event listener", type);
   }
 
   removeEventListener(type: string, listener: EventListener): void {
-    console.log('Mock: Removing event listener', type);
+    console.log("Mock: Removing event listener", type);
   }
 }
 
 // Global declarations for when react-native-webrtc is not available
 declare global {
-  var RTCPeerConnection: typeof MockRTCPeerConnection;
-  var MediaStream: typeof MockMediaStream;
+  const RTCPeerConnection: typeof MockRTCPeerConnection;
+  const MediaStream: typeof MockMediaStream;
 }
 
 // Export mock implementations with proper names
 export const MockRTCPeerConnection = MockRTCPeerConnectionImpl;
 export const MockMediaStream = MockMediaStreamImpl;
-

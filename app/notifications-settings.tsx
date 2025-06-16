@@ -1,8 +1,15 @@
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Alert, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface NotificationSettings {
   messageNotifications: boolean;
@@ -26,13 +33,14 @@ const defaultSettings: NotificationSettings = {
   vibrationEnabled: true,
   showPreview: true,
   quietHours: false,
-  quietStart: '22:00',
-  quietEnd: '07:00',
+  quietStart: "22:00",
+  quietEnd: "07:00",
 };
 
 export default function NotificationsSettingsScreen() {
   const router = useRouter();
-  const [settings, setSettings] = useState<NotificationSettings>(defaultSettings);
+  const [settings, setSettings] =
+    useState<NotificationSettings>(defaultSettings);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,12 +49,12 @@ export default function NotificationsSettingsScreen() {
 
   const loadSettings = async () => {
     try {
-      const savedSettings = await AsyncStorage.getItem('notificationSettings');
+      const savedSettings = await AsyncStorage.getItem("notificationSettings");
       if (savedSettings) {
         setSettings({ ...defaultSettings, ...JSON.parse(savedSettings) });
       }
     } catch (error) {
-      console.error('Error loading notification settings:', error);
+      console.error("Error loading notification settings:", error);
     } finally {
       setLoading(false);
     }
@@ -54,25 +62,31 @@ export default function NotificationsSettingsScreen() {
 
   const saveSettings = async (newSettings: NotificationSettings) => {
     try {
-      await AsyncStorage.setItem('notificationSettings', JSON.stringify(newSettings));
+      await AsyncStorage.setItem(
+        "notificationSettings",
+        JSON.stringify(newSettings),
+      );
       setSettings(newSettings);
     } catch (error) {
-      console.error('Error saving notification settings:', error);
-      Alert.alert('Error', 'Failed to save settings. Please try again.');
+      console.error("Error saving notification settings:", error);
+      Alert.alert("Error", "Failed to save settings. Please try again.");
     }
   };
 
-  const updateSetting = (key: keyof NotificationSettings, value: boolean | string) => {
+  const updateSetting = (
+    key: keyof NotificationSettings,
+    value: boolean | string,
+  ) => {
     const newSettings = { ...settings, [key]: value };
     saveSettings(newSettings);
   };
 
-  const SettingItem = ({ 
-    title, 
-    description, 
-    value, 
-    onToggle, 
-    icon 
+  const SettingItem = ({
+    title,
+    description,
+    value,
+    onToggle,
+    icon,
   }: {
     title: string;
     description: string;
@@ -91,8 +105,8 @@ export default function NotificationsSettingsScreen() {
       <Switch
         value={value}
         onValueChange={onToggle}
-        trackColor={{ false: '#E5E7EB', true: '#3B82F6' }}
-        thumbColor={value ? '#FFFFFF' : '#FFFFFF'}
+        trackColor={{ false: "#E5E7EB", true: "#3B82F6" }}
+        thumbColor={value ? "#FFFFFF" : "#FFFFFF"}
       />
     </View>
   );
@@ -119,13 +133,15 @@ export default function NotificationsSettingsScreen() {
 
       <ScrollView className="flex-1 px-4 py-6">
         {/* Message Notifications */}
-        <Text className="text-lg font-semibold text-gray-800 mb-4">Message Notifications</Text>
-        
+        <Text className="text-lg font-semibold text-gray-800 mb-4">
+          Message Notifications
+        </Text>
+
         <SettingItem
           title="Message Notifications"
           description="Get notified when you receive new messages"
           value={settings.messageNotifications}
-          onToggle={(value) => updateSetting('messageNotifications', value)}
+          onToggle={(value) => updateSetting("messageNotifications", value)}
           icon="chatbubble"
         />
 
@@ -133,7 +149,7 @@ export default function NotificationsSettingsScreen() {
           title="Group Notifications"
           description="Get notified for group messages"
           value={settings.groupNotifications}
-          onToggle={(value) => updateSetting('groupNotifications', value)}
+          onToggle={(value) => updateSetting("groupNotifications", value)}
           icon="people"
         />
 
@@ -141,7 +157,7 @@ export default function NotificationsSettingsScreen() {
           title="Call Notifications"
           description="Get notified for incoming calls"
           value={settings.callNotifications}
-          onToggle={(value) => updateSetting('callNotifications', value)}
+          onToggle={(value) => updateSetting("callNotifications", value)}
           icon="call"
         />
 
@@ -149,18 +165,20 @@ export default function NotificationsSettingsScreen() {
           title="Update Notifications"
           description="Get notified for status updates"
           value={settings.updateNotifications}
-          onToggle={(value) => updateSetting('updateNotifications', value)}
+          onToggle={(value) => updateSetting("updateNotifications", value)}
           icon="refresh"
         />
 
         {/* Notification Style */}
-        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">Notification Style</Text>
+        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">
+          Notification Style
+        </Text>
 
         <SettingItem
           title="Sound"
           description="Play sound for notifications"
           value={settings.soundEnabled}
-          onToggle={(value) => updateSetting('soundEnabled', value)}
+          onToggle={(value) => updateSetting("soundEnabled", value)}
           icon="volume-high"
         />
 
@@ -168,7 +186,7 @@ export default function NotificationsSettingsScreen() {
           title="Vibration"
           description="Vibrate for notifications"
           value={settings.vibrationEnabled}
-          onToggle={(value) => updateSetting('vibrationEnabled', value)}
+          onToggle={(value) => updateSetting("vibrationEnabled", value)}
           icon="phone-portrait"
         />
 
@@ -176,18 +194,20 @@ export default function NotificationsSettingsScreen() {
           title="Show Preview"
           description="Show message content in notifications"
           value={settings.showPreview}
-          onToggle={(value) => updateSetting('showPreview', value)}
+          onToggle={(value) => updateSetting("showPreview", value)}
           icon="eye"
         />
 
         {/* Quiet Hours */}
-        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">Quiet Hours</Text>
+        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">
+          Quiet Hours
+        </Text>
 
         <SettingItem
           title="Enable Quiet Hours"
           description="Mute notifications during specified hours"
           value={settings.quietHours}
-          onToggle={(value) => updateSetting('quietHours', value)}
+          onToggle={(value) => updateSetting("quietHours", value)}
           icon="moon"
         />
 
@@ -197,7 +217,9 @@ export default function NotificationsSettingsScreen() {
               Quiet hours: {settings.quietStart} - {settings.quietEnd}
             </Text>
             <TouchableOpacity
-              onPress={() => Alert.alert('Coming Soon', 'Time picker will be available soon')}
+              onPress={() =>
+                Alert.alert("Coming Soon", "Time picker will be available soon")
+              }
               className="bg-blue-50 py-2 px-4 rounded-lg"
             >
               <Text className="text-blue-600 text-center">Change Times</Text>
@@ -209,21 +231,23 @@ export default function NotificationsSettingsScreen() {
         <TouchableOpacity
           onPress={() => {
             Alert.alert(
-              'Reset Settings',
-              'Are you sure you want to reset all notification settings to default?',
+              "Reset Settings",
+              "Are you sure you want to reset all notification settings to default?",
               [
-                { text: 'Cancel', style: 'cancel' },
-                { 
-                  text: 'Reset', 
-                  style: 'destructive',
-                  onPress: () => saveSettings(defaultSettings)
-                }
-              ]
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Reset",
+                  style: "destructive",
+                  onPress: () => saveSettings(defaultSettings),
+                },
+              ],
             );
           }}
           className="bg-red-50 border border-red-200 py-3 px-4 rounded-lg mt-6"
         >
-          <Text className="text-red-600 text-center font-medium">Reset to Default</Text>
+          <Text className="text-red-600 text-center font-medium">
+            Reset to Default
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

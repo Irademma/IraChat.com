@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef } from "react";
 import {
   TouchableOpacity,
   Text,
@@ -6,15 +6,22 @@ import {
   ActivityIndicator,
   View,
   GestureResponderEvent,
-  Platform
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../ThemeProvider';
-import { useResponsiveDimensions, useResponsiveSpacing, useResponsiveFontSizes } from '../../hooks/useResponsiveDimensions';
-import { createSpringAnimation, getAnimationConfig } from '../../utils/animations';
+  Platform,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../ThemeProvider";
+import {
+  useResponsiveDimensions,
+  useResponsiveSpacing,
+  useResponsiveFontSizes,
+} from "../../hooks/useResponsiveDimensions";
+import {
+  createSpringAnimation,
+  getAnimationConfig,
+} from "../../utils/animations";
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-type ButtonSize = 'small' | 'medium' | 'large';
+type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
+type ButtonSize = "small" | "medium" | "large";
 
 interface ButtonProps {
   title: string;
@@ -24,7 +31,7 @@ interface ButtonProps {
   disabled?: boolean;
   loading?: boolean;
   icon?: keyof typeof Ionicons.glyphMap;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: "left" | "right";
   fullWidth?: boolean;
   className?: string;
 }
@@ -32,14 +39,14 @@ interface ButtonProps {
 export default function Button({
   title,
   onPress,
-  variant = 'primary',
-  size = 'medium',
+  variant = "primary",
+  size = "medium",
   disabled = false,
   loading = false,
   icon,
-  iconPosition = 'left',
+  iconPosition = "left",
   fullWidth = false,
-  className = '',
+  className = "",
 }: ButtonProps): React.JSX.Element {
   const { colors } = useTheme();
   const { width } = useResponsiveDimensions();
@@ -60,31 +67,31 @@ export default function Button({
 
   const getVariantStyles = () => {
     switch (variant) {
-      case 'primary':
+      case "primary":
         return {
           backgroundColor: disabled ? colors.textMuted : colors.primary,
           borderColor: disabled ? colors.textMuted : colors.primary,
           textColor: colors.messageTextOwn,
         };
-      case 'secondary':
+      case "secondary":
         return {
           backgroundColor: disabled ? colors.backgroundMuted : colors.secondary,
           borderColor: disabled ? colors.backgroundMuted : colors.secondary,
           textColor: colors.messageTextOwn,
         };
-      case 'outline':
+      case "outline":
         return {
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
           borderColor: disabled ? colors.textMuted : colors.primary,
           textColor: disabled ? colors.textMuted : colors.primary,
         };
-      case 'ghost':
+      case "ghost":
         return {
-          backgroundColor: 'transparent',
-          borderColor: 'transparent',
+          backgroundColor: "transparent",
+          borderColor: "transparent",
           textColor: disabled ? colors.textMuted : colors.primary,
         };
-      case 'danger':
+      case "danger":
         return {
           backgroundColor: disabled ? colors.textMuted : colors.error,
           borderColor: disabled ? colors.textMuted : colors.error,
@@ -101,14 +108,14 @@ export default function Button({
 
   const getSizeStyles = () => {
     switch (size) {
-      case 'small':
+      case "small":
         return {
           paddingVertical: spacing.buttonPadding.vertical * 0.75,
           paddingHorizontal: spacing.buttonPadding.horizontal * 0.75,
           fontSize: fontSizes.sm,
           iconSize: 16,
         };
-      case 'large':
+      case "large":
         return {
           paddingVertical: spacing.buttonPadding.vertical * 1.25,
           paddingHorizontal: spacing.buttonPadding.horizontal * 1.25,
@@ -132,10 +139,13 @@ export default function Button({
   const renderIcon = () => {
     if (loading) {
       return (
-        <ActivityIndicator 
-          size="small" 
-          color={variantStyles.textColor} 
-          style={{ marginRight: iconPosition === 'left' ? 8 : 0, marginLeft: iconPosition === 'right' ? 8 : 0 }}
+        <ActivityIndicator
+          size="small"
+          color={variantStyles.textColor}
+          style={{
+            marginRight: iconPosition === "left" ? 8 : 0,
+            marginLeft: iconPosition === "right" ? 8 : 0,
+          }}
         />
       );
     }
@@ -146,9 +156,9 @@ export default function Button({
           name={icon}
           size={sizeStyles.iconSize}
           color={variantStyles.textColor}
-          style={{ 
-            marginRight: iconPosition === 'left' ? 8 : 0, 
-            marginLeft: iconPosition === 'right' ? 8 : 0 
+          style={{
+            marginRight: iconPosition === "left" ? 8 : 0,
+            marginLeft: iconPosition === "right" ? 8 : 0,
           }}
         />
       );
@@ -161,7 +171,7 @@ export default function Button({
     <Animated.View
       style={{
         transform: [{ scale: scaleAnim }],
-        width: fullWidth ? '100%' : 'auto',
+        width: fullWidth ? "100%" : "auto",
       }}
     >
       <TouchableOpacity
@@ -180,18 +190,18 @@ export default function Button({
         }}
       >
         <View className="flex-row items-center">
-          {iconPosition === 'left' && renderIcon()}
+          {iconPosition === "left" && renderIcon()}
           <Text
             className="text-center"
             style={{
               color: variantStyles.textColor,
               fontSize: sizeStyles.fontSize,
-              fontWeight: '600',
+              fontWeight: "600",
             }}
           >
             {title}
           </Text>
-          {iconPosition === 'right' && renderIcon()}
+          {iconPosition === "right" && renderIcon()}
         </View>
       </TouchableOpacity>
     </Animated.View>

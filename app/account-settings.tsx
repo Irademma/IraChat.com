@@ -1,16 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useSelector } from 'react-redux';
-import { RootState } from '../src/redux/store';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useSelector } from "react-redux";
+import { RootState } from "../src/redux/store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AccountSettingsScreen() {
   const router = useRouter();
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
-  const [storageUsage, setStorageUsage] = useState('0 MB');
-  const [dataUsage, setDataUsage] = useState('0 MB');
+  const [storageUsage, setStorageUsage] = useState("0 MB");
+  const [dataUsage, setDataUsage] = useState("0 MB");
 
   useEffect(() => {
     calculateStorageUsage();
@@ -21,100 +28,106 @@ export default function AccountSettingsScreen() {
       // Calculate approximate storage usage
       const keys = await AsyncStorage.getAllKeys();
       let totalSize = 0;
-      
+
       for (const key of keys) {
         const value = await AsyncStorage.getItem(key);
         if (value) {
           totalSize += value.length;
         }
       }
-      
+
       const sizeInMB = (totalSize / (1024 * 1024)).toFixed(2);
       setStorageUsage(`${sizeInMB} MB`);
       setDataUsage(`${(parseFloat(sizeInMB) * 1.5).toFixed(2)} MB`); // Estimate data usage
     } catch (error) {
-      console.error('Error calculating storage:', error);
+      console.error("Error calculating storage:", error);
     }
   };
 
   const handleChangePhoneNumber = () => {
     Alert.alert(
-      'Change Phone Number',
-      'This will require verification of your new phone number.',
+      "Change Phone Number",
+      "This will require verification of your new phone number.",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Continue', 
-          onPress: () => Alert.alert('Coming Soon', 'Phone number change will be available soon')
-        }
-      ]
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Continue",
+          onPress: () =>
+            Alert.alert(
+              "Coming Soon",
+              "Phone number change will be available soon",
+            ),
+        },
+      ],
     );
   };
 
   const handleChangeEmail = () => {
-    Alert.alert(
-      'Change Email',
-      'Enter your new email address:',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Update', 
-          onPress: () => Alert.alert('Coming Soon', 'Email change will be available soon')
-        }
-      ]
-    );
+    Alert.alert("Change Email", "Enter your new email address:", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Update",
+        onPress: () =>
+          Alert.alert("Coming Soon", "Email change will be available soon"),
+      },
+    ]);
   };
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone.',
+      "Delete Account",
+      "Are you sure you want to delete your account? This action cannot be undone.",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
           onPress: () => {
             Alert.alert(
-              'Confirm Deletion',
+              "Confirm Deletion",
               'Type "DELETE" to confirm account deletion:',
               [
-                { text: 'Cancel', style: 'cancel' },
-                { 
-                  text: 'Confirm', 
-                  style: 'destructive',
-                  onPress: () => Alert.alert('Coming Soon', 'Account deletion will be available soon')
-                }
-              ]
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Confirm",
+                  style: "destructive",
+                  onPress: () =>
+                    Alert.alert(
+                      "Coming Soon",
+                      "Account deletion will be available soon",
+                    ),
+                },
+              ],
             );
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
   };
 
   const handleExportData = () => {
     Alert.alert(
-      'Export Data',
-      'We will prepare your data for download. This may take a few minutes.',
+      "Export Data",
+      "We will prepare your data for download. This may take a few minutes.",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Export', 
-          onPress: () => Alert.alert('Coming Soon', 'Data export will be available soon')
-        }
-      ]
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Export",
+          onPress: () =>
+            Alert.alert("Coming Soon", "Data export will be available soon"),
+        },
+      ],
     );
   };
 
-  const SettingItem = ({ 
-    title, 
-    description, 
-    value, 
-    onPress, 
+  const SettingItem = ({
+    title,
+    description,
+    value,
+    onPress,
     icon,
-    iconColor = '#3B82F6',
-    showArrow = true
+    iconColor = "#3B82F6",
+    showArrow = true,
   }: {
     title: string;
     description: string;
@@ -128,7 +141,10 @@ export default function AccountSettingsScreen() {
       onPress={onPress}
       className="flex-row items-center py-4 px-4 bg-white rounded-lg mb-3"
     >
-      <View className="w-10 h-10 rounded-full items-center justify-center mr-4" style={{ backgroundColor: `${iconColor}20` }}>
+      <View
+        className="w-10 h-10 rounded-full items-center justify-center mr-4"
+        style={{ backgroundColor: `${iconColor}20` }}
+      >
         <Ionicons name={icon as any} size={20} color={iconColor} />
       </View>
       <View className="flex-1">
@@ -136,7 +152,9 @@ export default function AccountSettingsScreen() {
         <Text className="text-gray-500 text-sm mt-1">{description}</Text>
         {value && <Text className="text-gray-600 text-sm mt-1">{value}</Text>}
       </View>
-      {showArrow && <Ionicons name="chevron-forward" size={16} color="#6B7280" />}
+      {showArrow && (
+        <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+      )}
     </TouchableOpacity>
   );
 
@@ -148,18 +166,22 @@ export default function AccountSettingsScreen() {
           <TouchableOpacity onPress={() => router.back()} className="mr-4">
             <Ionicons name="arrow-back" size={24} color="#374151" />
           </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-800">Account Settings</Text>
+          <Text className="text-xl font-bold text-gray-800">
+            Account Settings
+          </Text>
         </View>
       </View>
 
       <ScrollView className="flex-1 px-4 py-6">
         {/* Account Information */}
-        <Text className="text-lg font-semibold text-gray-800 mb-4">Account Information</Text>
-        
+        <Text className="text-lg font-semibold text-gray-800 mb-4">
+          Account Information
+        </Text>
+
         <SettingItem
           title="Phone Number"
           description="Your registered phone number"
-          value={currentUser?.phoneNumber || 'Not set'}
+          value={currentUser?.phoneNumber || "Not set"}
           onPress={handleChangePhoneNumber}
           icon="call"
         />
@@ -167,7 +189,7 @@ export default function AccountSettingsScreen() {
         <SettingItem
           title="Email Address"
           description="Your email address for account recovery"
-          value={currentUser?.email || 'Not set'}
+          value={currentUser?.email || "Not set"}
           onPress={handleChangeEmail}
           icon="mail"
         />
@@ -175,18 +197,22 @@ export default function AccountSettingsScreen() {
         <SettingItem
           title="Username"
           description="Your unique IraChat username"
-          value={currentUser?.username || 'Not set'}
-          onPress={() => router.push('/edit-profile')}
+          value={currentUser?.username || "Not set"}
+          onPress={() => router.push("/edit-profile")}
           icon="at"
         />
 
         {/* Security */}
-        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">Security</Text>
+        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">
+          Security
+        </Text>
 
         <SettingItem
           title="Change Password"
           description="Update your account password"
-          onPress={() => Alert.alert('Coming Soon', 'Password change will be available soon')}
+          onPress={() =>
+            Alert.alert("Coming Soon", "Password change will be available soon")
+          }
           icon="lock-closed"
           iconColor="#10B981"
         />
@@ -194,7 +220,12 @@ export default function AccountSettingsScreen() {
         <SettingItem
           title="Login Sessions"
           description="Manage your active login sessions"
-          onPress={() => Alert.alert('Coming Soon', 'Session management will be available soon')}
+          onPress={() =>
+            Alert.alert(
+              "Coming Soon",
+              "Session management will be available soon",
+            )
+          }
           icon="phone-portrait"
           iconColor="#10B981"
         />
@@ -202,19 +233,28 @@ export default function AccountSettingsScreen() {
         <SettingItem
           title="Two-Factor Authentication"
           description="Add extra security to your account"
-          onPress={() => Alert.alert('Coming Soon', '2FA setup will be available soon')}
+          onPress={() =>
+            Alert.alert("Coming Soon", "2FA setup will be available soon")
+          }
           icon="shield-checkmark"
           iconColor="#10B981"
         />
 
         {/* Data & Storage */}
-        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">Data & Storage</Text>
+        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">
+          Data & Storage
+        </Text>
 
         <SettingItem
           title="Storage Usage"
           description="How much storage IraChat is using"
           value={storageUsage}
-          onPress={() => Alert.alert('Storage Usage', `IraChat is using ${storageUsage} of storage on your device.`)}
+          onPress={() =>
+            Alert.alert(
+              "Storage Usage",
+              `IraChat is using ${storageUsage} of storage on your device.`,
+            )
+          }
           icon="folder"
           iconColor="#F59E0B"
           showArrow={false}
@@ -224,7 +264,12 @@ export default function AccountSettingsScreen() {
           title="Data Usage"
           description="Your data consumption"
           value={dataUsage}
-          onPress={() => Alert.alert('Data Usage', `You have used ${dataUsage} of data this month.`)}
+          onPress={() =>
+            Alert.alert(
+              "Data Usage",
+              `You have used ${dataUsage} of data this month.`,
+            )
+          }
           icon="stats-chart"
           iconColor="#F59E0B"
           showArrow={false}
@@ -235,18 +280,18 @@ export default function AccountSettingsScreen() {
           description="Free up space by clearing cached data"
           onPress={() => {
             Alert.alert(
-              'Clear Cache',
-              'This will clear temporary files and may free up storage space.',
+              "Clear Cache",
+              "This will clear temporary files and may free up storage space.",
               [
-                { text: 'Cancel', style: 'cancel' },
-                { 
-                  text: 'Clear', 
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Clear",
                   onPress: () => {
-                    Alert.alert('Success', 'Cache cleared successfully');
+                    Alert.alert("Success", "Cache cleared successfully");
                     calculateStorageUsage();
-                  }
-                }
-              ]
+                  },
+                },
+              ],
             );
           }}
           icon="trash"
@@ -254,7 +299,9 @@ export default function AccountSettingsScreen() {
         />
 
         {/* Data Management */}
-        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">Data Management</Text>
+        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">
+          Data Management
+        </Text>
 
         <SettingItem
           title="Export My Data"
@@ -267,18 +314,30 @@ export default function AccountSettingsScreen() {
         <SettingItem
           title="Request Account Info"
           description="Get a report of your account information"
-          onPress={() => Alert.alert('Coming Soon', 'Account info request will be available soon')}
+          onPress={() =>
+            Alert.alert(
+              "Coming Soon",
+              "Account info request will be available soon",
+            )
+          }
           icon="document-text"
           iconColor="#8B5CF6"
         />
 
         {/* Danger Zone */}
-        <Text className="text-lg font-semibold text-red-600 mb-4 mt-6">Danger Zone</Text>
+        <Text className="text-lg font-semibold text-red-600 mb-4 mt-6">
+          Danger Zone
+        </Text>
 
         <SettingItem
           title="Deactivate Account"
           description="Temporarily disable your account"
-          onPress={() => Alert.alert('Coming Soon', 'Account deactivation will be available soon')}
+          onPress={() =>
+            Alert.alert(
+              "Coming Soon",
+              "Account deactivation will be available soon",
+            )
+          }
           icon="pause-circle"
           iconColor="#F59E0B"
         />
@@ -293,7 +352,9 @@ export default function AccountSettingsScreen() {
 
         {/* Account Info */}
         <View className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-          <Text className="text-blue-800 text-sm font-medium mb-2">Account Created</Text>
+          <Text className="text-blue-800 text-sm font-medium mb-2">
+            Account Created
+          </Text>
           <Text className="text-blue-600 text-sm">
             Your account was created on {new Date().toLocaleDateString()}
           </Text>

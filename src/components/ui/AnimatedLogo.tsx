@@ -1,14 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Image, Animated, ImageSourcePropType, Easing, Platform } from 'react-native';
-import { createRotationAnimation, getAnimationConfig } from '../../utils/animations';
-import { useResponsiveDimensions } from '../../hooks/useResponsiveDimensions';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  View,
+  Image,
+  Animated,
+  ImageSourcePropType,
+  Easing,
+  Platform,
+} from "react-native";
+import {
+  createRotationAnimation,
+  getAnimationConfig,
+} from "../../utils/animations";
+import { useResponsiveDimensions } from "../../hooks/useResponsiveDimensions";
 
 interface AnimatedLogoProps {
   size?: number;
   source: ImageSourcePropType;
 }
 
-export default function AnimatedLogo({ size = 96, source }: AnimatedLogoProps): React.JSX.Element {
+export default function AnimatedLogo({
+  size = 96,
+  source,
+}: AnimatedLogoProps): React.JSX.Element {
   const [imageLoaded, setImageLoaded] = useState(false);
   const { isSmall } = useResponsiveDimensions();
   const animConfig = getAnimationConfig();
@@ -64,56 +77,59 @@ export default function AnimatedLogo({ size = 96, source }: AnimatedLogoProps): 
   // Create rotation interpolation for continuous 360-degree rotation
   const rotate = rotateAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-    extrapolate: 'extend', // Ensure smooth continuous rotation
+    outputRange: ["0deg", "360deg"],
+    extrapolate: "extend", // Ensure smooth continuous rotation
   });
 
   const borderWidth = isSmall ? 4 : responsiveSize > 120 ? 6 : 5;
-  const shadowProps = Platform.OS === 'web' ? {
-    // Use boxShadow for web
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-  } : {
-    // Use shadow props for native
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  };
+  const shadowProps =
+    Platform.OS === "web"
+      ? {
+          // Use boxShadow for web
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+        }
+      : {
+          // Use shadow props for native
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+        };
 
   return (
     <View
       style={{
         width: responsiveSize,
-        height: responsiveSize
+        height: responsiveSize,
       }}
       className="items-center justify-center"
     >
       {/* Animated Border - Only the border rotates */}
       <Animated.View
         style={{
-          position: 'absolute',
+          position: "absolute",
           width: responsiveSize,
           height: responsiveSize,
           borderRadius: responsiveSize / 2,
           borderWidth,
-          borderColor: 'transparent',
-          borderTopColor: '#3B82F6', // Blue-500
-          borderRightColor: '#667eea', // Sky blue from welcome page
-          borderBottomColor: '#F59E0B', // Amber-500
-          borderLeftColor: '#EF4444', // Red-500
-          transform: [{ rotate }]
+          borderColor: "transparent",
+          borderTopColor: "#3B82F6", // Blue-500
+          borderRightColor: "#667eea", // Sky blue from welcome page
+          borderBottomColor: "#F59E0B", // Amber-500
+          borderLeftColor: "#EF4444", // Red-500
+          transform: [{ rotate }],
         }}
       />
 
       {/* Static Logo Container - Logo stays still */}
       <View
         style={{
-          width: responsiveSize - (borderWidth * 2), // Account for border width
-          height: responsiveSize - (borderWidth * 2),
-          borderRadius: (responsiveSize - (borderWidth * 2)) / 2,
-          backgroundColor: '#FFFFFF',
-          overflow: 'hidden',
+          width: responsiveSize - borderWidth * 2, // Account for border width
+          height: responsiveSize - borderWidth * 2,
+          borderRadius: (responsiveSize - borderWidth * 2) / 2,
+          backgroundColor: "#FFFFFF",
+          overflow: "hidden",
           ...shadowProps,
         }}
         className="items-center justify-center"
@@ -121,9 +137,9 @@ export default function AnimatedLogo({ size = 96, source }: AnimatedLogoProps): 
         <Image
           source={source}
           style={{
-            width: responsiveSize - (borderWidth * 2),
-            height: responsiveSize - (borderWidth * 2),
-            borderRadius: (responsiveSize - (borderWidth * 2)) / 2
+            width: responsiveSize - borderWidth * 2,
+            height: responsiveSize - borderWidth * 2,
+            borderRadius: (responsiveSize - borderWidth * 2) / 2,
           }}
           resizeMode="contain"
           fadeDuration={0} // Remove fade-in animation for immediate display

@@ -1,14 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
-import React, { useRef } from 'react';
-import {
-    Animated,
-    Image,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { PanGestureHandler, State } from 'react-native-gesture-handler';
-import { trackSwipeAction } from '../services/analytics';
+import { Ionicons } from "@expo/vector-icons";
+import React, { useRef } from "react";
+import { Animated, Image, Text, TouchableOpacity, View } from "react-native";
+import { PanGestureHandler, State } from "react-native-gesture-handler";
+import { trackSwipeAction } from "../services/analytics";
 
 interface Message {
   id: string;
@@ -19,11 +13,11 @@ interface Message {
     avatar: string;
   };
   timestamp: Date;
-  type: 'text' | 'image' | 'video' | 'audio';
+  type: "text" | "image" | "video" | "audio";
   media?: Array<{
     id: string;
     uri: string;
-    type: 'image' | 'video' | 'audio';
+    type: "image" | "video" | "audio";
   }>;
 }
 
@@ -51,7 +45,7 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
 
   const handlePanGesture = Animated.event(
     [{ nativeEvent: { translationX: translateX } }],
-    { useNativeDriver: true }
+    { useNativeDriver: true },
   );
 
   const handlePanStateChange = (event: any) => {
@@ -79,11 +73,11 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
 
       if (translationX > threshold) {
         // Swipe right - Reply
-        trackSwipeAction('reply', message.type);
+        trackSwipeAction("reply", message.type);
         onReply(message);
       } else if (translationX < -threshold) {
         // Swipe left - Archive
-        trackSwipeAction('archive', message.type);
+        trackSwipeAction("archive", message.type);
         onArchive(message);
       }
 
@@ -108,7 +102,7 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   const renderMediaGrid = () => {
@@ -120,11 +114,11 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
     return (
       <View
         style={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
+          flexDirection: "row",
+          flexWrap: "wrap",
           marginTop: 8,
           borderRadius: 12,
-          overflow: 'hidden',
+          overflow: "hidden",
         }}
       >
         {mediaItems.map((media, index) => (
@@ -132,33 +126,33 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
             key={media.id}
             onPress={() => onMediaPress?.(media.uri, media.type)}
             style={{
-              width: gridCols === 1 ? '100%' : '50%',
+              width: gridCols === 1 ? "100%" : "50%",
               aspectRatio: 1,
               padding: 1,
             }}
           >
-            {media.type === 'image' ? (
+            {media.type === "image" ? (
               <Image
                 source={{ uri: media.uri }}
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  backgroundColor: '#f0f0f0',
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "#f0f0f0",
                 }}
                 resizeMode="cover"
               />
             ) : (
               <View
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  backgroundColor: '#000',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "#000",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
                 <Ionicons
-                  name={media.type === 'video' ? 'play-circle' : 'volume-high'}
+                  name={media.type === "video" ? "play-circle" : "volume-high"}
                   size={40}
                   color="white"
                 />
@@ -175,14 +169,14 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
       {/* Background Icons */}
       <View
         style={{
-          position: 'absolute',
+          position: "absolute",
           left: 0,
           right: 0,
           top: 0,
           bottom: 0,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
           paddingHorizontal: 30,
         }}
       >
@@ -198,9 +192,9 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
               width: 40,
               height: 40,
               borderRadius: 20,
-              backgroundColor: '#4CAF50',
-              justifyContent: 'center',
-              alignItems: 'center',
+              backgroundColor: "#4CAF50",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
             <Ionicons name="arrow-undo" size={20} color="white" />
@@ -219,9 +213,9 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
               width: 40,
               height: 40,
               borderRadius: 20,
-              backgroundColor: '#FF9800',
-              justifyContent: 'center',
-              alignItems: 'center',
+              backgroundColor: "#FF9800",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
             <Ionicons name="archive" size={20} color="white" />
@@ -237,8 +231,8 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
         <Animated.View
           style={{
             transform: [{ translateX }],
-            flexDirection: 'row',
-            justifyContent: isOwnMessage ? 'flex-end' : 'flex-start',
+            flexDirection: "row",
+            justifyContent: isOwnMessage ? "flex-end" : "flex-start",
           }}
         >
           {/* Sender Avatar (for others' messages) */}
@@ -250,7 +244,7 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
                 height: 32,
                 borderRadius: 16,
                 marginRight: 8,
-                alignSelf: 'flex-end',
+                alignSelf: "flex-end",
               }}
             />
           )}
@@ -258,8 +252,8 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
           {/* Message Bubble */}
           <View
             style={{
-              maxWidth: '75%',
-              backgroundColor: isOwnMessage ? '#667eea' : '#f0f0f0',
+              maxWidth: "75%",
+              backgroundColor: isOwnMessage ? "#667eea" : "#f0f0f0",
               borderRadius: 16,
               padding: 12,
               borderBottomRightRadius: isOwnMessage ? 4 : 16,
@@ -271,8 +265,8 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
               <Text
                 style={{
                   fontSize: 12,
-                  fontWeight: '600',
-                  color: '#667eea',
+                  fontWeight: "600",
+                  color: "#667eea",
                   marginBottom: 4,
                 }}
               >
@@ -285,7 +279,7 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
               <Text
                 style={{
                   fontSize: 16,
-                  color: isOwnMessage ? 'white' : '#333',
+                  color: isOwnMessage ? "white" : "#333",
                   lineHeight: 20,
                 }}
               >
@@ -300,9 +294,9 @@ export const SwipeableMessage: React.FC<SwipeableMessageProps> = ({
             <Text
               style={{
                 fontSize: 11,
-                color: isOwnMessage ? 'rgba(255,255,255,0.7)' : '#999',
+                color: isOwnMessage ? "rgba(255,255,255,0.7)" : "#999",
                 marginTop: 4,
-                alignSelf: 'flex-end',
+                alignSelf: "flex-end",
               }}
             >
               {formatTime(message.timestamp)}

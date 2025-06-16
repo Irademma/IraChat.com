@@ -22,22 +22,22 @@ export interface Message {
   senderPhoneNumber?: string;
   senderName?: string;
   timestamp: any;
-  type?: 'text' | 'image' | 'file';
+  type?: "text" | "image" | "file";
   mediaUrl?: string;
   fileName?: string;
   fileSize?: number;
   // Enhanced message status for individual chats
-  status?: 'sent' | 'delivered' | 'seen_not_replied' | 'seen_replied';
+  status?: "sent" | "delivered" | "seen_not_replied" | "seen_replied";
   statusTime?: any;
   // Media support for individual chats
   media?: {
-    type: 'image' | 'video';
+    type: "image" | "video";
     url: string;
     thumbnail?: string;
     caption?: string;
   };
   file?: {
-    type: 'document';
+    type: "document";
     name: string;
     size: string;
     url: string;
@@ -84,7 +84,7 @@ export interface Update {
   id: string;
   user: User;
   mediaUrl: string;
-  mediaType: 'video' | 'image';
+  mediaType: "video" | "image";
   caption?: string; // Make caption optional to match other definitions
   musicTitle?: string;
   musicAuthor?: string;
@@ -106,7 +106,7 @@ export interface Update {
   media?: Array<{
     id: string;
     url: string;
-    type: 'image' | 'video';
+    type: "image" | "video";
   }>;
 }
 
@@ -152,7 +152,15 @@ export interface UpdateState {
 }
 
 export interface UpdateAction {
-  type: 'FETCH_UPDATES_START' | 'FETCH_UPDATES_SUCCESS' | 'FETCH_UPDATES_ERROR' | 'ADD_UPDATE' | 'UPDATE_LIKE' | 'UPDATE_COMMENT' | 'UPDATE_SHARE' | 'UPDATE_VIEW';
+  type:
+    | "FETCH_UPDATES_START"
+    | "FETCH_UPDATES_SUCCESS"
+    | "FETCH_UPDATES_ERROR"
+    | "ADD_UPDATE"
+    | "UPDATE_LIKE"
+    | "UPDATE_COMMENT"
+    | "UPDATE_SHARE"
+    | "UPDATE_VIEW";
   payload?: any;
 }
 
@@ -181,7 +189,7 @@ export type NavigationParamList = {
 // Additional types for missing interfaces
 export interface SearchResult {
   id: string;
-  type: 'message' | 'member' | 'contact' | 'user';
+  type: "message" | "member" | "contact" | "user";
   title: string;
   subtitle: string;
   content: string;
@@ -196,7 +204,7 @@ export interface GroupMember {
   username?: string;
   name?: string; // Add name property for compatibility
   profilePic?: string;
-  role: 'admin' | 'member';
+  role: "admin" | "member";
   joinedAt: Date;
   lastSeen?: Date;
   isOnline?: boolean;
@@ -218,7 +226,7 @@ export interface GroupMemberPreferences {
   };
   media: {
     autoDownload: boolean;
-    quality: 'low' | 'medium' | 'high';
+    quality: "low" | "medium" | "high";
   };
   // Additional properties for compatibility
   isMuted: boolean;
@@ -250,5 +258,4 @@ export interface UpdatesScreenProps {
   route: any;
 }
 
-export type GroupRole = 'admin' | 'member';
-
+export type GroupRole = "admin" | "member";

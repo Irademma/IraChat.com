@@ -1,6 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { User, AuthState } from '../types';
-import { clearAuthData } from '../services/authStorageSimple';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { User, AuthState } from "../types";
+import { clearAuthData } from "../services/authStorageSimple";
 
 const initialState: AuthState = {
   currentUser: null,
@@ -9,7 +9,7 @@ const initialState: AuthState = {
 };
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -26,24 +26,25 @@ const userSlice = createSlice({
       }
     },
     logout: (state) => {
-      console.log('🔄 Redux: Logging out user...');
+      console.log("🔄 Redux: Logging out user...");
       state.currentUser = null;
       state.isAuthenticated = false;
       state.isLoading = false;
 
       // Clear stored auth data (async operation, but we don't wait for it)
-      clearAuthData().catch(error => {
-        console.error('❌ Error clearing auth data during logout:', error);
+      clearAuthData().catch((error) => {
+        console.error("❌ Error clearing auth data during logout:", error);
       });
 
-      console.log('✅ Redux: User logged out');
+      console.log("✅ Redux: User logged out");
     },
     setAuthError: (state) => {
       state.isLoading = false;
       state.isAuthenticated = false;
-    }
-  }
+    },
+  },
 });
 
-export const { setLoading, setUser, updateUser, logout, setAuthError } = userSlice.actions;
+export const { setLoading, setUser, updateUser, logout, setAuthError } =
+  userSlice.actions;
 export default userSlice.reducer;

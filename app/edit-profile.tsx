@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
-import AccountInfo from '../src/components/forms/AccountInfo';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { useRouter } from "expo-router";
+import AccountInfo from "../src/components/forms/AccountInfo";
 
 interface User {
   id: string;
@@ -32,7 +38,7 @@ export default function EditProfileScreen() {
 
   const loadUserData = () => {
     try {
-      const currentUserData = localStorage.getItem('iraChat_currentUser');
+      const currentUserData = localStorage.getItem("iraChat_currentUser");
       if (currentUserData) {
         const user = JSON.parse(currentUserData);
 
@@ -40,21 +46,19 @@ export default function EditProfileScreen() {
         const userInfo: User = {
           id: user.id || Date.now().toString(),
           objectId: user._id || user.objectId,
-          username: user.username || '',
-          name: user.name || user.displayName || '',
-          bio: user.bio || '',
-          image: user.avatar || user.image || '',
-          status: user.status || 'I Love IraChat',
+          username: user.username || "",
+          name: user.name || user.displayName || "",
+          bio: user.bio || "",
+          image: user.avatar || user.image || "",
+          status: user.status || "I Love IraChat",
         };
 
         setUserData(userInfo);
       }
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error("Error loading user data:", error);
     }
   };
-
-
 
   // Client-side check (similar to your example)
   if (!isClient) return null;
@@ -64,7 +68,7 @@ export default function EditProfileScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-gray-50"
     >
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -72,7 +76,7 @@ export default function EditProfileScreen() {
           {/* Header - Following your example structure */}
           <Text
             className="text-3xl text-gray-800 mb-2"
-            style={{ fontWeight: '700' }}
+            style={{ fontWeight: "700" }}
           >
             Edit Profile
           </Text>

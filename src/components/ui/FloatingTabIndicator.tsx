@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from "react";
 import {
   View,
   TouchableOpacity,
@@ -6,24 +6,25 @@ import {
   Animated,
   Dimensions,
   Platform,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTabNavigation } from '../../hooks/useTabNavigation';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTabNavigation } from "../../hooks/useTabNavigation";
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get("window");
 
 interface FloatingTabIndicatorProps {
   visible?: boolean;
-  position?: 'top' | 'bottom';
+  position?: "top" | "bottom";
   style?: any;
 }
 
-export default function FloatingTabIndicator({ 
-  visible = true, 
-  position = 'bottom',
-  style 
+export default function FloatingTabIndicator({
+  visible = true,
+  position = "bottom",
+  style,
 }: FloatingTabIndicatorProps) {
-  const { currentTabIndex, navigateToTab, getTabInfo, tabRoutes } = useTabNavigation();
+  const { currentTabIndex, navigateToTab, getTabInfo, tabRoutes } =
+    useTabNavigation();
   const fadeAnim = useRef(new Animated.Value(visible ? 1 : 0)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -42,8 +43,10 @@ export default function FloatingTabIndicator({
   useEffect(() => {
     const indicatorWidth = 60;
     const totalWidth = screenWidth - 40; // Account for margins
-    const position = (currentTabIndex / (tabRoutes.length - 1)) * (totalWidth - indicatorWidth);
-    
+    const position =
+      (currentTabIndex / (tabRoutes.length - 1)) *
+      (totalWidth - indicatorWidth);
+
     // No animations - set values directly
     slideAnim.setValue(position);
     scaleAnim.setValue(1);
@@ -54,12 +57,12 @@ export default function FloatingTabIndicator({
   };
 
   const getTabIcon = (index: number) => {
-    const icons = ['chatbubbles', 'people', 'radio-button-on', 'call'];
+    const icons = ["chatbubbles", "people", "radio-button-on", "call"];
     return icons[index] as keyof typeof Ionicons.glyphMap;
   };
 
   const getTabColor = (index: number) => {
-    return index === currentTabIndex ? '#667eea' : '#8E8E93';
+    return index === currentTabIndex ? "#667eea" : "#8E8E93";
   };
 
   if (!visible) return null;
@@ -68,39 +71,36 @@ export default function FloatingTabIndicator({
     <Animated.View
       style={[
         {
-          position: 'absolute',
+          position: "absolute",
           left: 20,
           right: 20,
           height: 60,
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
           borderRadius: 30,
-          flexDirection: 'row',
-          alignItems: 'center',
+          flexDirection: "row",
+          alignItems: "center",
           paddingHorizontal: 8,
-          shadowColor: '#000',
+          shadowColor: "#000",
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.15,
           shadowRadius: 12,
           elevation: 8,
           opacity: fadeAnim,
         },
-        position === 'top' ? { top: 100 } : { bottom: 100 },
+        position === "top" ? { top: 100 } : { bottom: 100 },
         style,
       ]}
     >
       {/* Background indicator */}
       <Animated.View
         style={{
-          position: 'absolute',
+          position: "absolute",
           width: 60,
           height: 44,
-          backgroundColor: '#667eea',
+          backgroundColor: "#667eea",
           borderRadius: 22,
           opacity: 0.1,
-          transform: [
-            { translateX: slideAnim },
-            { scale: scaleAnim },
-          ],
+          transform: [{ translateX: slideAnim }, { scale: scaleAnim }],
         }}
       />
 
@@ -110,8 +110,8 @@ export default function FloatingTabIndicator({
           key={tab.name}
           style={{
             flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
+            alignItems: "center",
+            justifyContent: "center",
             height: 44,
             borderRadius: 22,
           }}
@@ -120,10 +120,12 @@ export default function FloatingTabIndicator({
         >
           <Animated.View
             style={{
-              alignItems: 'center',
-              transform: [{
-                scale: currentTabIndex === index ? 1.1 : 1
-              }],
+              alignItems: "center",
+              transform: [
+                {
+                  scale: currentTabIndex === index ? 1.1 : 1,
+                },
+              ],
             }}
           >
             <Ionicons
@@ -134,7 +136,7 @@ export default function FloatingTabIndicator({
             <Text
               style={{
                 fontSize: 10,
-                fontWeight: '600',
+                fontWeight: "600",
                 color: getTabColor(index),
                 marginTop: 2,
               }}
@@ -148,13 +150,13 @@ export default function FloatingTabIndicator({
       {/* Current tab indicator dot */}
       <View
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: -4,
-          left: 20 + (currentTabIndex * ((screenWidth - 56) / 4)) + 22,
+          left: 20 + currentTabIndex * ((screenWidth - 56) / 4) + 22,
           width: 8,
           height: 8,
           borderRadius: 4,
-          backgroundColor: '#667eea',
+          backgroundColor: "#667eea",
         }}
       />
     </Animated.View>

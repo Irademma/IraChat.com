@@ -1,6 +1,9 @@
-import { User } from 'firebase/auth';
-import { useEffect, useState } from 'react';
-import { getAuthInstance, getCurrentUserSafely } from '../services/firebaseSimple';
+import { User } from "firebase/auth";
+import { useEffect, useState } from "react";
+import {
+  getAuthInstance,
+  getCurrentUserSafely,
+} from "../services/firebaseSimple";
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -26,7 +29,7 @@ export const useAuth = () => {
           setLoading(false);
         }
       } catch (error) {
-        console.error('Error in useAuth:', error);
+        console.error("Error in useAuth:", error);
         setUser(null);
         setLoading(false);
       }

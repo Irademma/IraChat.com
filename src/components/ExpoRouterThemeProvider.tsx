@@ -1,16 +1,22 @@
-import React from 'react';
-import { useColorScheme } from 'react-native';
-import { ThemeProvider as NavigationThemeProvider, DefaultTheme, DarkTheme } from '@react-navigation/native';
-import { Colors } from '../constants/Colors';
+import React from "react";
+import { useColorScheme } from "react-native";
+import {
+  ThemeProvider as NavigationThemeProvider,
+  DefaultTheme,
+  DarkTheme,
+} from "@react-navigation/native";
+import { Colors } from "../constants/Colors";
 
 interface ExpoRouterThemeProviderProps {
   children: React.ReactNode;
 }
 
-export function ExpoRouterThemeProvider({ children }: ExpoRouterThemeProviderProps) {
+export function ExpoRouterThemeProvider({
+  children,
+}: ExpoRouterThemeProviderProps) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const colors = Colors[isDark ? 'dark' : 'light'];
+  const isDark = colorScheme === "dark";
+  const colors = Colors[isDark ? "dark" : "light"];
 
   // Create React Navigation compatible theme for Expo Router
   const navigationTheme = {

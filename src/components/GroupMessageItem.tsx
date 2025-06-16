@@ -1,31 +1,38 @@
-import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useRef, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import React, { useCallback, useRef, useState } from "react";
 import {
-    Animated,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { colors } from '../styles/colors';
-import { GroupMessage } from '../types/groupChat';
-import { formatTimeAgo } from '../utils/dateUtils';
-import { handleDelete } from '../utils/deleteHandler';
-import { fontSize, spacing, wp } from '../utils/responsive';
+  Animated,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { colors } from "../styles/colors";
+import { GroupMessage } from "../types/groupChat";
+import { formatTimeAgo } from "../utils/dateUtils";
+import { handleDelete } from "../utils/deleteHandler";
+import { fontSize, spacing, wp } from "../utils/responsive";
 
 // Define Media type for compatibility
 interface Media {
   id: string;
-  type: 'image' | 'video' | 'document';
+  type: "image" | "video" | "document";
   url: string;
   caption?: string;
 }
 
 // Define MediaPreview component for compatibility
-const MediaPreview: React.FC<{ media: Media; onPress: () => void; onLongPress: () => void }> = ({ media, onPress, onLongPress }) => (
+const MediaPreview: React.FC<{
+  media: Media;
+  onPress: () => void;
+  onLongPress: () => void;
+}> = ({ media, onPress, onLongPress }) => (
   <TouchableOpacity onPress={onPress} onLongPress={onLongPress}>
-    <Image source={{ uri: media.url }} style={{ width: wp(50), height: wp(50), borderRadius: 8 }} />
+    <Image
+      source={{ uri: media.url }}
+      style={{ width: wp(50), height: wp(50), borderRadius: 8 }}
+    />
   </TouchableOpacity>
 );
 
@@ -72,7 +79,7 @@ export const GroupMessageItem: React.FC<GroupMessageItemProps> = ({
     if (!onDelete) return;
 
     handleDelete({
-      type: 'message',
+      type: "message",
       onDelete: async () => {
         await onDelete(message.id);
       },
@@ -83,10 +90,11 @@ export const GroupMessageItem: React.FC<GroupMessageItemProps> = ({
     if (!onDelete) return;
 
     handleDelete({
-      type: 'media',
+      type: "media",
       onDelete: async () => {
         // Implement media deletion logic
-        const updatedMedia = message.media?.filter(m => m.id !== mediaId) || [];
+        const updatedMedia =
+          message.media?.filter((m) => m.id !== mediaId) || [];
         // Update the message with new media array
         await onDelete(message.id);
       },
@@ -100,21 +108,26 @@ export const GroupMessageItem: React.FC<GroupMessageItemProps> = ({
     return (
       <View style={styles.mediaContainer}>
         {mediaUrls.map((media, index) => {
-          const mediaItem = typeof media === 'string'
-            ? { id: `media_${index}`, type: 'image' as const, url: media }
-            : media;
+          const mediaItem =
+            typeof media === "string"
+              ? { id: `media_${index}`, type: "image" as const, url: media }
+              : media;
 
           return (
             <TouchableOpacity
               key={mediaItem.id || `media_${index}`}
               style={styles.mediaItem}
               onPress={() => onMediaPress?.(mediaItem)}
-              onLongPress={() => handleDeleteMedia(mediaItem.id || `media_${index}`)}
+              onLongPress={() =>
+                handleDeleteMedia(mediaItem.id || `media_${index}`)
+              }
             >
               <MediaPreview
                 media={mediaItem}
                 onPress={() => onMediaPress?.(mediaItem)}
-                onLongPress={() => handleDeleteMedia(mediaItem.id || `media_${index}`)}
+                onLongPress={() =>
+                  handleDeleteMedia(mediaItem.id || `media_${index}`)
+                }
               />
             </TouchableOpacity>
           );
@@ -189,7 +202,7 @@ export const GroupMessageItem: React.FC<GroupMessageItemProps> = ({
           {renderMedia()}
           <Text style={styles.timestamp}>
             {formatTimeAgo(message.timestamp)}
-            {message.isEdited && ' (edited)'}
+            {message.isEdited && " (edited)"}
           </Text>
         </TouchableOpacity>
 
@@ -228,15 +241,15 @@ export const GroupMessageItem: React.FC<GroupMessageItemProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
   },
   currentUserContainer: {
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   otherUserContainer: {
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
   },
   avatar: {
     width: wp(8),
@@ -248,25 +261,25 @@ const styles = StyleSheet.create({
     maxWidth: wp(70),
   },
   senderName: {
-    color: '#666',
+    color: "#666",
     fontSize: fontSize.xs,
     marginBottom: spacing.xs,
   },
   messageBubble: {
-    backgroundColor: '#1A1A1A',
+    backgroundColor: "#1A1A1A",
     borderRadius: 16,
     padding: spacing.sm,
   },
   messageText: {
-    color: 'white',
+    color: "white",
     fontSize: fontSize.sm,
     lineHeight: fontSize.sm * 1.5,
   },
   timestamp: {
-    color: '#666',
+    color: "#666",
     fontSize: fontSize.xs,
     marginTop: spacing.xs,
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
   },
   mediaContainer: {
     marginTop: spacing.sm,
@@ -280,18 +293,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   mediaCaption: {
-    color: 'white',
+    color: "white",
     fontSize: fontSize.xs,
     marginTop: spacing.xs,
   },
   reactionsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: spacing.xs,
   },
   reactionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#333',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#333",
     borderRadius: 12,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
@@ -302,29 +315,29 @@ const styles = StyleSheet.create({
     marginRight: spacing.xs,
   },
   reactionCount: {
-    color: 'white',
+    color: "white",
     fontSize: fontSize.xs,
   },
   repliesContainer: {
     marginTop: spacing.sm,
     paddingLeft: spacing.md,
     borderLeftWidth: 2,
-    borderLeftColor: '#333',
+    borderLeftColor: "#333",
   },
   replyItem: {
     marginBottom: spacing.xs,
   },
   replySender: {
-    color: '#666',
+    color: "#666",
     fontSize: fontSize.xs,
     marginBottom: spacing.xs,
   },
   replyContent: {
-    color: 'white',
+    color: "white",
     fontSize: fontSize.sm,
   },
   actionsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: spacing.xs,
   },
   actionButton: {
@@ -334,4 +347,4 @@ const styles = StyleSheet.create({
   deleteButton: {
     padding: 8,
   },
-}); 
+});

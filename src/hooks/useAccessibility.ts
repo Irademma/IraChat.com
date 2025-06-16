@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useCallback, useEffect, useState } from 'react';
-import { AccessibilityInfo } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useCallback, useEffect, useState } from "react";
+import { AccessibilityInfo } from "react-native";
 
 interface AccessibilitySettings {
   isScreenReaderEnabled: boolean;
@@ -28,10 +28,11 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
   showCaptions: true,
 };
 
-const STORAGE_KEY = '@accessibility_settings';
+const STORAGE_KEY = "@accessibility_settings";
 
 export const useAccessibility = () => {
-  const [settings, setSettings] = useState<AccessibilitySettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] =
+    useState<AccessibilitySettings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadSettings = useCallback(async () => {
@@ -41,25 +42,34 @@ export const useAccessibility = () => {
         setSettings(JSON.parse(storedSettings));
       }
     } catch (error) {
-      console.error('Error loading accessibility settings:', error);
+      console.error("Error loading accessibility settings:", error);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const saveSettings = useCallback(async (newSettings: Partial<AccessibilitySettings>) => {
-    try {
-      const updatedSettings = { ...settings, ...newSettings };
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedSettings));
-      setSettings(updatedSettings);
-    } catch (error) {
-      console.error('Error saving accessibility settings:', error);
-    }
-  }, [settings]);
+  const saveSettings = useCallback(
+    async (newSettings: Partial<AccessibilitySettings>) => {
+      try {
+        const updatedSettings = { ...settings, ...newSettings };
+        await AsyncStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(updatedSettings),
+        );
+        setSettings(updatedSettings);
+      } catch (error) {
+        console.error("Error saving accessibility settings:", error);
+      }
+    },
+    [settings],
+  );
 
-  const updateFontSize = useCallback((size: number) => {
-    saveSettings({ fontSize: Math.max(0.8, Math.min(2, size)) });
-  }, [saveSettings]);
+  const updateFontSize = useCallback(
+    (size: number) => {
+      saveSettings({ fontSize: Math.max(0.8, Math.min(2, size)) });
+    },
+    [saveSettings],
+  );
 
   const toggleHighContrast = useCallback(() => {
     saveSettings({ highContrast: !settings.highContrast });
@@ -78,7 +88,7 @@ export const useAccessibility = () => {
       await AsyncStorage.removeItem(STORAGE_KEY);
       setSettings(DEFAULT_SETTINGS);
     } catch (error) {
-      console.error('Error resetting accessibility settings:', error);
+      console.error("Error resetting accessibility settings:", error);
     }
   }, []);
 
@@ -86,45 +96,48 @@ export const useAccessibility = () => {
     loadSettings();
 
     const screenReaderSubscription = AccessibilityInfo.addEventListener(
-      'screenReaderChanged',
+      "screenReaderChanged",
       (isEnabled) => {
-        setSettings(prev => ({ ...prev, isScreenReaderEnabled: isEnabled }));
-      }
+        setSettings((prev) => ({ ...prev, isScreenReaderEnabled: isEnabled }));
+      },
     );
 
     const reduceMotionSubscription = AccessibilityInfo.addEventListener(
-      'reduceMotionChanged',
+      "reduceMotionChanged",
       (isEnabled) => {
-        setSettings(prev => ({ ...prev, isReduceMotionEnabled: isEnabled }));
-      }
+        setSettings((prev) => ({ ...prev, isReduceMotionEnabled: isEnabled }));
+      },
     );
 
     const reduceTransparencySubscription = AccessibilityInfo.addEventListener(
-      'reduceTransparencyChanged',
+      "reduceTransparencyChanged",
       (isEnabled) => {
-        setSettings(prev => ({ ...prev, isReduceTransparencyEnabled: isEnabled }));
-      }
+        setSettings((prev) => ({
+          ...prev,
+          isReduceTransparencyEnabled: isEnabled,
+        }));
+      },
     );
 
     const invertColorsSubscription = AccessibilityInfo.addEventListener(
-      'invertColorsChanged',
+      "invertColorsChanged",
       (isEnabled) => {
-        setSettings(prev => ({ ...prev, isInvertColorsEnabled: isEnabled }));
-      }
+        setSettings((prev) => ({ ...prev, isInvertColorsEnabled: isEnabled }));
+      },
     );
 
     const boldTextSubscription = AccessibilityInfo.addEventListener(
-      'boldTextChanged',
+      "boldTextChanged",
       (isEnabled) => {
-        setSettings(prev => ({ ...prev, isBoldTextEnabled: isEnabled }));
-      }
+        setSettings((prev) => ({ ...prev, isBoldTextEnabled: isEnabled }));
+      },
     );
 
     const grayscaleSubscription = AccessibilityInfo.addEventListener(
-      'grayscaleChanged',
+      "grayscaleChanged",
       (isEnabled) => {
-        setSettings(prev => ({ ...prev, isGrayscaleEnabled: isEnabled }));
-      }
+        setSettings((prev) => ({ ...prev, isGrayscaleEnabled: isEnabled }));
+      },
     );
 
     // Initial values
@@ -135,24 +148,26 @@ export const useAccessibility = () => {
       AccessibilityInfo.isInvertColorsEnabled(),
       AccessibilityInfo.isBoldTextEnabled(),
       AccessibilityInfo.isGrayscaleEnabled(),
-    ]).then(([
-      isScreenReaderEnabled,
-      isReduceMotionEnabled,
-      isReduceTransparencyEnabled,
-      isInvertColorsEnabled,
-      isBoldTextEnabled,
-      isGrayscaleEnabled,
-    ]) => {
-      setSettings(prev => ({
-        ...prev,
+    ]).then(
+      ([
         isScreenReaderEnabled,
         isReduceMotionEnabled,
         isReduceTransparencyEnabled,
         isInvertColorsEnabled,
         isBoldTextEnabled,
         isGrayscaleEnabled,
-      }));
-    });
+      ]) => {
+        setSettings((prev) => ({
+          ...prev,
+          isScreenReaderEnabled,
+          isReduceMotionEnabled,
+          isReduceTransparencyEnabled,
+          isInvertColorsEnabled,
+          isBoldTextEnabled,
+          isGrayscaleEnabled,
+        }));
+      },
+    );
 
     return () => {
       screenReaderSubscription.remove();
@@ -168,7 +183,7 @@ export const useAccessibility = () => {
     const styles: any = {};
 
     if (settings.isReduceMotionEnabled) {
-      styles.animationDuration = '0s';
+      styles.animationDuration = "0s";
     }
 
     if (settings.isReduceTransparencyEnabled) {
@@ -176,20 +191,20 @@ export const useAccessibility = () => {
     }
 
     if (settings.isInvertColorsEnabled) {
-      styles.filter = 'invert(100%)';
+      styles.filter = "invert(100%)";
     }
 
     if (settings.isBoldTextEnabled) {
-      styles.fontWeight = 'bold';
+      styles.fontWeight = "bold";
     }
 
     if (settings.isGrayscaleEnabled) {
-      styles.filter = 'grayscale(100%)';
+      styles.filter = "grayscale(100%)";
     }
 
     if (settings.highContrast) {
-      styles.backgroundColor = '#000000';
-      styles.color = '#FFFFFF';
+      styles.backgroundColor = "#000000";
+      styles.color = "#FFFFFF";
     }
 
     if (settings.fontSize !== 1) {
@@ -209,4 +224,4 @@ export const useAccessibility = () => {
     resetSettings,
     getAccessibilityStyles,
   };
-}; 
+};

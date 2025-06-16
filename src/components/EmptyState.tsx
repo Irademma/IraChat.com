@@ -1,6 +1,13 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, Animated, ImageSourcePropType } from 'react-native';
-import { useTheme } from './ThemeProvider';
+import React, { useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Animated,
+  ImageSourcePropType,
+} from "react-native";
+import { useTheme } from "./ThemeProvider";
 
 interface EmptyStateProps {
   icon: ImageSourcePropType;
@@ -8,7 +15,7 @@ interface EmptyStateProps {
   description: string;
   actionText?: string;
   onAction?: () => void;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
 }
 
 export default function EmptyState({
@@ -17,7 +24,7 @@ export default function EmptyState({
   description,
   actionText,
   onAction,
-  size = 'medium'
+  size = "medium",
 }: EmptyStateProps) {
   const { colors } = useTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -40,26 +47,26 @@ export default function EmptyState({
 
   const getSizeStyles = () => {
     switch (size) {
-      case 'small':
+      case "small":
         return {
-          iconSize: 'w-16 h-16',
-          titleSize: 'text-lg',
-          descriptionSize: 'text-sm',
-          spacing: 'mb-4',
+          iconSize: "w-16 h-16",
+          titleSize: "text-lg",
+          descriptionSize: "text-sm",
+          spacing: "mb-4",
         };
-      case 'large':
+      case "large":
         return {
-          iconSize: 'w-28 h-28',
-          titleSize: 'text-2xl',
-          descriptionSize: 'text-lg',
-          spacing: 'mb-8',
+          iconSize: "w-28 h-28",
+          titleSize: "text-2xl",
+          descriptionSize: "text-lg",
+          spacing: "mb-8",
         };
       default:
         return {
-          iconSize: 'w-20 h-20',
-          titleSize: 'text-xl',
-          descriptionSize: 'text-base',
-          spacing: 'mb-6',
+          iconSize: "w-20 h-20",
+          titleSize: "text-xl",
+          descriptionSize: "text-base",
+          spacing: "mb-6",
         };
     }
   };
@@ -86,7 +93,7 @@ export default function EmptyState({
         className={`${sizeStyles.titleSize} mb-3 text-center`}
         style={{
           color: colors.textSecondary,
-          fontWeight: '600'
+          fontWeight: "600",
         }}
       >
         {title}
@@ -110,7 +117,7 @@ export default function EmptyState({
             className="text-base"
             style={{
               color: colors.messageTextOwn,
-              fontWeight: '600'
+              fontWeight: "600",
             }}
           >
             {actionText}

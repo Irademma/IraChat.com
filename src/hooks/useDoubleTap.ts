@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
-import { Animated } from 'react-native';
+import { useCallback, useRef, useState } from "react";
+import { Animated } from "react-native";
 
 interface UseDoubleTapProps {
   onDoubleTap: () => void;
@@ -7,7 +7,11 @@ interface UseDoubleTapProps {
   delay?: number;
 }
 
-export const useDoubleTap = (onDoubleTap: () => void, onSingleTap?: () => void, delay: number = 300) => {
+export const useDoubleTap = (
+  onDoubleTap: () => void,
+  onSingleTap?: () => void,
+  delay: number = 300,
+) => {
   const [lastTap, setLastTap] = useState<number | null>(null);
   const likeAnimation = useRef(new Animated.Value(0)).current;
 
@@ -47,4 +51,4 @@ export const useDoubleTap = (onDoubleTap: () => void, onSingleTap?: () => void, 
     onPress: handleTap,
     likeAnimation,
   };
-}; 
+};

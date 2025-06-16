@@ -1,14 +1,21 @@
-import { Video } from 'expo-av';
-import { useEffect, useRef, useState } from 'react';
-import { ViewToken } from 'react-native';
+import { Video } from "expo-av";
+import { useEffect, useRef, useState } from "react";
+import { ViewToken } from "react-native";
 
 interface UseVideoPlayerProps {
   isActive: boolean;
   videoUri: string;
-  onViewableItemsChanged?: (info: { viewableItems: ViewToken[]; changed: ViewToken[] }) => void;
+  onViewableItemsChanged?: (info: {
+    viewableItems: ViewToken[];
+    changed: ViewToken[];
+  }) => void;
 }
 
-export const useVideoPlayer = ({ isActive, videoUri, onViewableItemsChanged }: UseVideoPlayerProps) => {
+export const useVideoPlayer = ({
+  isActive,
+  videoUri,
+  onViewableItemsChanged,
+}: UseVideoPlayerProps) => {
   const [status, setStatus] = useState<any>({});
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -31,7 +38,7 @@ export const useVideoPlayer = ({ isActive, videoUri, onViewableItemsChanged }: U
         setIsPlaying(true);
       }
     } catch (error) {
-      console.error('Error playing video:', error);
+      console.error("Error playing video:", error);
     }
   };
 
@@ -42,7 +49,7 @@ export const useVideoPlayer = ({ isActive, videoUri, onViewableItemsChanged }: U
         setIsPlaying(false);
       }
     } catch (error) {
-      console.error('Error pausing video:', error);
+      console.error("Error pausing video:", error);
     }
   };
 
@@ -54,7 +61,7 @@ export const useVideoPlayer = ({ isActive, videoUri, onViewableItemsChanged }: U
         setIsMuted(newMuteState);
       }
     } catch (error) {
-      console.error('Error toggling mute:', error);
+      console.error("Error toggling mute:", error);
     }
   };
 
@@ -66,7 +73,7 @@ export const useVideoPlayer = ({ isActive, videoUri, onViewableItemsChanged }: U
         setIsPlaying(true);
       }
     } catch (error) {
-      console.error('Error replaying video:', error);
+      console.error("Error replaying video:", error);
     }
   };
 
@@ -96,12 +103,12 @@ export const useVideoPlayer = ({ isActive, videoUri, onViewableItemsChanged }: U
         }
       }
     } catch (error) {
-      console.error('Error loading video:', error);
+      console.error("Error loading video:", error);
     }
   };
 
   const handleError = (error: any) => {
-    console.error('Video error:', error);
+    console.error("Video error:", error);
     setIsBuffering(false);
     setIsPlaying(false);
   };
@@ -120,4 +127,4 @@ export const useVideoPlayer = ({ isActive, videoUri, onViewableItemsChanged }: U
     handleLoad,
     handleError,
   };
-}; 
+};

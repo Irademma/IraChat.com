@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -8,13 +8,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
-} from 'react-native';
-import { colors } from '../theme/colors';
+  View,
+} from "react-native";
+import { colors } from "../theme/colors";
 
 interface SearchResult {
   id: string;
-  type: 'message' | 'member' | 'contact' | 'username';
+  type: "message" | "member" | "contact" | "username";
   title: string;
   subtitle?: string;
   content?: string;
@@ -32,28 +32,28 @@ interface SearchBarProps {
 
 const getResultIcon = (type: string) => {
   switch (type) {
-    case 'message':
-      return 'chatbubble-outline';
-    case 'member':
-      return 'person-outline';
-    case 'contact':
-      return 'people-outline';
-    case 'username':
-      return 'at-outline';
+    case "message":
+      return "chatbubble-outline";
+    case "member":
+      return "person-outline";
+    case "contact":
+      return "people-outline";
+    case "username":
+      return "at-outline";
     default:
-      return 'search-outline';
+      return "search-outline";
   }
 };
 
 const getResultColor = (type: string) => {
   switch (type) {
-    case 'message':
+    case "message":
       return colors.primary;
-    case 'member':
+    case "member":
       return colors.textSecondary;
-    case 'contact':
+    case "contact":
       return colors.accent;
-    case 'username':
+    case "username":
       return colors.success;
     default:
       return colors.text;
@@ -64,9 +64,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   onResultPress,
   onFilterChange,
-  initialFilters = { messages: true, members: true, contacts: true, usernames: true },
+  initialFilters = {
+    messages: true,
+    members: true,
+    contacts: true,
+    usernames: true,
+  },
 }) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [filters, setFilters] = useState(initialFilters);
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -99,16 +104,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setResults(searchResults);
       }
     } catch (error) {
-      console.error('Search error:', error);
+      console.error("Search error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleClear = () => {
-    setQuery('');
+    setQuery("");
     setResults([]);
-    onSearch('');
+    onSearch("");
   };
 
   const handleFilterToggle = (filter: keyof typeof filters) => {
@@ -119,10 +124,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   const renderFilterButton = (type: keyof typeof filters, label: string) => (
     <TouchableOpacity
-      style={[
-        styles.filterButton,
-        filters[type] && styles.filterButtonActive,
-      ]}
+      style={[styles.filterButton, filters[type] && styles.filterButtonActive]}
       onPress={() => handleFilterToggle(type)}
     >
       <Text
@@ -183,7 +185,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
       ]}
     >
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color={colors.text} style={styles.searchIcon} />
+        <Ionicons
+          name="search"
+          size={20}
+          color={colors.text}
+          style={styles.searchIcon}
+        />
         <TextInput
           style={styles.input}
           placeholder="Search messages, members, contacts..."
@@ -201,10 +208,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
       </View>
 
       <View style={styles.filterContainer}>
-        {renderFilterButton('messages', 'Messages')}
-        {renderFilterButton('members', 'Members')}
-        {renderFilterButton('contacts', 'Contacts')}
-        {renderFilterButton('usernames', 'Usernames')}
+        {renderFilterButton("messages", "Messages")}
+        {renderFilterButton("members", "Members")}
+        {renderFilterButton("contacts", "Contacts")}
+        {renderFilterButton("usernames", "Usernames")}
       </View>
 
       {isLoading ? (
@@ -241,8 +248,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.surface,
     borderRadius: 8,
     paddingHorizontal: 12,
@@ -260,9 +267,9 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   filterContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 12,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
     gap: 8,
   },
   filterButton: {
@@ -290,8 +297,8 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   resultItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 12,
     backgroundColor: colors.surface,
     borderRadius: 8,
@@ -302,8 +309,8 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
     backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   resultContentContainer: {
@@ -312,7 +319,7 @@ const styles = StyleSheet.create({
   resultTitle: {
     color: colors.text,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 2,
   },
   resultSubtitle: {
@@ -331,11 +338,11 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   noResultsContainer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   noResultsText: {
     color: colors.textSecondary,
@@ -343,4 +350,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SearchBar; 
+export default SearchBar;

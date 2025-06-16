@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Text, TouchableOpacity } from 'react-native';
-import { Audio } from 'expo-av';
+import React, { useState } from "react";
+import { Text, TouchableOpacity } from "react-native";
+import { Audio } from "expo-av";
 
 export default function AudioPlayer({ uri }: { uri: string }) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
@@ -24,8 +24,11 @@ export default function AudioPlayer({ uri }: { uri: string }) {
   }
 
   return (
-    <TouchableOpacity onPress={handlePlayPause} className="bg-blue-100 p-2 rounded">
-      <Text>{isPlaying ? 'Pause' : 'Play'} Audio</Text>
+    <TouchableOpacity
+      onPress={handlePlayPause}
+      className="bg-blue-100 p-2 rounded"
+    >
+      <Text>{isPlaying ? "Pause" : "Play"} Audio</Text>
     </TouchableOpacity>
   );
 }

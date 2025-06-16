@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import ProfilePicturePicker from '../ui/ProfilePicturePicker';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from "react-native";
+import { useRouter } from "expo-router";
+import ProfilePicturePicker from "../ui/ProfilePicturePicker";
 
 interface User {
   id: string;
@@ -18,12 +25,12 @@ interface AccountInfoProps {
 }
 
 export default function AccountInfo({ user }: AccountInfoProps) {
-  const [name, setName] = useState(user.name || '');
-  const [username, setUsername] = useState(user.username || '');
-  const [bio, setBio] = useState(user.bio || '');
-  const [profilePicture, setProfilePicture] = useState(user.image || '');
+  const [name, setName] = useState(user.name || "");
+  const [username, setUsername] = useState(user.username || "");
+  const [bio, setBio] = useState(user.bio || "");
+  const [profilePicture, setProfilePicture] = useState(user.image || "");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleProfilePictureChange = (imageUri: string) => {
@@ -32,34 +39,34 @@ export default function AccountInfo({ user }: AccountInfoProps) {
 
   const validateForm = () => {
     if (!name.trim()) {
-      setError('Name is required');
+      setError("Name is required");
       return false;
     }
 
     if (name.trim().length < 2) {
-      setError('Name must be at least 2 characters long');
+      setError("Name must be at least 2 characters long");
       return false;
     }
 
     if (!username.trim()) {
-      setError('Username is required');
+      setError("Username is required");
       return false;
     }
 
     if (username.trim().length < 3) {
-      setError('Username must be at least 3 characters long');
+      setError("Username must be at least 3 characters long");
       return false;
     }
 
     // Username validation
     const usernameRegex = /^[a-zA-Z0-9_]+$/;
     if (!usernameRegex.test(username.trim())) {
-      setError('Username can only contain letters, numbers, and underscores');
+      setError("Username can only contain letters, numbers, and underscores");
       return false;
     }
 
     if (bio.length > 200) {
-      setError('Bio must be 200 characters or less');
+      setError("Bio must be 200 characters or less");
       return false;
     }
 
@@ -67,10 +74,10 @@ export default function AccountInfo({ user }: AccountInfoProps) {
   };
 
   const handleSave = async () => {
-    setError('');
+    setError("");
 
     if (!validateForm()) {
-      Alert.alert('Validation Error', error);
+      Alert.alert("Validation Error", error);
       return;
     }
 
@@ -82,20 +89,23 @@ export default function AccountInfo({ user }: AccountInfoProps) {
         name: name.trim(),
         username: username.trim().toLowerCase(),
         displayName: name.trim(),
-        bio: bio.trim() || 'I Love IraChat',
+        bio: bio.trim() || "I Love IraChat",
         image: profilePicture || user.image,
         avatar: profilePicture || user.image, // Keep both for compatibility
-        status: bio.trim() || 'I Love IraChat',
+        status: bio.trim() || "I Love IraChat",
       };
 
       // Save updated data to localStorage
-      localStorage.setItem('iraChat_currentUser', JSON.stringify(updatedUserData));
-      
-      Alert.alert('Success', 'Profile updated successfully!');
+      localStorage.setItem(
+        "iraChat_currentUser",
+        JSON.stringify(updatedUserData),
+      );
+
+      Alert.alert("Success", "Profile updated successfully!");
       router.back();
     } catch (error) {
-      console.error('Error saving profile:', error);
-      Alert.alert('Error', 'Failed to save profile. Please try again.');
+      console.error("Error saving profile:", error);
+      Alert.alert("Error", "Failed to save profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -155,9 +165,7 @@ export default function AccountInfo({ user }: AccountInfoProps) {
 
         {/* Bio Field */}
         <View>
-          <Text className="text-base font-medium text-gray-700 mb-2">
-            Bio
-          </Text>
+          <Text className="text-base font-medium text-gray-700 mb-2">Bio</Text>
           <TextInput
             value={bio}
             onChangeText={setBio}
@@ -187,12 +195,12 @@ export default function AccountInfo({ user }: AccountInfoProps) {
             onPress={handleSave}
             disabled={loading}
             className={`py-4 px-6 rounded-lg ${
-              loading ? 'bg-gray-400' : 'bg-blue-500'
+              loading ? "bg-gray-400" : "bg-blue-500"
             }`}
           >
             <Text
               className="text-white text-center text-base"
-              style={{ fontWeight: '600' }}
+              style={{ fontWeight: "600" }}
             >
               {loading ? "Saving..." : "Save Changes"}
             </Text>
@@ -205,7 +213,7 @@ export default function AccountInfo({ user }: AccountInfoProps) {
           >
             <Text
               className="text-gray-700 text-center text-base"
-              style={{ fontWeight: '600' }}
+              style={{ fontWeight: "600" }}
             >
               Cancel
             </Text>

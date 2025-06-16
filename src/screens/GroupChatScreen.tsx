@@ -1,24 +1,28 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { Audio } from "expo-av";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-    AccessibilityInfo,
-    Animated,
-    FlatList,
-    Image,
-    Keyboard,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+  AccessibilityInfo,
+  Animated,
+  FlatList,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 // Import available types and components
-import { GroupMember, GroupMemberPreferences, SearchResult } from '../types/index';
+import {
+  GroupMember,
+  GroupMemberPreferences,
+  SearchResult,
+} from "../types/index";
 
 // Define missing types
 interface GroupMessage {
@@ -30,50 +34,62 @@ interface GroupMessage {
     avatar: string;
   };
   timestamp: Date;
-  type: 'text' | 'image' | 'video' | 'audio';
+  type: "text" | "image" | "video" | "audio";
   media?: Array<{
     id: string;
     url: string;
-    type: 'image' | 'video' | 'audio';
+    type: "image" | "video" | "audio";
     duration?: number;
   }>;
 }
 
 // Mock missing imports for now
 const colors = {
-  background: '#FFFFFF',
-  text: '#000000',
-  textSecondary: '#666666',
-  primary: '#667eea',
-  error: '#FF0000',
-  card: '#F8F9FA',
-  border: '#E5E5E5',
-  shadow: '#000000',
-  inputBackground: '#F5F5F5',
-  primaryLight: '#8B9FEE',
-  white: '#FFFFFF',
-  dark: '#000000',
-  skeleton: '#E0E0E0',
-  skeletonHighlight: '#F0F0F0',
-  ripple: '#667eea',
+  background: "#FFFFFF",
+  text: "#000000",
+  textSecondary: "#666666",
+  primary: "#667eea",
+  error: "#FF0000",
+  card: "#F8F9FA",
+  border: "#E5E5E5",
+  shadow: "#000000",
+  inputBackground: "#F5F5F5",
+  primaryLight: "#8B9FEE",
+  white: "#FFFFFF",
+  dark: "#000000",
+  skeleton: "#E0E0E0",
+  skeletonHighlight: "#F0F0F0",
+  ripple: "#667eea",
 };
 
 const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 };
 const fontSize = { sm: 12, md: 14, lg: 16, xl: 18 };
 const shadows = {
   small: { shadowOpacity: 0.1 },
-  medium: { shadowOpacity: 0.2, shadowRadius: 4 }
+  medium: { shadowOpacity: 0.2, shadowRadius: 4 },
 };
 const animations = { timing: { normal: 300 } };
-const modalConfig = { default: { animationType: 'slide' as const, transparent: true } };
+const modalConfig = {
+  default: { animationType: "slide" as const, transparent: true },
+};
 
 // Mock missing utilities
 const isTablet = false;
 const isSmallDevice = false;
-const handleError = (error: any, animation?: any) => console.error('Error:', error);
+const handleError = (error: any, animation?: any) =>
+  console.error("Error:", error);
 const validateMessage = (message: string) => message.trim().length > 0;
-const validateGroupAction = (action: string, isAdmin: boolean, isBlocked: boolean) => true;
-const getSearchResults = async (query: string, messages: any[], members: any[], contacts: any[]) => [];
+const validateGroupAction = (
+  action: string,
+  isAdmin: boolean,
+  isBlocked: boolean,
+) => true;
+const getSearchResults = async (
+  query: string,
+  messages: any[],
+  members: any[],
+  contacts: any[],
+) => [];
 
 // Mock missing hooks
 const useGroupChat = (groupId: string, userId: string) => ({
@@ -90,9 +106,18 @@ const useGroupChat = (groupId: string, userId: string) => ({
   loadMoreMessages: async () => {},
 });
 
-const useMediaUpload = () => ({ uploadMedia: async () => {}, uploading: false });
-const useMentionNotifications = (config: any) => ({ sendMentionNotifications: async () => {} });
-const useResponsive = () => ({ isLandscape: false, wp: (val: number) => val, hp: (val: number) => val });
+const useMediaUpload = () => ({
+  uploadMedia: async () => {},
+  uploading: false,
+});
+const useMentionNotifications = (config: any) => ({
+  sendMentionNotifications: async () => {},
+});
+const useResponsive = () => ({
+  isLandscape: false,
+  wp: (val: number) => val,
+  hp: (val: number) => val,
+});
 
 // Mock missing components
 const GroupHeader = ({ onBackPress, onInfoPress, onSettingsPress }: any) => (
@@ -118,7 +143,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { isLandscape, wp, hp } = useResponsive();
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [replyingTo, setReplyingTo] = useState<any | null>(null);
   const [showMediaGrid, setShowMediaGrid] = useState(false);
@@ -129,18 +154,20 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
   const [preferences, setPreferences] = useState<GroupMemberPreferences>({
     notifications: { messages: true, mentions: true, reactions: true },
     privacy: { readReceipts: true, lastSeen: true, profilePhoto: true },
-    media: { autoDownload: true, quality: 'medium' },
+    media: { autoDownload: true, quality: "medium" },
     isMuted: false,
     isArchived: false,
     isLocked: false,
     hiddenMessages: [],
-    hiddenUpdates: []
+    hiddenUpdates: [],
   });
   const [showSettings, setShowSettings] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
-  const [selectedMember, setSelectedMember] = useState<GroupMember | null>(null);
+  const [selectedMember, setSelectedMember] = useState<GroupMember | null>(
+    null,
+  );
   const [selectedContact, setSelectedContact] = useState<any | null>(null);
   const [showMemberProfile, setShowMemberProfile] = useState(false);
   const [showContactProfile, setShowContactProfile] = useState(false);
@@ -148,7 +175,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
   const [recordingMembers, setRecordingMembers] = useState<string[]>([]);
   const [onlineMembers, setOnlineMembers] = useState<string[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [lastReadMessageId, setLastReadMessageId] = useState<string>('');
+  const [lastReadMessageId, setLastReadMessageId] = useState<string>("");
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isScreenReaderEnabled, setIsScreenReaderEnabled] = useState(false);
@@ -168,7 +195,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
       adminCount: number;
     };
     recentActivity: Array<{
-      type: 'message' | 'member' | 'media';
+      type: "message" | "member" | "media";
       timestamp: number;
       description: string;
     }>;
@@ -182,7 +209,9 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
     contacts: true,
   });
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [playingVoiceMessage, setPlayingVoiceMessage] = useState<string | null>(null);
+  const [playingVoiceMessage, setPlayingVoiceMessage] = useState<string | null>(
+    null,
+  );
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   const {
@@ -260,11 +289,11 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
   const handleSendMessage = async () => {
     try {
       validateMessage(message);
-      validateGroupAction('send', isAdmin, false);
+      validateGroupAction("send", isAdmin, false);
 
       // ... existing handleSendMessage logic ...
 
-      setMessage('');
+      setMessage("");
     } catch (error) {
       handleError(error, shakeAnimation);
     }
@@ -280,7 +309,10 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
     }
   };
 
-  const handleHideContent = async (contentId: string, contentType: 'message' | 'update') => {
+  const handleHideContent = async (
+    contentId: string,
+    contentType: "message" | "update",
+  ) => {
     try {
       // ... existing handleHideContent logic ...
     } catch (error) {
@@ -290,7 +322,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
 
   const handleDeleteMessage = async (messageId: string) => {
     try {
-      validateGroupAction('deleteMessage', isAdmin, false);
+      validateGroupAction("deleteMessage", isAdmin, false);
 
       // ... existing handleDeleteMessage logic ...
     } catch (error) {
@@ -324,27 +356,27 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
 
   // Add missing handler functions
   const handleAddMember = async (userId: string) => {
-    console.log('Adding member:', userId);
+    console.log("Adding member:", userId);
   };
 
   const handleRemoveMember = async (userId: string) => {
-    console.log('Removing member:', userId);
+    console.log("Removing member:", userId);
   };
 
   const handlePromoteMember = async (userId: string) => {
-    console.log('Promoting member:', userId);
+    console.log("Promoting member:", userId);
   };
 
   const handleDemoteMember = async (userId: string) => {
-    console.log('Demoting member:', userId);
+    console.log("Demoting member:", userId);
   };
 
   const handleBlockMember = async (userId: string) => {
-    console.log('Blocking member:', userId);
+    console.log("Blocking member:", userId);
   };
 
   const handleUnblockMember = async (userId: string) => {
-    console.log('Unblocking member:', userId);
+    console.log("Unblocking member:", userId);
   };
 
   // markMessagesAsRead function moved to useCallback below
@@ -355,7 +387,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
         query,
         messages,
         members,
-        contacts
+        contacts,
       );
       return results;
     } catch (error) {
@@ -366,7 +398,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
 
   const handleSearchResultPress = (result: SearchResult) => {
     switch (result.type) {
-      case 'message':
+      case "message":
         // Find the message index and scroll to it
         const messageIndex = messages.findIndex((m: any) => m.id === result.id);
         if (messageIndex !== -1) {
@@ -377,20 +409,21 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
           });
         }
         break;
-      case 'member':
+      case "member":
         setSelectedMember(members.find((m: any) => m.id === result.id) || null);
         setShowMemberProfile(true);
         break;
-      case 'contact':
+      case "contact":
         setSelectedContact(contacts.find((c) => c.id === result.id));
         setShowContactProfile(true);
         break;
-      case 'user':
+      case "user":
         // Find the user in either members or contacts
-        const user = members.find((m) => m.id === result.id) || 
-                    contacts.find((c) => c.id === result.id);
+        const user =
+          members.find((m) => m.id === result.id) ||
+          contacts.find((c) => c.id === result.id);
         if (user) {
-          if ('role' in user) {
+          if ("role" in user) {
             setSelectedMember(user as GroupMember);
             setShowMemberProfile(true);
           } else {
@@ -404,7 +437,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
 
   const handleSearchFilterChange = (filters: { [key: string]: boolean }) => {
     // Update search filters if needed
-    console.log('Search filters updated:', filters);
+    console.log("Search filters updated:", filters);
   };
 
   // Function to handle voice message recording
@@ -417,13 +450,13 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
       });
 
       const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
+        Audio.RecordingOptionsPresets.HIGH_QUALITY,
       );
       setRecording(recording);
       setIsRecording(true);
-      setTypingMembers(prev => [...prev, currentUserId]);
+      setTypingMembers((prev) => [...prev, currentUserId]);
     } catch (error) {
-      console.error('Failed to start recording:', error);
+      console.error("Failed to start recording:", error);
     }
   };
 
@@ -435,14 +468,14 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
       const uri = recording.getURI();
       setRecording(null);
       setIsRecording(false);
-      setTypingMembers(prev => prev.filter(id => id !== currentUserId));
+      setTypingMembers((prev) => prev.filter((id) => id !== currentUserId));
 
       if (uri) {
         // Here you would typically upload the voice message to your backend
         // and send it as a message
         const voiceMessage = {
           id: Date.now().toString(),
-          type: 'voice',
+          type: "voice",
           uri,
           duration: 0, // You would calculate this
           sender: currentUserId,
@@ -451,7 +484,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
         // Add the voice message to your messages
       }
     } catch (error) {
-      console.error('Failed to stop recording:', error);
+      console.error("Failed to stop recording:", error);
     }
   };
 
@@ -464,7 +497,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
 
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri },
-        { shouldPlay: true }
+        { shouldPlay: true },
       );
       setSound(newSound);
       setPlayingVoiceMessage(uri);
@@ -475,7 +508,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
         }
       });
     } catch (error) {
-      console.error('Failed to play voice message:', error);
+      console.error("Failed to play voice message:", error);
     }
   };
 
@@ -504,14 +537,18 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
   // Function to render voice message
   const renderVoiceMessage = (message: GroupMessage) => {
     const isPlaying = playingVoiceMessage === message.media?.[0]?.url;
-    
+
     return (
       <TouchableOpacity
         style={styles.voiceMessageContainer}
-        onPress={() => isPlaying ? stopVoiceMessage() : playVoiceMessage(message.media?.[0]?.url || '')}
+        onPress={() =>
+          isPlaying
+            ? stopVoiceMessage()
+            : playVoiceMessage(message.media?.[0]?.url || "")
+        }
       >
         <Ionicons
-          name={isPlaying ? 'pause' : 'play'}
+          name={isPlaying ? "pause" : "play"}
           size={24}
           color={colors.primary}
         />
@@ -548,12 +585,12 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
     };
 
     const showSubscription = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      keyboardWillShow
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      keyboardWillShow,
     );
     const hideSubscription = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      keyboardWillHide
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      keyboardWillHide,
     );
 
     return () => {
@@ -571,11 +608,15 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
 
   const renderMessage = ({ item: message }: { item: GroupMessage }) => {
     const isCurrentUser = message.sender.id === currentUserId;
-    const messageStyle = isCurrentUser ? styles.sentMessage : styles.receivedMessage;
-    const containerStyle = isCurrentUser ? styles.sentContainer : styles.receivedContainer;
+    const messageStyle = isCurrentUser
+      ? styles.sentMessage
+      : styles.receivedMessage;
+    const containerStyle = isCurrentUser
+      ? styles.sentContainer
+      : styles.receivedContainer;
 
     const handleProfilePress = () => {
-      const member = members.find(m => m.id === message.sender.id);
+      const member = members.find((m) => m.id === message.sender.id);
       if (member) {
         setSelectedMember(member);
         setShowMemberProfile(true);
@@ -583,14 +624,14 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
     };
 
     return (
-      <View 
+      <View
         style={[styles.messageContainer, containerStyle]}
         accessible={isScreenReaderEnabled}
         accessibilityLabel={`${message.sender.name}: ${message.content}`}
         accessibilityRole="text"
       >
         {!isCurrentUser && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.avatarContainer}
             onPress={handleProfilePress}
             accessibilityLabel={`View ${message.sender.name}'s profile`}
@@ -601,51 +642,59 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
               style={[
                 styles.avatar,
                 isTablet && styles.avatarTablet,
-                isSmallDevice && styles.avatarSmall
+                isSmallDevice && styles.avatarSmall,
               ]}
             />
           </TouchableOpacity>
         )}
         <View style={[styles.messageBubble, messageStyle]}>
           {!isCurrentUser && (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={handleProfilePress}
               style={styles.senderInfo}
               accessibilityLabel={`View ${message.sender.name}'s profile`}
               accessibilityRole="button"
             >
-              <Text style={[
-                styles.senderName,
-                isTablet && styles.senderNameTablet,
-                isSmallDevice && styles.senderNameSmall
-              ]}>
+              <Text
+                style={[
+                  styles.senderName,
+                  isTablet && styles.senderNameTablet,
+                  isSmallDevice && styles.senderNameSmall,
+                ]}
+              >
                 {message.sender.name}
               </Text>
-              <Text style={[
-                styles.senderUsername,
-                isTablet && styles.senderUsernameTablet,
-                isSmallDevice && styles.senderUsernameSmall
-              ]}>
+              <Text
+                style={[
+                  styles.senderUsername,
+                  isTablet && styles.senderUsernameTablet,
+                  isSmallDevice && styles.senderUsernameSmall,
+                ]}
+              >
                 @{message.sender?.name || (message as any).senderName}
               </Text>
             </TouchableOpacity>
           )}
-          {message.type === 'audio' ? (
+          {message.type === "audio" ? (
             renderVoiceMessage(message)
           ) : (
-            <Text style={[
-              styles.messageText,
-              isTablet && styles.messageTextTablet,
-              isSmallDevice && styles.messageTextSmall
-            ]}>
+            <Text
+              style={[
+                styles.messageText,
+                isTablet && styles.messageTextTablet,
+                isSmallDevice && styles.messageTextSmall,
+              ]}
+            >
               {message.content}
             </Text>
           )}
-          <Text style={[
-            styles.timestamp,
-            isTablet && styles.timestampTablet,
-            isSmallDevice && styles.timestampSmall
-          ]}>
+          <Text
+            style={[
+              styles.timestamp,
+              isTablet && styles.timestampTablet,
+              isSmallDevice && styles.timestampSmall,
+            ]}
+          >
             {message.timestamp.toLocaleTimeString()}
           </Text>
         </View>
@@ -653,7 +702,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
     );
   };
 
-  const isBlocked = members.find(m => m.id === currentUserId)?.isBlocked;
+  const isBlocked = members.find((m) => m.id === currentUserId)?.isBlocked;
 
   // Function to mark messages as read
   const markMessagesAsRead = useCallback(() => {
@@ -669,7 +718,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
   useEffect(() => {
     if (messages.length > 0 && lastReadMessageId) {
       const unreadMessages = messages.filter(
-        (message: any) => message.id > lastReadMessageId
+        (message: any) => message.id > lastReadMessageId,
       );
       setUnreadCount(unreadMessages.length);
     }
@@ -677,7 +726,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
 
   // Mark messages as read when screen is focused
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener("focus", () => {
       markMessagesAsRead();
     });
 
@@ -704,8 +753,8 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
 
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
         <FlatList
           ref={flatListRef}
@@ -716,7 +765,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
           onEndReachedThreshold={0.5}
           contentContainerStyle={[
             styles.listContent,
-            isKeyboardVisible && { paddingBottom: keyboardHeight }
+            isKeyboardVisible && { paddingBottom: keyboardHeight },
           ]}
           showsVerticalScrollIndicator={false}
           onScroll={handleScrollToBottom}
@@ -727,19 +776,23 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
           initialNumToRender={10}
         />
 
-        <View style={[
-          styles.inputContainer,
-          isKeyboardVisible && styles.inputContainerKeyboardVisible
-        ]}>
+        <View
+          style={[
+            styles.inputContainer,
+            isKeyboardVisible && styles.inputContainerKeyboardVisible,
+          ]}
+        >
           <TouchableOpacity
             style={styles.voiceButton}
             onPressIn={startRecording}
             onPressOut={stopRecording}
-            accessibilityLabel={isRecording ? "Stop recording" : "Start recording"}
+            accessibilityLabel={
+              isRecording ? "Stop recording" : "Start recording"
+            }
             accessibilityRole="button"
           >
             <Ionicons
-              name={isRecording ? 'stop' : 'mic'}
+              name={isRecording ? "stop" : "mic"}
               size={isTablet ? 28 : 24}
               color={isRecording ? colors.error : colors.primary}
             />
@@ -748,7 +801,7 @@ export const GroupChatScreen: React.FC<GroupChatScreenProps> = ({
             style={[
               styles.input,
               isTablet && styles.inputTablet,
-              isSmallDevice && styles.inputSmall
+              isSmallDevice && styles.inputSmall,
             ]}
             placeholder="Type a message..."
             placeholderTextColor={colors.textSecondary}
@@ -860,8 +913,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     backgroundColor: colors.background,
@@ -876,7 +929,7 @@ const styles = StyleSheet.create({
   },
   groupName: {
     fontSize: fontSize.lg,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   memberCount: {
@@ -887,15 +940,15 @@ const styles = StyleSheet.create({
     padding: spacing.xs,
   },
   messageContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginVertical: 4,
     paddingHorizontal: 12,
   },
   sentContainer: {
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   receivedContainer: {
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
   },
   avatarContainer: {
     marginRight: 8,
@@ -918,7 +971,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   messageBubble: {
-    maxWidth: '80%',
+    maxWidth: "80%",
     padding: 12,
     borderRadius: 16,
   },
@@ -935,7 +988,7 @@ const styles = StyleSheet.create({
   },
   senderName: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 2,
   },
@@ -971,26 +1024,26 @@ const styles = StyleSheet.create({
   },
   mediaContainer: {
     marginTop: 8,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 4,
   },
   mediaItem: {
     width: 100,
     height: 100,
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   mediaImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   timestamp: {
     fontSize: 12,
     color: colors.textSecondary,
     marginTop: 4,
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
   },
   timestampTablet: {
     fontSize: 10,
@@ -999,8 +1052,8 @@ const styles = StyleSheet.create({
     fontSize: 8,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     backgroundColor: colors.background,
@@ -1019,7 +1072,7 @@ const styles = StyleSheet.create({
     }),
   },
   inputContainerKeyboardVisible: {
-    paddingBottom: Platform.OS === 'ios' ? spacing.sm : 0,
+    paddingBottom: Platform.OS === "ios" ? spacing.sm : 0,
   },
   voiceButton: {
     padding: spacing.xs,
@@ -1050,52 +1103,52 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    width: '90%',
-    maxHeight: '80%',
+    width: "90%",
+    maxHeight: "80%",
     backgroundColor: colors.background,
     borderRadius: 12,
     ...shadows.medium,
   },
   blockedContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: spacing.xl,
   },
   blockedText: {
     fontSize: fontSize.lg,
     color: colors.error,
     marginTop: spacing.md,
-    textAlign: 'center',
+    textAlign: "center",
   },
   blockedSubtext: {
     fontSize: fontSize.md,
     color: colors.textSecondary,
     marginTop: spacing.xs,
-    textAlign: 'center',
+    textAlign: "center",
   },
   lockedContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: spacing.xl,
   },
   lockedText: {
     fontSize: fontSize.lg,
     color: colors.primary,
     marginTop: spacing.md,
-    textAlign: 'center',
+    textAlign: "center",
   },
   lockedSubtext: {
     fontSize: fontSize.md,
     color: colors.textSecondary,
     marginTop: spacing.xs,
-    textAlign: 'center',
+    textAlign: "center",
   },
   listContent: {
     paddingHorizontal: spacing.md,
@@ -1108,7 +1161,7 @@ const styles = StyleSheet.create({
     ...shadows.small,
   },
   searchFilters: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     backgroundColor: colors.background,
@@ -1116,8 +1169,8 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   searchFilter: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginRight: spacing.md,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
@@ -1134,11 +1187,11 @@ const styles = StyleSheet.create({
   },
   searchFilterTextActive: {
     color: colors.primary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   voiceMessageContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 8,
     backgroundColor: colors.card,
     borderRadius: 8,
@@ -1158,4 +1211,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderRadius: 10,
   },
-}); 
+});

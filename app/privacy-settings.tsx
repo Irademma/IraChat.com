@@ -1,17 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Switch,
+  Alert,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface PrivacySettings {
-  lastSeen: 'everyone' | 'contacts' | 'nobody';
-  profilePhoto: 'everyone' | 'contacts' | 'nobody';
-  status: 'everyone' | 'contacts' | 'nobody';
+  lastSeen: "everyone" | "contacts" | "nobody";
+  profilePhoto: "everyone" | "contacts" | "nobody";
+  status: "everyone" | "contacts" | "nobody";
   readReceipts: boolean;
-  groupsAddMe: 'everyone' | 'contacts' | 'nobody';
+  groupsAddMe: "everyone" | "contacts" | "nobody";
   liveLocation: boolean;
-  callsFrom: 'everyone' | 'contacts' | 'nobody';
+  callsFrom: "everyone" | "contacts" | "nobody";
   blockedContacts: string[];
   twoStepVerification: boolean;
   disappearingMessages: boolean;
@@ -19,13 +26,13 @@ interface PrivacySettings {
 }
 
 const defaultSettings: PrivacySettings = {
-  lastSeen: 'everyone',
-  profilePhoto: 'everyone',
-  status: 'everyone',
+  lastSeen: "everyone",
+  profilePhoto: "everyone",
+  status: "everyone",
   readReceipts: true,
-  groupsAddMe: 'contacts',
+  groupsAddMe: "contacts",
   liveLocation: false,
-  callsFrom: 'everyone',
+  callsFrom: "everyone",
   blockedContacts: [],
   twoStepVerification: false,
   disappearingMessages: false,
@@ -43,12 +50,12 @@ export default function PrivacySettingsScreen() {
 
   const loadSettings = async () => {
     try {
-      const savedSettings = await AsyncStorage.getItem('privacySettings');
+      const savedSettings = await AsyncStorage.getItem("privacySettings");
       if (savedSettings) {
         setSettings({ ...defaultSettings, ...JSON.parse(savedSettings) });
       }
     } catch (error) {
-      console.error('Error loading privacy settings:', error);
+      console.error("Error loading privacy settings:", error);
     } finally {
       setLoading(false);
     }
@@ -56,11 +63,14 @@ export default function PrivacySettingsScreen() {
 
   const saveSettings = async (newSettings: PrivacySettings) => {
     try {
-      await AsyncStorage.setItem('privacySettings', JSON.stringify(newSettings));
+      await AsyncStorage.setItem(
+        "privacySettings",
+        JSON.stringify(newSettings),
+      );
       setSettings(newSettings);
     } catch (error) {
-      console.error('Error saving privacy settings:', error);
-      Alert.alert('Error', 'Failed to save settings. Please try again.');
+      console.error("Error saving privacy settings:", error);
+      Alert.alert("Error", "Failed to save settings. Please try again.");
     }
   };
 
@@ -69,25 +79,25 @@ export default function PrivacySettingsScreen() {
     saveSettings(newSettings);
   };
 
-  const showPrivacyOptions = (title: string, currentValue: string, onSelect: (value: string) => void) => {
-    Alert.alert(
-      title,
-      'Who can see this information?',
-      [
-        { text: 'Everyone', onPress: () => onSelect('everyone') },
-        { text: 'My Contacts', onPress: () => onSelect('contacts') },
-        { text: 'Nobody', onPress: () => onSelect('nobody') },
-        { text: 'Cancel', style: 'cancel' }
-      ]
-    );
+  const showPrivacyOptions = (
+    title: string,
+    currentValue: string,
+    onSelect: (value: string) => void,
+  ) => {
+    Alert.alert(title, "Who can see this information?", [
+      { text: "Everyone", onPress: () => onSelect("everyone") },
+      { text: "My Contacts", onPress: () => onSelect("contacts") },
+      { text: "Nobody", onPress: () => onSelect("nobody") },
+      { text: "Cancel", style: "cancel" },
+    ]);
   };
 
-  const PrivacyItem = ({ 
-    title, 
-    description, 
-    value, 
-    onPress, 
-    icon 
+  const PrivacyItem = ({
+    title,
+    description,
+    value,
+    onPress,
+    icon,
   }: {
     title: string;
     description: string;
@@ -113,12 +123,12 @@ export default function PrivacySettingsScreen() {
     </TouchableOpacity>
   );
 
-  const SwitchItem = ({ 
-    title, 
-    description, 
-    value, 
-    onToggle, 
-    icon 
+  const SwitchItem = ({
+    title,
+    description,
+    value,
+    onToggle,
+    icon,
   }: {
     title: string;
     description: string;
@@ -137,8 +147,8 @@ export default function PrivacySettingsScreen() {
       <Switch
         value={value}
         onValueChange={onToggle}
-        trackColor={{ false: '#E5E7EB', true: '#8B5CF6' }}
-        thumbColor={value ? '#FFFFFF' : '#FFFFFF'}
+        trackColor={{ false: "#E5E7EB", true: "#8B5CF6" }}
+        thumbColor={value ? "#FFFFFF" : "#FFFFFF"}
       />
     </View>
   );
@@ -159,19 +169,27 @@ export default function PrivacySettingsScreen() {
           <TouchableOpacity onPress={() => router.back()} className="mr-4">
             <Ionicons name="arrow-back" size={24} color="#374151" />
           </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-800">Privacy & Security</Text>
+          <Text className="text-xl font-bold text-gray-800">
+            Privacy & Security
+          </Text>
         </View>
       </View>
 
       <ScrollView className="flex-1 px-4 py-6">
         {/* Who Can See My Info */}
-        <Text className="text-lg font-semibold text-gray-800 mb-4">Who Can See My Info</Text>
-        
+        <Text className="text-lg font-semibold text-gray-800 mb-4">
+          Who Can See My Info
+        </Text>
+
         <PrivacyItem
           title="Last Seen"
           description="Who can see when you were last online"
           value={settings.lastSeen}
-          onPress={() => showPrivacyOptions('Last Seen', settings.lastSeen, (value) => updateSetting('lastSeen', value))}
+          onPress={() =>
+            showPrivacyOptions("Last Seen", settings.lastSeen, (value) =>
+              updateSetting("lastSeen", value),
+            )
+          }
           icon="time"
         />
 
@@ -179,7 +197,13 @@ export default function PrivacySettingsScreen() {
           title="Profile Photo"
           description="Who can see your profile photo"
           value={settings.profilePhoto}
-          onPress={() => showPrivacyOptions('Profile Photo', settings.profilePhoto, (value) => updateSetting('profilePhoto', value))}
+          onPress={() =>
+            showPrivacyOptions(
+              "Profile Photo",
+              settings.profilePhoto,
+              (value) => updateSetting("profilePhoto", value),
+            )
+          }
           icon="person-circle"
         />
 
@@ -187,18 +211,24 @@ export default function PrivacySettingsScreen() {
           title="Status"
           description="Who can see your status updates"
           value={settings.status}
-          onPress={() => showPrivacyOptions('Status', settings.status, (value) => updateSetting('status', value))}
+          onPress={() =>
+            showPrivacyOptions("Status", settings.status, (value) =>
+              updateSetting("status", value),
+            )
+          }
           icon="chatbubble-ellipses"
         />
 
         {/* Message Settings */}
-        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">Message Settings</Text>
+        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">
+          Message Settings
+        </Text>
 
         <SwitchItem
           title="Read Receipts"
           description="Let others know when you've read their messages"
           value={settings.readReceipts}
-          onToggle={(value) => updateSetting('readReceipts', value)}
+          onToggle={(value) => updateSetting("readReceipts", value)}
           icon="checkmark-done"
         />
 
@@ -206,7 +236,7 @@ export default function PrivacySettingsScreen() {
           title="Disappearing Messages"
           description="Messages disappear after being read"
           value={settings.disappearingMessages}
-          onToggle={(value) => updateSetting('disappearingMessages', value)}
+          onToggle={(value) => updateSetting("disappearingMessages", value)}
           icon="timer"
         />
 
@@ -214,18 +244,24 @@ export default function PrivacySettingsScreen() {
           title="Screenshot Notifications"
           description="Notify when someone screenshots your messages"
           value={settings.screenshotNotification}
-          onToggle={(value) => updateSetting('screenshotNotification', value)}
+          onToggle={(value) => updateSetting("screenshotNotification", value)}
           icon="camera"
         />
 
         {/* Groups & Calls */}
-        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">Groups & Calls</Text>
+        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">
+          Groups & Calls
+        </Text>
 
         <PrivacyItem
           title="Groups"
           description="Who can add you to groups"
           value={settings.groupsAddMe}
-          onPress={() => showPrivacyOptions('Groups', settings.groupsAddMe, (value) => updateSetting('groupsAddMe', value))}
+          onPress={() =>
+            showPrivacyOptions("Groups", settings.groupsAddMe, (value) =>
+              updateSetting("groupsAddMe", value),
+            )
+          }
           icon="people"
         />
 
@@ -233,12 +269,18 @@ export default function PrivacySettingsScreen() {
           title="Calls"
           description="Who can call you"
           value={settings.callsFrom}
-          onPress={() => showPrivacyOptions('Calls', settings.callsFrom, (value) => updateSetting('callsFrom', value))}
+          onPress={() =>
+            showPrivacyOptions("Calls", settings.callsFrom, (value) =>
+              updateSetting("callsFrom", value),
+            )
+          }
           icon="call"
         />
 
         {/* Security */}
-        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">Security</Text>
+        <Text className="text-lg font-semibold text-gray-800 mb-4 mt-6">
+          Security
+        </Text>
 
         <SwitchItem
           title="Two-Step Verification"
@@ -246,9 +288,12 @@ export default function PrivacySettingsScreen() {
           value={settings.twoStepVerification}
           onToggle={(value) => {
             if (value) {
-              Alert.alert('Two-Step Verification', 'This feature will be available soon');
+              Alert.alert(
+                "Two-Step Verification",
+                "This feature will be available soon",
+              );
             } else {
-              updateSetting('twoStepVerification', value);
+              updateSetting("twoStepVerification", value);
             }
           }}
           icon="shield-checkmark"
@@ -256,15 +301,24 @@ export default function PrivacySettingsScreen() {
 
         {/* Blocked Contacts */}
         <TouchableOpacity
-          onPress={() => Alert.alert('Blocked Contacts', `You have ${settings.blockedContacts.length} blocked contacts`)}
+          onPress={() =>
+            Alert.alert(
+              "Blocked Contacts",
+              `You have ${settings.blockedContacts.length} blocked contacts`,
+            )
+          }
           className="flex-row items-center py-4 px-4 bg-white rounded-lg mb-3"
         >
           <View className="w-10 h-10 rounded-full bg-red-100 items-center justify-center mr-4">
             <Ionicons name="ban" size={20} color="#EF4444" />
           </View>
           <View className="flex-1">
-            <Text className="text-gray-800 text-base font-medium">Blocked Contacts</Text>
-            <Text className="text-gray-500 text-sm mt-1">{settings.blockedContacts.length} contacts blocked</Text>
+            <Text className="text-gray-800 text-base font-medium">
+              Blocked Contacts
+            </Text>
+            <Text className="text-gray-500 text-sm mt-1">
+              {settings.blockedContacts.length} contacts blocked
+            </Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color="#6B7280" />
         </TouchableOpacity>

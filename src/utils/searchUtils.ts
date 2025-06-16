@@ -1,8 +1,8 @@
-import { GroupMember, GroupMessage } from '../types/groupChat';
+import { GroupMember, GroupMessage } from "../types/groupChat";
 
 interface SearchResult {
   id: string;
-  type: 'message' | 'member' | 'contact' | 'username';
+  type: "message" | "member" | "contact" | "username";
   title: string;
   subtitle?: string;
   content?: string;
@@ -13,27 +13,27 @@ interface SearchResult {
 
 export const searchMessages = (
   messages: GroupMessage[],
-  query: string
+  query: string,
 ): SearchResult[] => {
   if (!query.trim()) return [];
 
-  const searchRegex = new RegExp(query, 'i');
+  const searchRegex = new RegExp(query, "i");
   return messages
     .filter((message) => {
       return (
         searchRegex.test(message.content) ||
         searchRegex.test(message.sender.name) ||
-        searchRegex.test(message.sender.username || '') ||
-        (message.media?.some((media) => searchRegex.test(media.caption || '')))
+        searchRegex.test(message.sender.username || "") ||
+        message.media?.some((media) => searchRegex.test(media.caption || ""))
       );
     })
     .map((message) => ({
       id: message.id,
-      type: 'message',
+      type: "message",
       title: message.sender.name,
-      subtitle: message.timestamp?.toLocaleString() || '',
+      subtitle: message.timestamp?.toLocaleString() || "",
       content: message.content,
-      timestamp: message.timestamp?.toLocaleString() || '',
+      timestamp: message.timestamp?.toLocaleString() || "",
       avatar: message.sender.avatar,
       username: message.sender.username,
     }));
@@ -41,24 +41,24 @@ export const searchMessages = (
 
 export const searchMembers = (
   members: GroupMember[],
-  query: string
+  query: string,
 ): SearchResult[] => {
   if (!query.trim()) return [];
 
-  const searchRegex = new RegExp(query, 'i');
+  const searchRegex = new RegExp(query, "i");
   return members
     .filter((member) => {
       return (
-        searchRegex.test(member.name || '') ||
+        searchRegex.test(member.name || "") ||
         searchRegex.test(member.username) ||
         searchRegex.test(member.role) ||
-        searchRegex.test(member.email || '')
+        searchRegex.test(member.email || "")
       );
     })
     .map((member) => ({
-      id: member.id || '',
-      type: 'member',
-      title: member.name || '',
+      id: member.id || "",
+      type: "member",
+      title: member.name || "",
       subtitle: member.role,
       content: member.username,
       avatar: member.avatar,
@@ -68,11 +68,11 @@ export const searchMembers = (
 
 export const searchContacts = (
   contacts: any[],
-  query: string
+  query: string,
 ): SearchResult[] => {
   if (!query.trim()) return [];
 
-  const searchRegex = new RegExp(query, 'i');
+  const searchRegex = new RegExp(query, "i");
   return contacts
     .filter((contact) => {
       return (
@@ -83,7 +83,7 @@ export const searchContacts = (
     })
     .map((contact) => ({
       id: contact.id,
-      type: 'contact',
+      type: "contact",
       title: contact.name,
       subtitle: contact.username,
       content: contact.email,
@@ -95,21 +95,21 @@ export const searchContacts = (
 export const searchUsernames = (
   members: GroupMember[],
   contacts: any[],
-  query: string
+  query: string,
 ): SearchResult[] => {
   if (!query.trim()) return [];
 
-  const searchRegex = new RegExp(query, 'i');
+  const searchRegex = new RegExp(query, "i");
   const allUsers = [...members, ...contacts];
-  
+
   return allUsers
     .filter((user) => searchRegex.test(user.username))
     .map((user) => ({
       id: user.id,
-      type: 'username',
+      type: "username",
       title: user.username,
       subtitle: user.name,
-      content: user.email || '',
+      content: user.email || "",
       avatar: user.avatar,
       username: user.username,
     }));
@@ -129,15 +129,15 @@ export const debounce = (func: Function, wait: number) => {
 
 export const highlightMatches = (text: string, query: string): string => {
   if (!query.trim()) return text;
-  const regex = new RegExp(`(${query})`, 'gi');
-  return text.replace(regex, '<mark>$1</mark>');
+  const regex = new RegExp(`(${query})`, "gi");
+  return text.replace(regex, "<mark>$1</mark>");
 };
 
 export const getSearchResults = async (
   query: string,
   messages: GroupMessage[],
   members: GroupMember[],
-  contacts: any[]
+  contacts: any[],
 ): Promise<SearchResult[]> => {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 300));
@@ -147,7 +147,12 @@ export const getSearchResults = async (
   const contactResults = searchContacts(contacts, query);
   const usernameResults = searchUsernames(members, contacts, query);
 
-  return [...messageResults, ...memberResults, ...contactResults, ...usernameResults];
+  return [
+    ...messageResults,
+    ...memberResults,
+    ...contactResults,
+    ...usernameResults,
+  ];
 };
 
 export const sortSearchResults = (results: SearchResult[]): SearchResult[] => {
@@ -176,20 +181,20 @@ export const filterSearchResults = (
     members?: boolean;
     contacts?: boolean;
     usernames?: boolean;
-  }
+  },
 ): SearchResult[] => {
   return results.filter((result) => {
     switch (result.type) {
-      case 'message':
+      case "message":
         return filters.messages !== false;
-      case 'member':
+      case "member":
         return filters.members !== false;
-      case 'contact':
+      case "contact":
         return filters.contacts !== false;
-      case 'username':
+      case "username":
         return filters.usernames !== false;
       default:
         return true;
     }
   });
-}; 
+};

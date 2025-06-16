@@ -1,26 +1,26 @@
-import { Ionicons } from '@expo/vector-icons';
-import React, { useRef, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import React, { useRef, useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    FlatList,
-    Modal,
-    Platform,
-    StyleSheet,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { useResponsive } from '../hooks/useResponsive';
-import { colors } from '../theme/colors';
-import { MediaPreview } from './MediaPreview';
-import { MediaViewer } from './MediaViewer';
+  Animated,
+  Dimensions,
+  FlatList,
+  Modal,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useResponsive } from "../hooks/useResponsive";
+import { colors } from "../theme/colors";
+import { MediaPreview } from "./MediaPreview";
+import { MediaViewer } from "./MediaViewer";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface MediaGridProps {
   media: Array<{
     url: string;
-    type: 'image' | 'video' | 'file';
+    type: "image" | "video" | "file";
     caption?: string;
     fileType?: string;
     fileSize?: string;
@@ -29,7 +29,9 @@ interface MediaGridProps {
 }
 
 export const MediaGrid: React.FC<MediaGridProps> = ({ media, onClose }) => {
-  const [selectedMedia, setSelectedMedia] = useState<typeof media[0] | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<(typeof media)[0] | null>(
+    null,
+  );
   const [showViewer, setShowViewer] = useState(false);
   const { isTablet } = useResponsive();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -42,7 +44,7 @@ export const MediaGrid: React.FC<MediaGridProps> = ({ media, onClose }) => {
     }).start();
   }, []);
 
-  const handleMediaPress = (item: typeof media[0]) => {
+  const handleMediaPress = (item: (typeof media)[0]) => {
     setSelectedMedia(item);
     setShowViewer(true);
   };
@@ -55,7 +57,7 @@ export const MediaGrid: React.FC<MediaGridProps> = ({ media, onClose }) => {
   const numColumns = isTablet ? 4 : 3;
   const itemSize = (SCREEN_WIDTH - (numColumns + 1) * 8) / numColumns;
 
-  const renderMediaItem = ({ item }: { item: typeof media[0] }) => (
+  const renderMediaItem = ({ item }: { item: (typeof media)[0] }) => (
     <TouchableOpacity
       style={[styles.mediaItem, { width: itemSize, height: itemSize }]}
       onPress={() => handleMediaPress(item)}
@@ -133,11 +135,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
-    paddingTop: Platform.OS === 'ios' ? 48 : 16,
+    paddingTop: Platform.OS === "ios" ? 48 : 16,
     backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -154,13 +156,13 @@ const styles = StyleSheet.create({
   mediaItem: {
     margin: 4,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     backgroundColor: colors.mediaPreview.background,
     borderWidth: 1,
     borderColor: colors.mediaPreview.border,
   },
   preview: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
-}); 
+});

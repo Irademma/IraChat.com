@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-console.log('🚀 Optimizing IraChat Performance...');
+console.log("🚀 Optimizing IraChat Performance...");
 
 // 1. Create optimized metro config
 const metroConfig = `
@@ -28,58 +28,54 @@ module.exports = config;
 
 // 2. Create performance optimized app.json
 const appJsonOptimized = {
-  "expo": {
-    "name": "IraChat",
-    "slug": "irachat",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+  expo: {
+    name: "IraChat",
+    slug: "irachat",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: "./assets/icon.png",
+    userInterfaceStyle: "light",
+    splash: {
+      image: "./assets/splash.png",
+      resizeMode: "contain",
+      backgroundColor: "#ffffff",
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.irachat.app"
+    assetBundlePatterns: ["**/*"],
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: "com.irachat.app",
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+    android: {
+      adaptiveIcon: {
+        foregroundImage: "./assets/adaptive-icon.png",
+        backgroundColor: "#FFFFFF",
       },
-      "package": "com.irachat.app"
+      package: "com.irachat.app",
     },
-    "web": {
-      "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+    web: {
+      favicon: "./assets/favicon.png",
+      bundler: "metro",
     },
-    "plugins": [
-      "expo-router"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    }
-  }
+    plugins: ["expo-router"],
+    experiments: {
+      typedRoutes: true,
+    },
+  },
 };
 
 // 3. Performance optimization functions
 function optimizePerformance() {
-  console.log('📦 Creating optimized configurations...');
-  
+  console.log("📦 Creating optimized configurations...");
+
   try {
     // Write optimized metro config
-    fs.writeFileSync('metro.config.js', metroConfig.trim());
-    console.log('✅ Metro config optimized');
-    
+    fs.writeFileSync("metro.config.js", metroConfig.trim());
+    console.log("✅ Metro config optimized");
+
     // Update app.json for better performance
-    fs.writeFileSync('app.json', JSON.stringify(appJsonOptimized, null, 2));
-    console.log('✅ App.json optimized');
-    
+    fs.writeFileSync("app.json", JSON.stringify(appJsonOptimized, null, 2));
+    console.log("✅ App.json optimized");
+
     // Create performance tips
     const performanceTips = `
 # 🚀 IraChat Performance Optimization Guide
@@ -164,17 +160,16 @@ npx expo build:android
 **IraChat now loads in under 1 second!** ⚡
 `;
 
-    fs.writeFileSync('PERFORMANCE_GUIDE.md', performanceTips.trim());
-    console.log('✅ Performance guide created');
-    
-    console.log('\n🎉 Performance optimization complete!');
-    console.log('📊 Expected improvements:');
-    console.log('  ⚡ Load time: < 1 second');
-    console.log('  📦 Bundle size: < 25KB');
-    console.log('  🚀 Server response: < 1 second');
-    
+    fs.writeFileSync("PERFORMANCE_GUIDE.md", performanceTips.trim());
+    console.log("✅ Performance guide created");
+
+    console.log("\n🎉 Performance optimization complete!");
+    console.log("📊 Expected improvements:");
+    console.log("  ⚡ Load time: < 1 second");
+    console.log("  📦 Bundle size: < 25KB");
+    console.log("  🚀 Server response: < 1 second");
   } catch (error) {
-    console.error('❌ Optimization failed:', error.message);
+    console.error("❌ Optimization failed:", error.message);
   }
 }
 
@@ -233,10 +228,13 @@ const styles = StyleSheet.create({
 `;
 
   try {
-    fs.writeFileSync('src/components/FastLoader.tsx', fastLoadingComponent.trim());
-    console.log('✅ Fast loading component created');
+    fs.writeFileSync(
+      "src/components/FastLoader.tsx",
+      fastLoadingComponent.trim(),
+    );
+    console.log("✅ Fast loading component created");
   } catch (error) {
-    console.error('❌ Failed to create fast loader:', error.message);
+    console.error("❌ Failed to create fast loader:", error.message);
   }
 }
 

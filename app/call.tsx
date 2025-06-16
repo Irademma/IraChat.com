@@ -1,18 +1,18 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
-    Alert,
-    Animated,
-    Dimensions,
-    Image,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+  Alert,
+  Animated,
+  Dimensions,
+  Image,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 interface Contact {
   id: string;
@@ -29,7 +29,7 @@ export default function CallScreen() {
   const [isCallConnected, setIsCallConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
-  const [isVideoOn, setIsVideoOn] = useState(type === 'video');
+  const [isVideoOn, setIsVideoOn] = useState(type === "video");
   const [callContacts, setCallContacts] = useState<Contact[]>([]);
 
   // Animation values
@@ -42,23 +42,26 @@ export default function CallScreen() {
   // Sample contacts data for demonstration
   const mockContactsData: Contact[] = [
     {
-      id: '1',
-      name: 'John Doe',
-      phoneNumber: '+256701234567',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200'
+      id: "1",
+      name: "John Doe",
+      phoneNumber: "+256701234567",
+      avatar:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
     },
     {
-      id: '2',
-      name: 'Sarah Johnson',
-      phoneNumber: '+256701234568',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200'
+      id: "2",
+      name: "Sarah Johnson",
+      phoneNumber: "+256701234568",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200",
     },
     {
-      id: '3',
-      name: 'Mike Wilson',
-      phoneNumber: '+256701234569',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200'
-    }
+      id: "3",
+      name: "Mike Wilson",
+      phoneNumber: "+256701234569",
+      avatar:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200",
+    },
   ];
 
   useEffect(() => {
@@ -66,19 +69,21 @@ export default function CallScreen() {
     if (contacts) {
       try {
         const decodedContacts = decodeURIComponent(contacts as string);
-        const contactIds = decodedContacts.split(',');
-        const selectedContacts = mockContactsData.filter(c => contactIds.includes(c.id));
+        const contactIds = decodedContacts.split(",");
+        const selectedContacts = mockContactsData.filter((c) =>
+          contactIds.includes(c.id),
+        );
 
         if (selectedContacts.length === 0) {
-          Alert.alert('Error', 'No valid contacts found for call');
+          Alert.alert("Error", "No valid contacts found for call");
           router.back();
           return;
         }
 
         setCallContacts(selectedContacts);
       } catch (error) {
-        console.error('Error parsing contacts:', error);
-        Alert.alert('Error', 'Invalid call parameters');
+        console.error("Error parsing contacts:", error);
+        Alert.alert("Error", "Invalid call parameters");
         router.back();
         return;
       }
@@ -126,51 +131,49 @@ export default function CallScreen() {
           duration: 1000,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   };
 
   const startCallTimer = () => {
     timerRef.current = setInterval(() => {
-      setCallDuration(prev => prev + 1);
+      setCallDuration((prev) => prev + 1);
     }, 1000);
   };
 
   const formatCallDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleEndCall = () => {
-    Alert.alert(
-      'End Call',
-      'Are you sure you want to end this call?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'End Call',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              console.log('📴 Ending call...');
+    Alert.alert("End Call", "Are you sure you want to end this call?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "End Call",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            console.log("📴 Ending call...");
 
-              // Import calling service
-              const { callingService } = await import('../src/services/callingService');
+            // Import calling service
+            const { callingService } = await import(
+              "../src/services/callingService"
+            );
 
-              // End the call
-              await callingService.endCall();
+            // End the call
+            await callingService.endCall();
 
-              console.log('✅ Call ended successfully');
-              router.back();
-            } catch (error) {
-              console.error('❌ Error ending call:', error);
-              router.back();
-            }
+            console.log("✅ Call ended successfully");
+            router.back();
+          } catch (error) {
+            console.error("❌ Error ending call:", error);
+            router.back();
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleMute = () => {
@@ -198,7 +201,7 @@ export default function CallScreen() {
           </Animated.View>
           <Text
             className="text-white text-2xl mt-6"
-            style={{ fontWeight: '700' }}
+            style={{ fontWeight: "700" }}
           >
             {contact.name}
           </Text>
@@ -210,10 +213,7 @@ export default function CallScreen() {
     } else {
       return (
         <View className="items-center">
-          <Text
-            className="text-white text-2xl"
-            style={{ fontWeight: '700' }}
-          >
+          <Text className="text-white text-2xl" style={{ fontWeight: "700" }}>
             Group Call
           </Text>
           <Text className="text-white/80 text-lg mt-2">
@@ -242,7 +242,7 @@ export default function CallScreen() {
   };
 
   const renderVideoCall = () => {
-    if (type !== 'video' || !isVideoOn) return null;
+    if (type !== "video" || !isVideoOn) return null;
 
     return (
       <View className="absolute inset-0">
@@ -250,7 +250,7 @@ export default function CallScreen() {
         <View className="flex-1 bg-gray-900 items-center justify-center">
           <Text className="text-white text-lg">Remote Video</Text>
           <Text className="text-white/60 text-sm mt-2">
-            {callContacts[0]?.name || 'Contact'}&apos;s video
+            {callContacts[0]?.name || "Contact"}&apos;s video
           </Text>
         </View>
 
@@ -266,8 +266,12 @@ export default function CallScreen() {
 
   return (
     <View className="flex-1 bg-gradient-to-b from-gray-800 to-gray-900">
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent
+      />
+
       {/* Video Call Overlay */}
       {renderVideoCall()}
 
@@ -277,27 +281,27 @@ export default function CallScreen() {
           <View className="items-center">
             {renderContactInfo()}
             <Text className="text-white/80 text-lg mt-8">
-              {type === 'video' ? 'Video calling...' : 'Calling...'}
+              {type === "video" ? "Video calling..." : "Calling..."}
             </Text>
           </View>
         ) : (
           <View className="items-center">
-            {type !== 'video' && renderContactInfo()}
+            {type !== "video" && renderContactInfo()}
             <Text
               className="text-white text-xl mt-8"
-              style={{ fontWeight: '700' }}
+              style={{ fontWeight: "700" }}
             >
               {formatCallDuration(callDuration)}
             </Text>
             <Text className="text-white/80 text-base mt-2">
-              {type === 'video' ? 'Video call active' : 'Voice call active'}
+              {type === "video" ? "Video call active" : "Voice call active"}
             </Text>
           </View>
         )}
       </View>
 
       {/* Call Controls */}
-      <Animated.View 
+      <Animated.View
         style={{ opacity: fadeAnim }}
         className="absolute bottom-16 left-0 right-0"
       >
@@ -306,15 +310,17 @@ export default function CallScreen() {
           <TouchableOpacity
             onPress={handleMute}
             className={`w-16 h-16 rounded-full items-center justify-center ${
-              isMuted ? 'bg-red-500' : 'bg-white/20'
+              isMuted ? "bg-red-500" : "bg-white/20"
             }`}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel={isMuted ? 'Unmute microphone' : 'Mute microphone'}
+            accessibilityLabel={
+              isMuted ? "Unmute microphone" : "Mute microphone"
+            }
             accessibilityHint="Tap to toggle microphone"
           >
             <Ionicons
-              name={isMuted ? 'mic-off' : 'mic'}
+              name={isMuted ? "mic-off" : "mic"}
               size={24}
               color="white"
             />
@@ -333,48 +339,48 @@ export default function CallScreen() {
           </TouchableOpacity>
 
           {/* Speaker/Video Button */}
-          {type === 'video' ? (
+          {type === "video" ? (
             <TouchableOpacity
               onPress={handleVideoToggle}
               className={`w-16 h-16 rounded-full items-center justify-center ${
-                !isVideoOn ? 'bg-red-500' : 'bg-white/20'
+                !isVideoOn ? "bg-red-500" : "bg-white/20"
               }`}
             >
-              <Ionicons 
-                name={isVideoOn ? 'videocam' : 'videocam-off'} 
-                size={24} 
-                color="white" 
+              <Ionicons
+                name={isVideoOn ? "videocam" : "videocam-off"}
+                size={24}
+                color="white"
               />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               onPress={handleSpeaker}
               className={`w-16 h-16 rounded-full items-center justify-center ${
-                isSpeakerOn ? 'bg-blue-500' : 'bg-white/20'
+                isSpeakerOn ? "bg-blue-500" : "bg-white/20"
               }`}
             >
-              <Ionicons 
-                name={isSpeakerOn ? 'volume-high' : 'volume-medium'} 
-                size={24} 
-                color="white" 
+              <Ionicons
+                name={isSpeakerOn ? "volume-high" : "volume-medium"}
+                size={24}
+                color="white"
               />
             </TouchableOpacity>
           )}
         </View>
 
         {/* Additional Controls for Video Calls */}
-        {type === 'video' && (
+        {type === "video" && (
           <View className="flex-row justify-center mt-6 space-x-6">
             <TouchableOpacity
               onPress={handleSpeaker}
               className={`w-12 h-12 rounded-full items-center justify-center ${
-                isSpeakerOn ? 'bg-blue-500' : 'bg-white/20'
+                isSpeakerOn ? "bg-blue-500" : "bg-white/20"
               }`}
             >
-              <Ionicons 
-                name={isSpeakerOn ? 'volume-high' : 'volume-medium'} 
-                size={20} 
-                color="white" 
+              <Ionicons
+                name={isSpeakerOn ? "volume-high" : "volume-medium"}
+                size={20}
+                color="white"
               />
             </TouchableOpacity>
 

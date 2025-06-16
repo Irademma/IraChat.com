@@ -1,24 +1,24 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Video } from 'expo-av';
-import React, { useRef, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { Video } from "expo-av";
+import React, { useRef, useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import { useResponsive } from '../hooks/useResponsive';
-import { colors } from '../theme/colors';
+  Animated,
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useResponsive } from "../hooks/useResponsive";
+import { colors } from "../theme/colors";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface MediaPreviewProps {
   media: {
     url: string;
-    type: 'image' | 'video' | 'file';
+    type: "image" | "video" | "file";
     caption?: string;
     fileType?: string;
     fileSize?: string;
@@ -55,7 +55,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
   };
 
   const handleVideoPress = async () => {
-    if (media.type === 'video') {
+    if (media.type === "video") {
       if (isPlaying) {
         await videoRef.current?.pauseAsync();
       } else {
@@ -69,22 +69,22 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
   const renderFilePreview = () => {
     const getFileIcon = () => {
       switch (media.fileType?.toLowerCase()) {
-        case 'pdf':
-          return 'document-text';
-        case 'doc':
-        case 'docx':
-          return 'document';
-        case 'xls':
-        case 'xlsx':
-          return 'grid';
-        case 'ppt':
-        case 'pptx':
-          return 'easel';
-        case 'zip':
-        case 'rar':
-          return 'archive';
+        case "pdf":
+          return "document-text";
+        case "doc":
+        case "docx":
+          return "document";
+        case "xls":
+        case "xlsx":
+          return "grid";
+        case "ppt":
+        case "pptx":
+          return "easel";
+        case "zip":
+        case "rar":
+          return "archive";
         default:
-          return 'document';
+          return "document";
       }
     };
 
@@ -92,7 +92,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
       <View style={styles.filePreview}>
         <Ionicons name={getFileIcon()} size={32} color={colors.primary} />
         <Text style={styles.fileName} numberOfLines={1}>
-          {media.caption || 'File'}
+          {media.caption || "File"}
         </Text>
         <Text style={styles.fileInfo}>
           {media.fileType?.toUpperCase()} • {media.fileSize}
@@ -103,7 +103,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
 
   const renderMediaContent = () => {
     switch (media.type) {
-      case 'image':
+      case "image":
         return (
           <Image
             source={{ uri: media.url }}
@@ -111,14 +111,14 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
             resizeMode="cover"
           />
         );
-      case 'video':
+      case "video":
         return (
           <View style={styles.videoContainer}>
             <Video
               ref={videoRef}
               source={{ uri: media.url }}
               style={styles.mediaContent}
-              resizeMode={'cover' as any}
+              resizeMode={"cover" as any}
               isLooping
               shouldPlay={isPlaying}
               isMuted={!isPlaying}
@@ -130,7 +130,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
             )}
           </View>
         );
-      case 'file':
+      case "file":
         return renderFilePreview();
       default:
         return null;
@@ -139,11 +139,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
 
   return (
     <Animated.View
-      style={[
-        styles.container,
-        { transform: [{ scale: scaleAnim }] },
-        style,
-      ]}
+      style={[styles.container, { transform: [{ scale: scaleAnim }] }, style]}
     >
       <TouchableOpacity
         onPress={handleVideoPress}
@@ -154,14 +150,14 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
         style={styles.touchable}
       >
         {renderMediaContent()}
-        {media.caption && media.type !== 'file' && (
+        {media.caption && media.type !== "file" && (
           <View style={styles.captionContainer}>
             <Text style={styles.caption} numberOfLines={2}>
               {media.caption}
             </Text>
           </View>
         )}
-        {media.type === 'video' && (
+        {media.type === "video" && (
           <View style={styles.videoInfo}>
             <Ionicons name="videocam" size={16} color={colors.primary} />
             <Text style={styles.videoDuration}>00:00</Text>
@@ -175,37 +171,37 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
 const styles = StyleSheet.create({
   container: {
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     backgroundColor: colors.mediaPreview.background,
     borderWidth: 1,
     borderColor: colors.mediaPreview.border,
   },
   touchable: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   mediaContent: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   videoContainer: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   playButton: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
     transform: [{ translateX: -20 }, { translateY: -20 }],
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   captionContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
@@ -215,15 +211,15 @@ const styles = StyleSheet.create({
   caption: {
     color: colors.text,
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   videoInfo: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -235,15 +231,15 @@ const styles = StyleSheet.create({
   },
   filePreview: {
     padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   fileName: {
     color: colors.text,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     marginTop: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   fileInfo: {
     color: colors.textSecondary,

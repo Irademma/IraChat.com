@@ -7,12 +7,14 @@ This guide will help you create a development build for IraChat that enables ful
 ## ✅ Current Status
 
 ### What's Working:
+
 - ✅ **Web Version**: Firebase Auth works perfectly with IndexedDB persistence
 - ✅ **Android/iOS Fallback**: Apps run with web SDK fallback and memory persistence
 - ✅ **Cross-Platform Compatibility**: Universal Firebase configuration
 - ✅ **Graceful Degradation**: App continues to work even when native Firebase modules aren't available
 
 ### What Needs Development Build:
+
 - 🔧 **Full React Native Firebase**: Native modules for better performance and persistence
 - 🔧 **AsyncStorage Persistence**: Proper auth state persistence on mobile
 - 🔧 **Push Notifications**: Firebase Cloud Messaging (future feature)
@@ -58,6 +60,7 @@ eas init
 ### Step 3: Build Development Client
 
 #### For Android:
+
 ```bash
 # Build development client for Android
 eas build --profile development --platform android
@@ -66,6 +69,7 @@ eas build --profile development --platform android
 ```
 
 #### For iOS (requires Apple Developer Account):
+
 ```bash
 # Build development client for iOS
 eas build --profile development --platform ios
@@ -90,6 +94,7 @@ npx expo start --dev-client
 ## 🔧 Configuration Files Created
 
 ### `eas.json`
+
 ```json
 {
   "cli": {
@@ -123,6 +128,7 @@ npx expo start --dev-client
 ```
 
 ### Updated `app.json`
+
 - Added React Native Firebase main plugin (`@react-native-firebase/app`)
 - Added EAS project configuration
 - Configured for development builds
@@ -147,6 +153,7 @@ npx expo start --dev-client
 ## 🔄 Alternative: Continue with Current Setup
 
 Your current setup is already working well! You can continue development with:
+
 - **Web version** for full Firebase Auth functionality
 - **Android/iOS** with fallback for testing mobile-specific features
 - **Upgrade to development build** when you need native Firebase features
@@ -160,6 +167,7 @@ Your current setup is already working well! You can continue development with:
 ## 🆘 Troubleshooting
 
 If you encounter issues:
+
 1. Check EAS build logs for detailed error messages
 2. Ensure all Firebase configuration files are in place
 3. Verify app.json configuration matches your setup

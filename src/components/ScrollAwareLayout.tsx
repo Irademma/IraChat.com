@@ -1,12 +1,10 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from "react";
 import {
-  View,
   Animated,
-  ScrollView,
-  FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
-} from 'react-native';
+  View,
+} from "react-native";
 
 interface ScrollAwareLayoutProps {
   children: React.ReactNode;
@@ -31,7 +29,7 @@ export const ScrollAwareLayout: React.FC<ScrollAwareLayoutProps> = ({
   const headerTranslateY = useRef(new Animated.Value(0)).current;
   const footerOpacity = useRef(new Animated.Value(1)).current;
   const footerTranslateY = useRef(new Animated.Value(0)).current;
-  
+
   const lastScrollY = useRef(0);
   const isHeaderVisible = useRef(true);
   const isFooterVisible = useRef(true);
@@ -40,7 +38,7 @@ export const ScrollAwareLayout: React.FC<ScrollAwareLayoutProps> = ({
     if (isHeaderVisible.current) {
       isHeaderVisible.current = false;
       onHeaderVisibilityChange?.(false);
-      
+
       Animated.parallel([
         Animated.timing(headerOpacity, {
           toValue: 0,
@@ -60,7 +58,7 @@ export const ScrollAwareLayout: React.FC<ScrollAwareLayoutProps> = ({
     if (!isHeaderVisible.current) {
       isHeaderVisible.current = true;
       onHeaderVisibilityChange?.(true);
-      
+
       Animated.parallel([
         Animated.timing(headerOpacity, {
           toValue: 1,
@@ -80,7 +78,7 @@ export const ScrollAwareLayout: React.FC<ScrollAwareLayoutProps> = ({
     if (isFooterVisible.current) {
       isFooterVisible.current = false;
       onFooterVisibilityChange?.(false);
-      
+
       Animated.parallel([
         Animated.timing(footerOpacity, {
           toValue: 0,
@@ -100,7 +98,7 @@ export const ScrollAwareLayout: React.FC<ScrollAwareLayoutProps> = ({
     if (!isFooterVisible.current) {
       isFooterVisible.current = true;
       onFooterVisibilityChange?.(true);
-      
+
       Animated.parallel([
         Animated.timing(footerOpacity, {
           toValue: 1,
@@ -118,12 +116,13 @@ export const ScrollAwareLayout: React.FC<ScrollAwareLayoutProps> = ({
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const currentScrollY = event.nativeEvent.contentOffset.y;
-    const scrollDirection = currentScrollY > lastScrollY.current ? 'down' : 'up';
+    const scrollDirection =
+      currentScrollY > lastScrollY.current ? "down" : "up";
     const scrollDelta = Math.abs(currentScrollY - lastScrollY.current);
 
     // Only trigger animations if scroll delta exceeds threshold
     if (scrollDelta > scrollThreshold) {
-      if (scrollDirection === 'down') {
+      if (scrollDirection === "down") {
         // Scrolling down - hide header and footer
         hideHeader();
         hideFooter();
@@ -144,7 +143,7 @@ export const ScrollAwareLayout: React.FC<ScrollAwareLayoutProps> = ({
       {
         useNativeDriver: false,
         listener: handleScroll,
-      }
+      },
     );
   };
 
@@ -154,7 +153,7 @@ export const ScrollAwareLayout: React.FC<ScrollAwareLayoutProps> = ({
       {headerComponent && (
         <Animated.View
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             left: 0,
             right: 0,
@@ -168,8 +167,14 @@ export const ScrollAwareLayout: React.FC<ScrollAwareLayoutProps> = ({
       )}
 
       {/* Main Content */}
-      <View style={{ flex: 1, paddingTop: headerComponent ? 100 : 0, paddingBottom: footerComponent ? 80 : 0 }}>
-        {React.cloneElement(children as React.ReactElement, {
+      <View
+        style={{
+          flex: 1,
+          paddingTop: headerComponent ? 100 : 0,
+          paddingBottom: footerComponent ? 80 : 0,
+        }}
+      >
+        {React.cloneElement(children as React.ReactElement<any>, {
           onScroll: createScrollHandler(),
           scrollEventThrottle: 16,
         })}
@@ -179,7 +184,7 @@ export const ScrollAwareLayout: React.FC<ScrollAwareLayoutProps> = ({
       {footerComponent && (
         <Animated.View
           style={{
-            position: 'absolute',
+            position: "absolute",
             bottom: 0,
             left: 0,
             right: 0,
@@ -205,16 +210,17 @@ export const useScrollAware = (scrollThreshold = 50) => {
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const currentScrollY = event.nativeEvent.contentOffset.y;
-    const scrollDirection = currentScrollY > lastScrollY.current ? 'down' : 'up';
+    const scrollDirection =
+      currentScrollY > lastScrollY.current ? "down" : "up";
     const scrollDelta = Math.abs(currentScrollY - lastScrollY.current);
 
     if (scrollDelta > scrollThreshold) {
-      const targetOpacity = scrollDirection === 'down' ? 0 : 1;
-      
-      if (scrollDirection === 'down' && isHeaderVisible.current) {
+      const targetOpacity = scrollDirection === "down" ? 0 : 1;
+
+      if (scrollDirection === "down" && isHeaderVisible.current) {
         isHeaderVisible.current = false;
         isFooterVisible.current = false;
-        
+
         Animated.parallel([
           Animated.timing(headerOpacity, {
             toValue: targetOpacity,
@@ -227,10 +233,10 @@ export const useScrollAware = (scrollThreshold = 50) => {
             useNativeDriver: true,
           }),
         ]).start();
-      } else if (scrollDirection === 'up' && !isHeaderVisible.current) {
+      } else if (scrollDirection === "up" && !isHeaderVisible.current) {
         isHeaderVisible.current = true;
         isFooterVisible.current = true;
-        
+
         Animated.parallel([
           Animated.timing(headerOpacity, {
             toValue: targetOpacity,
@@ -254,7 +260,7 @@ export const useScrollAware = (scrollThreshold = 50) => {
     {
       useNativeDriver: false,
       listener: handleScroll,
-    }
+    },
   );
 
   return {
@@ -268,9 +274,12 @@ export const useScrollAware = (scrollThreshold = 50) => {
 
 // Higher-order component for adding scroll-aware behavior
 export const withScrollAware = <P extends object>(
-  Component: React.ComponentType<P>
+  Component: React.ComponentType<P>,
 ) => {
-  return React.forwardRef<any, P & { scrollThreshold?: number }>((props, ref) => {
+  const WrappedComponent = React.forwardRef<
+    any,
+    P & { scrollThreshold?: number }
+  >((props, ref) => {
     const { scrollThreshold, ...componentProps } = props;
     const scrollAware = useScrollAware(scrollThreshold);
 
@@ -282,4 +291,8 @@ export const withScrollAware = <P extends object>(
       />
     );
   });
+
+  WrappedComponent.displayName = `withScrollAware(${Component.displayName || Component.name})`;
+
+  return WrappedComponent;
 };

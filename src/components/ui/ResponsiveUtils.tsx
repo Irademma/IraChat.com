@@ -1,6 +1,10 @@
-import React from 'react';
-import { View, ViewStyle, Platform, Dimensions } from 'react-native';
-import { useResponsiveDesign, useResponsiveSpacing, useResponsiveLayout } from '../../hooks/useResponsiveDesign';
+import React from "react";
+import { View, ViewStyle, Platform, Dimensions } from "react-native";
+import {
+  useResponsiveDesign,
+  useResponsiveSpacing,
+  useResponsiveLayout,
+} from "../../hooks/useResponsiveDesign";
 
 // Enhanced responsive wrapper for perfect cross-device compatibility
 interface ResponsiveWrapperProps {
@@ -18,7 +22,7 @@ interface ResponsiveWrapperProps {
 export function ResponsiveWrapper({
   children,
   style,
-  className = '',
+  className = "",
   maxWidth = false,
   centered = false,
   padding = false,
@@ -34,11 +38,11 @@ export function ResponsiveWrapper({
     ...(fullHeight && { flex: 1 }),
     ...(maxWidth && {
       maxWidth: layout.maxContentWidth as any,
-      width: '100%',
+      width: "100%",
     }),
     ...(centered && {
-      alignSelf: 'center' as 'center',
-      alignItems: 'center' as 'center',
+      alignSelf: "center" as "center",
+      alignItems: "center" as "center",
     }),
     ...(padding && {
       padding: spacing.containerPadding,
@@ -46,10 +50,11 @@ export function ResponsiveWrapper({
     ...(margin && {
       margin: spacing.itemSpacing,
     }),
-    ...(safeArea && Platform.OS !== 'web' && {
-      paddingTop: spacing.safeArea,
-      paddingBottom: spacing.safeArea,
-    }),
+    ...(safeArea &&
+      Platform.OS !== "web" && {
+        paddingTop: spacing.safeArea,
+        paddingBottom: spacing.safeArea,
+      }),
     ...style,
   };
 
@@ -63,9 +68,15 @@ export function ResponsiveWrapper({
 // Responsive flex container
 interface ResponsiveFlexProps {
   children: React.ReactNode;
-  direction?: 'row' | 'column';
-  justify?: 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly';
-  align?: 'flex-start' | 'center' | 'flex-end' | 'stretch';
+  direction?: "row" | "column";
+  justify?:
+    | "flex-start"
+    | "center"
+    | "flex-end"
+    | "space-between"
+    | "space-around"
+    | "space-evenly";
+  align?: "flex-start" | "center" | "flex-end" | "stretch";
   wrap?: boolean;
   gap?: number;
   style?: ViewStyle;
@@ -74,23 +85,23 @@ interface ResponsiveFlexProps {
 
 export function ResponsiveFlex({
   children,
-  direction = 'column',
-  justify = 'flex-start',
-  align = 'stretch',
+  direction = "column",
+  justify = "flex-start",
+  align = "stretch",
   wrap = false,
   gap,
   style,
-  className = '',
+  className = "",
 }: ResponsiveFlexProps) {
   const spacing = useResponsiveSpacing();
   const { breakpoints } = useResponsiveDesign();
 
   const flexStyle: ViewStyle = {
-    display: 'flex',
+    display: "flex",
     flexDirection: direction,
     justifyContent: justify,
     alignItems: align,
-    ...(wrap && { flexWrap: 'wrap' }),
+    ...(wrap && { flexWrap: "wrap" }),
     ...(gap !== undefined && { gap: gap }),
     ...style,
   };
@@ -118,13 +129,13 @@ export function ResponsiveImageContainer({
   maxWidth,
   maxHeight,
   style,
-  className = '',
+  className = "",
 }: ResponsiveImageContainerProps) {
   const { breakpoints } = useResponsiveDesign();
 
   const containerStyle: ViewStyle = {
-    width: '100%',
-    overflow: 'hidden' as 'hidden',
+    width: "100%",
+    overflow: "hidden" as "hidden",
     ...(aspectRatio && { aspectRatio }),
     ...(maxWidth && { maxWidth: maxWidth as any }),
     ...(maxHeight && { maxHeight: maxHeight as any }),
@@ -168,7 +179,7 @@ export function ResponsiveShow({
 }: ResponsiveShowProps) {
   const { breakpoints, deviceType } = useResponsiveDesign();
 
-  const shouldShow = 
+  const shouldShow =
     (xs && breakpoints.isXS) ||
     (sm && breakpoints.isSM) ||
     (md && breakpoints.isMD) ||
@@ -176,9 +187,9 @@ export function ResponsiveShow({
     (xl && breakpoints.isXL) ||
     (xxl && breakpoints.isXXL) ||
     (xxxl && breakpoints.isXXXL) ||
-    (mobile && deviceType === 'mobile') ||
-    (tablet && deviceType === 'tablet') ||
-    (desktop && deviceType === 'desktop');
+    (mobile && deviceType === "mobile") ||
+    (tablet && deviceType === "tablet") ||
+    (desktop && deviceType === "desktop");
 
   if (!shouldShow) return null;
 
@@ -189,7 +200,7 @@ export function ResponsiveShow({
 export function ResponsiveHide(props: ResponsiveShowProps) {
   const { breakpoints, deviceType } = useResponsiveDesign();
 
-  const shouldHide = 
+  const shouldHide =
     (props.xs && breakpoints.isXS) ||
     (props.sm && breakpoints.isSM) ||
     (props.md && breakpoints.isMD) ||
@@ -197,9 +208,9 @@ export function ResponsiveHide(props: ResponsiveShowProps) {
     (props.xl && breakpoints.isXL) ||
     (props.xxl && breakpoints.isXXL) ||
     (props.xxxl && breakpoints.isXXXL) ||
-    (props.mobile && deviceType === 'mobile') ||
-    (props.tablet && deviceType === 'tablet') ||
-    (props.desktop && deviceType === 'desktop');
+    (props.mobile && deviceType === "mobile") ||
+    (props.tablet && deviceType === "tablet") ||
+    (props.desktop && deviceType === "desktop");
 
   if (shouldHide) return null;
 
@@ -209,7 +220,7 @@ export function ResponsiveHide(props: ResponsiveShowProps) {
 // Responsive dimensions hook for components
 export function useResponsiveDimensions() {
   const { dimensions, breakpoints, deviceType } = useResponsiveDesign();
-  
+
   return {
     ...dimensions,
     breakpoints,
@@ -217,9 +228,9 @@ export function useResponsiveDimensions() {
     isPortrait: dimensions.height > dimensions.width,
     isLandscape: dimensions.width > dimensions.height,
     // Convenience flags
-    isMobile: deviceType === 'mobile',
-    isTablet: deviceType === 'tablet',
-    isDesktop: deviceType === 'desktop',
+    isMobile: deviceType === "mobile",
+    isTablet: deviceType === "tablet",
+    isDesktop: deviceType === "desktop",
     isSmallScreen: breakpoints.isXS || breakpoints.isSM,
     isMediumScreen: breakpoints.isMD || breakpoints.isLG,
     isLargeScreen: breakpoints.isXL || breakpoints.isXXL || breakpoints.isXXXL,
@@ -281,18 +292,14 @@ export function ResponsiveSafeArea({
 
   const safeAreaStyle: ViewStyle = {
     flex: 1,
-    ...(top && Platform.OS !== 'web' && { paddingTop: spacing.safeArea }),
-    ...(bottom && Platform.OS !== 'web' && { paddingBottom: spacing.safeArea }),
-    ...(left && Platform.OS !== 'web' && { paddingLeft: spacing.safeArea }),
-    ...(right && Platform.OS !== 'web' && { paddingRight: spacing.safeArea }),
+    ...(top && Platform.OS !== "web" && { paddingTop: spacing.safeArea }),
+    ...(bottom && Platform.OS !== "web" && { paddingBottom: spacing.safeArea }),
+    ...(left && Platform.OS !== "web" && { paddingLeft: spacing.safeArea }),
+    ...(right && Platform.OS !== "web" && { paddingRight: spacing.safeArea }),
     ...style,
   };
 
-  return (
-    <View style={safeAreaStyle}>
-      {children}
-    </View>
-  );
+  return <View style={safeAreaStyle}>{children}</View>;
 }
 
 // Responsive aspect ratio container
@@ -310,15 +317,11 @@ export function ResponsiveAspectRatio({
   style,
 }: ResponsiveAspectRatioProps) {
   const containerStyle: ViewStyle = {
-    width: '100%',
+    width: "100%",
     aspectRatio: ratio,
     ...(maxWidth && { maxWidth: maxWidth as any }),
     ...style,
   };
 
-  return (
-    <View style={containerStyle}>
-      {children}
-    </View>
-  );
+  return <View style={containerStyle}>{children}</View>;
 }

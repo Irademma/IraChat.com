@@ -1,8 +1,8 @@
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { useCallback } from 'react';
-import { db } from '../services/firebaseSimple';
-import { ParsedMention } from '../utils/parseMentions';
-import { useAnalytics } from './useAnalytics';
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useCallback } from "react";
+import { db } from "../services/firebaseSimple";
+import { ParsedMention } from "../utils/parseMentions";
+import { useAnalytics } from "./useAnalytics";
 
 interface UseMentionNotificationsProps {
   currentUserId?: string;
@@ -18,12 +18,12 @@ export const useMentionNotifications = ({
   const sendMentionNotifications = useCallback(
     async (
       contentId: string,
-      contentType: 'update' | 'comment',
+      contentType: "update" | "comment",
       mentions: ParsedMention[],
-      contentPreview: string
+      contentPreview: string,
     ) => {
       try {
-        const notificationsRef = collection(db, 'notifications');
+        const notificationsRef = collection(db, "notifications");
         const timestamp = serverTimestamp();
 
         // Create notifications for each mentioned user
@@ -32,7 +32,7 @@ export const useMentionNotifications = ({
 
           const notification = {
             userId: mention.userId,
-            type: 'mention',
+            type: "mention",
             contentId,
             contentType,
             contentPreview,
@@ -45,20 +45,24 @@ export const useMentionNotifications = ({
 
           // Track the mention engagement
           if (currentUserId) {
-            trackEngagement({ type: 'mention', contentId, contentType: 'message' });
+            trackEngagement({
+              type: "mention",
+              contentId,
+              contentType: "message",
+            });
           }
         });
 
         await Promise.all(notificationPromises);
       } catch (error) {
-        console.error('Error sending mention notifications:', error);
+        console.error("Error sending mention notifications:", error);
         onError?.(error as Error);
       }
     },
-    [currentUserId, trackEngagement, onError]
+    [currentUserId, trackEngagement, onError],
   );
 
   return {
     sendMentionNotifications,
   };
-}; 
+};

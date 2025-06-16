@@ -1,4 +1,4 @@
-export type GroupRole = 'admin' | 'moderator' | 'member';
+export type GroupRole = "admin" | "moderator" | "member";
 
 export interface GroupMember {
   userId: string;
@@ -30,7 +30,7 @@ export interface GroupMessage {
   senderProfilePic: string;
   content: string;
   mediaUrls?: string[];
-  mediaType?: 'image' | 'video' | 'document';
+  mediaType?: "image" | "video" | "document";
   mediaCaptions?: string[];
   mentions?: {
     userId: string;
@@ -89,7 +89,7 @@ export interface TemporaryCallGroup {
   id: string;
   name: string;
   participants: string[];
-  callType: 'voice' | 'video';
+  callType: "voice" | "video";
   startTime: Date;
   endTime?: Date;
   callLog: {
@@ -116,6 +116,6 @@ export interface GroupMemberPreferences {
   };
   media: {
     autoDownload: boolean;
-    quality: 'low' | 'medium' | 'high';
+    quality: "low" | "medium" | "high";
   };
 }

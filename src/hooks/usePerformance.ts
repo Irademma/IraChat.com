@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { InteractionManager, Platform } from 'react-native';
-import { useAnalytics } from './useAnalytics';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { InteractionManager, Platform } from "react-native";
+import { useAnalytics } from "./useAnalytics";
 
 interface PerformanceMetric {
   name: string;
@@ -15,7 +15,10 @@ interface UsePerformanceProps {
   onError?: (error: Error) => void;
 }
 
-export const usePerformance = ({ currentUserId, onError }: UsePerformanceProps) => {
+export const usePerformance = ({
+  currentUserId,
+  onError,
+}: UsePerformanceProps) => {
   const [metrics, setMetrics] = useState<PerformanceMetric[]>([]);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const { trackPerformance } = useAnalytics({ currentUserId, onError });
@@ -47,15 +50,17 @@ export const usePerformance = ({ currentUserId, onError }: UsePerformanceProps) 
         fpsHistory.current.shift();
       }
 
-      const averageFPS = fpsHistory.current.reduce((a, b) => a + b, 0) / fpsHistory.current.length;
+      const averageFPS =
+        fpsHistory.current.reduce((a, b) => a + b, 0) /
+        fpsHistory.current.length;
       const metric: PerformanceMetric = {
-        name: 'fps',
+        name: "fps",
         value: averageFPS,
-        unit: 'fps',
+        unit: "fps",
         timestamp: now,
       };
 
-      setMetrics(prev => [...prev, metric]);
+      setMetrics((prev) => [...prev, metric]);
       trackPerformance(metric);
       frameCount.current = 0;
       lastFrameTime.current = now;
@@ -67,18 +72,22 @@ export const usePerformance = ({ currentUserId, onError }: UsePerformanceProps) 
   }, [isMonitoring, trackPerformance]);
 
   const measureMemoryUsage = useCallback(async () => {
-    if (Platform.OS === 'web') {
-      if (typeof global !== 'undefined' && global.performance && 'memory' in global.performance) {
+    if (Platform.OS === "web") {
+      if (
+        typeof global !== "undefined" &&
+        global.performance &&
+        "memory" in global.performance
+      ) {
         const { usedJSHeapSize, totalJSHeapSize } = (performance as any).memory;
         memoryUsage.current = usedJSHeapSize;
         const metric: PerformanceMetric = {
-          name: 'memory',
+          name: "memory",
           value: usedJSHeapSize,
-          unit: 'bytes',
+          unit: "bytes",
           context: `Total: ${totalJSHeapSize}`,
           timestamp: Date.now(),
         };
-        setMetrics(prev => [...prev, metric]);
+        setMetrics((prev) => [...prev, metric]);
         trackPerformance(metric);
       }
     }
@@ -87,57 +96,63 @@ export const usePerformance = ({ currentUserId, onError }: UsePerformanceProps) 
   const measureNetworkLatency = useCallback(async () => {
     try {
       const start = Date.now();
-      const response = await fetch('https://www.google.com/favicon.ico');
+      const response = await fetch("https://www.google.com/favicon.ico");
       const end = Date.now();
       const latency = end - start;
 
       const metric: PerformanceMetric = {
-        name: 'network_latency',
+        name: "network_latency",
         value: latency,
-        unit: 'ms',
+        unit: "ms",
         timestamp: end,
       };
 
-      setMetrics(prev => [...prev, metric]);
+      setMetrics((prev) => [...prev, metric]);
       trackPerformance(metric);
     } catch (error) {
-      console.error('Error measuring network latency:', error);
+      console.error("Error measuring network latency:", error);
     }
   }, [trackPerformance]);
 
-  const measureRenderTime = useCallback((componentName: string, startTime: number) => {
-    const endTime = Date.now();
-    const renderTime = endTime - startTime;
-
-    const metric: PerformanceMetric = {
-      name: 'render_time',
-      value: renderTime,
-      unit: 'ms',
-      context: componentName,
-      timestamp: endTime,
-    };
-
-    setMetrics(prev => [...prev, metric]);
-    trackPerformance(metric);
-  }, [trackPerformance]);
-
-  const measureInteractionTime = useCallback((interactionName: string, startTime: number) => {
-    InteractionManager.runAfterInteractions(() => {
+  const measureRenderTime = useCallback(
+    (componentName: string, startTime: number) => {
       const endTime = Date.now();
-      const interactionTime = endTime - startTime;
+      const renderTime = endTime - startTime;
 
       const metric: PerformanceMetric = {
-        name: 'interaction_time',
-        value: interactionTime,
-        unit: 'ms',
-        context: interactionName,
+        name: "render_time",
+        value: renderTime,
+        unit: "ms",
+        context: componentName,
         timestamp: endTime,
       };
 
-      setMetrics(prev => [...prev, metric]);
+      setMetrics((prev) => [...prev, metric]);
       trackPerformance(metric);
-    });
-  }, [trackPerformance]);
+    },
+    [trackPerformance],
+  );
+
+  const measureInteractionTime = useCallback(
+    (interactionName: string, startTime: number) => {
+      InteractionManager.runAfterInteractions(() => {
+        const endTime = Date.now();
+        const interactionTime = endTime - startTime;
+
+        const metric: PerformanceMetric = {
+          name: "interaction_time",
+          value: interactionTime,
+          unit: "ms",
+          context: interactionName,
+          timestamp: endTime,
+        };
+
+        setMetrics((prev) => [...prev, metric]);
+        trackPerformance(metric);
+      });
+    },
+    [trackPerformance],
+  );
 
   const clearMetrics = useCallback(() => {
     setMetrics([]);
@@ -167,4 +182,4 @@ export const usePerformance = ({ currentUserId, onError }: UsePerformanceProps) 
     measureInteractionTime,
     clearMetrics,
   };
-}; 
+};

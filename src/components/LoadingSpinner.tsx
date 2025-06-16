@@ -1,19 +1,19 @@
-import React, { useRef, useEffect } from 'react';
-import { View, ActivityIndicator, Text, Animated } from 'react-native';
-import { useTheme } from './ThemeProvider';
+import React, { useRef, useEffect } from "react";
+import { View, ActivityIndicator, Text, Animated } from "react-native";
+import { useTheme } from "./ThemeProvider";
 
 interface LoadingSpinnerProps {
   message?: string;
-  size?: 'small' | 'large';
+  size?: "small" | "large";
   color?: string;
   overlay?: boolean;
 }
 
 export default function LoadingSpinner({
-  message = 'Loading...',
-  size = 'large',
+  message = "Loading...",
+  size = "large",
   color,
-  overlay = false
+  overlay = false,
 }: LoadingSpinnerProps) {
   const { colors } = useTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -42,7 +42,7 @@ export default function LoadingSpinner({
       <Animated.View
         className="absolute inset-0 justify-center items-center z-50"
         style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
           opacity: fadeAnim,
         }}
       >

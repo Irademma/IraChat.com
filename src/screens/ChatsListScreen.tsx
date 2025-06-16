@@ -19,6 +19,7 @@ import {
 import { useDispatch } from "react-redux";
 import { setChats } from "../redux/chatSlice";
 import { auth, db } from "../services/firebaseSimple";
+import { chatService } from "../services/firestoreService";
 import { Chat } from "../types";
 
 const { width } = Dimensions.get("window");
@@ -241,8 +242,8 @@ export default function ChatsListScreen({ navigation }: any) {
     toggleFab();
 
     // Navigate immediately without delay for better UX
-    console.log("🚀 Opening contacts screen");
-    router.push("/contacts");
+    console.log("🚀 Opening FAST contacts screen");
+    router.push("/fast-contacts");
   };
 
   const handleCreateGroup = () => {
@@ -292,9 +293,11 @@ export default function ChatsListScreen({ navigation }: any) {
     setShowDeleteModal(false);
 
     try {
-      // Delete chats from Firebase
+      console.log(`🗑️ Deleting ${selectedChats.length} chat(s) using chatService...`);
+
+      // Use the new chatService to delete chats
       const deletePromises = selectedChats.map(chatId =>
-        deleteDoc(doc(db, "chats", chatId))
+        chatService.deleteChat(chatId)
       );
 
       await Promise.all(deletePromises);
@@ -307,18 +310,18 @@ export default function ChatsListScreen({ navigation }: any) {
       // Exit selection mode
       exitSelectionMode();
 
-      console.log(`✅ Deleted ${selectedChats.length} chat(s) successfully`);
+      console.log(`✅ Deleted ${selectedChats.length} chat(s) successfully using automatic service`);
 
-      // Show undo option briefly
+      // Show success message
       Alert.alert(
-        "Chats Deleted",
+        "✅ Chats Deleted",
         `${selectedChats.length} chat(s) deleted successfully`,
         [{ text: "OK" }]
       );
 
     } catch (error) {
       console.error("❌ Error deleting chats:", error);
-      Alert.alert("Error", "Failed to delete chats. Please try again.");
+      Alert.alert("❌ Error", "Failed to delete chats. Please try again.");
     } finally {
       setDeletingChats(false);
     }
@@ -392,9 +395,9 @@ export default function ChatsListScreen({ navigation }: any) {
   };
 
   useEffect(() => {
-    // Load real chat data from Firebase
+    // Load real chat data using automatic chatService
     const loadUserChats = async () => {
-      console.log("📥 [ChatsListScreen] Loading user chats from Firebase...");
+      console.log("📥 [ChatsListScreen] Loading user chats using chatService...");
       setIsLoadingChats(true);
 
       try {
@@ -409,53 +412,21 @@ export default function ChatsListScreen({ navigation }: any) {
           return;
         }
 
-        // Use real-time listener for user's chats
-        // Firebase functions are already imported at the top
+        // Use the new chatService for real-time chat updates
+        const unsubscribe = chatService.getUserChats(currentUser.uid, (chatsData) => {
+          console.log("✅ [ChatsListScreen] Chats loaded via chatService:", chatsData.length);
 
-        if (!db) {
-          throw new Error("Firestore not initialized");
-        }
-
-        const chatsQuery = query(
-          collection(db, "chats"),
-          where("participants", "array-contains", currentUser.uid),
-          orderBy("lastMessageAt", "desc"),
-        );
-
-        const unsubscribe = onSnapshot(
-          chatsQuery,
-          (snapshot) => {
-            const chatsData = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            })) as Chat[];
-
-            console.log(
-              "✅ [ChatsListScreen] Real chats loaded:",
-              chatsData.length,
-            );
-            setLocalChats(chatsData);
-            setFilteredChats(chatsData);
-            dispatch(setChats(chatsData));
-            setIsLoadingChats(false);
-            setHasLoadedOnce(true);
-          },
-          (error) => {
-            console.error("❌ [ChatsListScreen] Error loading chats:", error);
-            setLocalChats([]);
-            setFilteredChats([]);
-            setIsLoadingChats(false);
-            setHasLoadedOnce(true);
-          },
-        );
+          setLocalChats(chatsData);
+          setFilteredChats(chatsData);
+          dispatch(setChats(chatsData));
+          setIsLoadingChats(false);
+          setHasLoadedOnce(true);
+        });
 
         // Return cleanup function
         return unsubscribe;
       } catch (error) {
-        console.error(
-          "❌ [ChatsListScreen] Error setting up chat listener:",
-          error,
-        );
+        console.error("❌ [ChatsListScreen] Error setting up chat listener:", error);
         setLocalChats([]);
         setFilteredChats([]);
         setIsLoadingChats(false);

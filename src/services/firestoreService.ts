@@ -1,22 +1,20 @@
 // Automatic Firestore Data Management for IraChat
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  updateDoc, 
-  addDoc, 
-  serverTimestamp, 
-  query, 
-  where, 
-  orderBy, 
-  onSnapshot,
-  getDocs,
-  deleteDoc,
-  arrayUnion,
-  arrayRemove,
-  increment
+import {
+    addDoc,
+    arrayRemove,
+    arrayUnion,
+    collection,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    orderBy,
+    query,
+    serverTimestamp,
+    setDoc,
+    updateDoc,
+    where
 } from 'firebase/firestore';
-import { db, auth } from './firebaseSimple';
+import { db } from './firebaseSimple';
 
 // User Management Service
 export const userService = {
@@ -250,6 +248,193 @@ export const messageService = {
       });
     } catch (error) {
       console.error('❌ Error marking message as read:', error);
+    }
+  }
+};
+
+// Group Management Service
+export const groupService = {
+  // Automatically create group when user creates one
+  async createGroup(groupData: {
+    name: string;
+    description?: string;
+    participants: string[];
+    createdBy: string;
+    avatar?: string;
+    maxMembers?: number;
+  }) {
+    try {
+      console.log('👥 Creating group:', groupData.name);
+
+      const group = {
+        name: groupData.name,
+        description: groupData.description || '',
+        participants: groupData.participants,
+        admins: [groupData.createdBy],
+        createdBy: groupData.createdBy,
+        createdAt: serverTimestamp(),
+        avatar: groupData.avatar || `https://via.placeholder.com/150/87CEEB/FFFFFF?text=${groupData.name.charAt(0)}`,
+        maxMembers: groupData.maxMembers || 1024,
+        settings: {
+          onlyAdminsCanMessage: false,
+          onlyAdminsCanAddMembers: true,
+          onlyAdminsCanEditInfo: true
+        }
+      };
+
+      const groupRef = await addDoc(collection(db, 'groups'), group);
+
+      // Also create a chat for this group
+      await chatService.createChat(groupData.participants, true, groupData.name);
+
+      console.log('✅ Group created with ID:', groupRef.id);
+      return groupRef.id;
+    } catch (error) {
+      console.error('❌ Error creating group:', error);
+      throw error;
+    }
+  },
+
+  // Automatically add member to group
+  async addMember(groupId: string, userId: string) {
+    try {
+      await updateDoc(doc(db, 'groups', groupId), {
+        participants: arrayUnion(userId)
+      });
+      console.log('✅ Member added to group');
+    } catch (error) {
+      console.error('❌ Error adding member:', error);
+      throw error;
+    }
+  },
+
+  // Automatically remove member from group
+  async removeMember(groupId: string, userId: string) {
+    try {
+      await updateDoc(doc(db, 'groups', groupId), {
+        participants: arrayRemove(userId)
+      });
+      console.log('✅ Member removed from group');
+    } catch (error) {
+      console.error('❌ Error removing member:', error);
+      throw error;
+    }
+  }
+};
+
+// Document Management Service
+export const documentService = {
+  // Automatically store document when user uploads file
+  async uploadDocument(documentData: {
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+    uploadedBy: string;
+    chatId: string;
+    downloadUrl: string;
+    description?: string;
+  }) {
+    try {
+      console.log('📄 Storing document:', documentData.fileName);
+
+      const document = {
+        fileName: documentData.fileName,
+        fileSize: documentData.fileSize,
+        fileType: documentData.fileType,
+        uploadedBy: documentData.uploadedBy,
+        uploadedAt: serverTimestamp(),
+        downloadUrl: documentData.downloadUrl,
+        chatId: documentData.chatId,
+        description: documentData.description || ''
+      };
+
+      const docRef = await addDoc(collection(db, 'documents'), document);
+
+      // Send message with document reference
+      await messageService.sendMessage(documentData.chatId, documentData.uploadedBy, {
+        text: `📄 ${documentData.fileName}`,
+        type: 'document',
+        fileName: documentData.fileName,
+        mediaUrl: documentData.downloadUrl,
+        fileSize: documentData.fileSize
+      });
+
+      console.log('✅ Document stored with ID:', docRef.id);
+      return docRef.id;
+    } catch (error) {
+      console.error('❌ Error storing document:', error);
+      throw error;
+    }
+  }
+};
+
+// Media Management Service
+export const mediaService = {
+  // Automatically store media when user uploads photo/video/audio
+  async uploadMedia(mediaData: {
+    type: 'image' | 'video' | 'audio';
+    url: string;
+    thumbnail?: string;
+    duration?: number;
+    uploadedBy: string;
+    chatId: string;
+    fileName: string;
+    fileSize?: number;
+    dimensions?: { width: number; height: number };
+  }) {
+    try {
+      console.log('🎬 Storing media:', mediaData.fileName);
+
+      const media = {
+        type: mediaData.type,
+        url: mediaData.url,
+        thumbnail: mediaData.thumbnail || null,
+        duration: mediaData.duration || null,
+        uploadedBy: mediaData.uploadedBy,
+        uploadedAt: serverTimestamp(),
+        chatId: mediaData.chatId,
+        fileName: mediaData.fileName,
+        fileSize: mediaData.fileSize || 0,
+        dimensions: mediaData.dimensions || null
+      };
+
+      const mediaRef = await addDoc(collection(db, 'media'), media);
+
+      // Send message with media reference
+      await messageService.sendMessage(mediaData.chatId, mediaData.uploadedBy, {
+        text: '',
+        type: mediaData.type,
+        mediaUrl: mediaData.url,
+        fileName: mediaData.fileName,
+        fileSize: mediaData.fileSize,
+        duration: mediaData.duration
+      });
+
+      console.log('✅ Media stored with ID:', mediaRef.id);
+      return mediaRef.id;
+    } catch (error) {
+      console.error('❌ Error storing media:', error);
+      throw error;
+    }
+  },
+
+  // Get all media for a chat
+  async getChatMedia(chatId: string) {
+    try {
+      const q = query(
+        collection(db, 'media'),
+        where('chatId', '==', chatId),
+        orderBy('uploadedAt', 'desc')
+      );
+
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('❌ Error getting chat media:', error);
+      return [];
     }
   }
 };

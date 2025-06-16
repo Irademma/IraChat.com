@@ -18,10 +18,14 @@ export interface Contact {
   isOnline?: boolean;
 }
 
-// NO MORE MOCK DATA - Using real contacts only
+// OPTIMIZED CONTACTS SERVICE - Fast loading with caching
 class ContactsService {
   private contacts: Contact[] = [];
   private hasPermission = false;
+  private contactsCache: Contact[] | null = null;
+  private cacheTimestamp: number = 0;
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private isLoading = false;
 
   /**
    * Request contacts permission

@@ -7,7 +7,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -52,7 +52,7 @@ const mockContacts = [
     id: "contact5",
     name: "Lisa Davis",
     avatar:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face",
+      "",
     isOnline: false,
     lastSeen: new Date(Date.now() - 30 * 60 * 1000),
     hasIraChat: true,

@@ -1,16 +1,16 @@
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Animated,
-  FlatList,
-  Image,
-  RefreshControl,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Animated,
+    FlatList,
+    Image,
+    RefreshControl,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { db } from "../../src/services/firebaseSimple";
 
@@ -145,6 +145,25 @@ const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({
         </View>
       </TouchableOpacity>
 
+      {/* Scroll Demo Button */}
+      <TouchableOpacity
+        onPress={() => router.push("/scroll-demo")}
+        className="px-6 py-2 rounded-full items-center justify-center mt-4"
+        style={{
+          backgroundColor: "#10b981",
+          elevation: 4,
+          shadowColor: "#10b981",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+        }}
+        activeOpacity={0.8}
+      >
+        <Text className="text-white text-sm" style={{ fontWeight: "600" }}>
+          🚀 Test Scroll UI
+        </Text>
+      </TouchableOpacity>
+
       {/* Subtle hint */}
       <Text className="text-gray-400 text-xs text-center mt-6">
         We&apos;ll show you contacts who are already using IraChat
@@ -162,6 +181,9 @@ export default function ChatsListScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [isLoadingChats, setIsLoadingChats] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(true);
+
+  // Swipe hint for new users
+  const [showSwipeHint, setShowSwipeHint] = useState(false);
 
   // Get screen dimensions for responsive FAB positioning
   const { width, height } = Dimensions.get("window");
@@ -288,6 +310,17 @@ export default function ChatsListScreen() {
   useEffect(() => {
     filterChats();
   }, [searchQuery, chats]);
+
+  // Show swipe hint for users with chats
+  useEffect(() => {
+    if (chats.length > 0 && hasLoadedOnce) {
+      setTimeout(() => {
+        setShowSwipeHint(true);
+        // Auto-hide after 5 seconds
+        setTimeout(() => setShowSwipeHint(false), 5000);
+      }, 3000); // Show after 3 seconds
+    }
+  }, [chats.length, hasLoadedOnce]);
 
   // Removed FAB-related useEffect hooks
 
@@ -481,12 +514,45 @@ export default function ChatsListScreen() {
     );
   };
 
+  // For now, let's use the existing structure but prepare for scroll-responsive
   return (
     <View
       className="flex-1 bg-gray-50"
       accessible={true}
       accessibilityLabel="Chats list screen"
     >
+      {/* Swipe Navigation Hint */}
+      {showSwipeHint && (
+        <View style={{
+          position: 'absolute',
+          bottom: 120,
+          left: 0,
+          right: 0,
+          alignItems: 'center',
+          zIndex: 1000,
+          pointerEvents: 'none',
+        }}>
+          <View style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 20,
+            flexDirection: 'row',
+            alignItems: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+          }}>
+            <Ionicons name="chevron-back" size={16} color="#667eea" />
+            <Ionicons name="chevron-forward" size={16} color="#667eea" />
+            <Text style={{ fontSize: 12, color: '#667eea', fontWeight: '600', marginLeft: 8 }}>
+              Swipe to navigate between tabs
+            </Text>
+          </View>
+        </View>
+      )}
       <View className="px-4 py-3 bg-white border-b border-gray-200">
         <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2">
           <Ionicons

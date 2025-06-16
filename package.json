@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "A fully functional React Native messaging app built with Expo, Firebase, and NativeWind",
   "main": "expo-router/entry",
-
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -134,7 +133,14 @@
     },
     "doctor": {
       "reactNativeDirectoryCheck": {
-        "exclude": ["react-native-webrtc", "redux-persist", "ajv", "ajv-keywords", "firebase", "metro"],
+        "exclude": [
+          "react-native-webrtc",
+          "redux-persist",
+          "ajv",
+          "ajv-keywords",
+          "firebase",
+          "metro"
+        ],
         "listUnknownPackages": false
       }
     }

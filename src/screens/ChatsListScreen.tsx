@@ -4,17 +4,17 @@ import { useRouter } from "expo-router";
 import { collection, deleteDoc, doc, getDocs, query } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Animated,
-  Dimensions,
-  FlatList,
-  Image,
-  Modal,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Animated,
+    Dimensions,
+    FlatList,
+    Image,
+    Modal,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useDispatch } from "react-redux";
 import { setChats } from "../redux/chatSlice";
@@ -27,10 +27,12 @@ const { width } = Dimensions.get("window");
 // New User Welcome Component for ChatsListScreen
 interface NewUserWelcomeProps {
   onStartMessaging: () => void;
+  router: any;
 }
 
 const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({
   onStartMessaging,
+  router,
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -131,6 +133,33 @@ const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({
           />
           <Text className="text-white text-base" style={{ fontWeight: "600" }}>
             Find Your Contacts
+          </Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* Invite Friends Button */}
+      <TouchableOpacity
+        onPress={() => router.push("/fast-contacts")}
+        className="px-8 py-3 rounded-full items-center justify-center mt-4"
+        style={{
+          backgroundColor: "#10b981",
+          elevation: 6,
+          shadowColor: "#10b981",
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.25,
+          shadowRadius: 6,
+        }}
+        activeOpacity={0.8}
+      >
+        <View className="flex-row items-center">
+          <Ionicons
+            name="person-add"
+            size={18}
+            color="white"
+            style={{ marginRight: 8 }}
+          />
+          <Text className="text-white text-sm" style={{ fontWeight: "600" }}>
+            Invite Friends
           </Text>
         </View>
       </TouchableOpacity>
@@ -243,6 +272,15 @@ export default function ChatsListScreen({ navigation }: any) {
 
     // Navigate immediately without delay for better UX
     console.log("🚀 Opening FAST contacts screen");
+    router.push("/fast-contacts");
+  };
+
+  const handleInviteFriends = () => {
+    animatePress(contactFabScale);
+    toggleFab();
+
+    // Navigate to contacts for inviting
+    console.log("🚀 Opening contacts for inviting friends");
     router.push("/fast-contacts");
   };
 
@@ -703,7 +741,10 @@ export default function ChatsListScreen({ navigation }: any) {
         </View>
       ) : chats.length === 0 ? (
         // Only show NewUserWelcome when we've confirmed there are no chats
-        <NewUserWelcome onStartMessaging={() => router.push("/contacts")} />
+        <NewUserWelcome
+          onStartMessaging={() => router.push("/fast-contacts")}
+          router={router}
+        />
       ) : (
         <View className="flex-1">
           {/* Search Bar - Hidden in selection mode */}

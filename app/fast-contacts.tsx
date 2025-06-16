@@ -1,16 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  Image,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
+    ActivityIndicator,
+    Alert,
+    Image,
+    Linking,
+    ScrollView,
+    Share,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { auth } from "../src/services/firebaseSimple";
+import { chatService } from "../src/services/firestoreService";
 import optimizedContactsService from "../src/services/optimizedContactsService";
 
 export default function FastContactsScreen() {
@@ -75,19 +80,81 @@ export default function FastContactsScreen() {
     }
   };
 
-  const openChat = (contact: any) => {
-    console.log("🚀 Opening chat with contact:", contact.name);
+  const openChat = async (contact: any) => {
+    if (!contact.isIraChatUser) {
+      // Handle invite for non-IraChat users
+      handleInviteContact(contact);
+      return;
+    }
 
-    router.replace({
-      pathname: "/individual-chat",
-      params: {
-        contactId: contact.id,
-        contactName: contact.name,
-        contactAvatar: contact.avatar,
-        contactIsOnline: contact.isOnline?.toString() || "false",
-        contactLastSeen: contact.lastSeen?.getTime().toString() || "",
-      },
-    });
+    try {
+      console.log("🚀 Opening chat with IraChat user:", contact.name);
+
+      // For IraChat users, create or find existing chat
+      const currentUser = auth?.currentUser;
+      if (!currentUser) {
+        Alert.alert("Error", "Please log in first");
+        return;
+      }
+
+      // Create or get existing chat
+      const chatId = await chatService.createChat(
+        [currentUser.uid, contact.userId],
+        false
+      );
+
+      console.log("✅ Chat ready, navigating to:", chatId);
+
+      // Navigate to individual chat
+      router.replace({
+        pathname: "/individual-chat",
+        params: {
+          contactId: contact.userId,
+          contactName: contact.name,
+          contactAvatar: contact.avatar,
+          contactIsOnline: contact.isOnline?.toString() || "false",
+          contactLastSeen: contact.lastSeen?.getTime().toString() || "",
+          chatId: chatId,
+        },
+      });
+    } catch (error) {
+      console.error("❌ Error opening chat:", error);
+      Alert.alert("Error", "Failed to open chat. Please try again.");
+    }
+  };
+
+  const handleInviteContact = (contact: any) => {
+    const inviteMessage = `Hey ${contact.name}! Join me on IraChat - a secure messaging app. Download it here: https://irachat.app`;
+
+    Alert.alert(
+      "Invite to IraChat",
+      `Invite ${contact.name} to join IraChat?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Send SMS",
+          onPress: () => {
+            // Open SMS with pre-filled message
+            const smsUrl = `sms:${contact.phoneNumber}?body=${encodeURIComponent(inviteMessage)}`;
+            Linking.openURL(smsUrl).catch(() => {
+              Alert.alert("Error", "Could not open SMS app");
+            });
+          }
+        },
+        {
+          text: "Share",
+          onPress: () => {
+            // Use share API
+            Share.share({
+              message: inviteMessage,
+              title: "Join IraChat"
+            }).catch(() => {
+              Alert.alert("Error", "Could not share invite");
+            });
+          }
+        }
+      ]
+    );
   };
 
   const renderContact = (contact: any, index: number) => {
@@ -129,15 +196,21 @@ export default function FastContactsScreen() {
               <View className="bg-sky-100 rounded-full p-2">
                 <Ionicons name="chatbubble" size={16} color="#0ea5e9" />
               </View>
-              <Text className="text-xs text-sky-600 mt-1 font-medium">IraChat</Text>
+              <Text className="text-xs text-sky-600 mt-1 font-medium">Chat</Text>
             </>
           ) : (
-            <>
-              <View className="bg-gray-100 rounded-full p-2">
-                <Ionicons name="person-add" size={16} color="#6b7280" />
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                handleInviteContact(contact);
+              }}
+              className="items-center"
+            >
+              <View className="bg-green-100 rounded-full p-2">
+                <Ionicons name="person-add" size={16} color="#10b981" />
               </View>
-              <Text className="text-xs text-gray-500 mt-1">Invite</Text>
-            </>
+              <Text className="text-xs text-green-600 mt-1 font-medium">Invite</Text>
+            </TouchableOpacity>
           )}
         </View>
       </TouchableOpacity>
@@ -235,6 +308,9 @@ export default function FastContactsScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Firebase Debug Panel */}
+      <FirebaseDebugger />
 
       {/* Performance Info */}
       <View className="px-4 py-2 bg-gray-50 border-t border-gray-200">

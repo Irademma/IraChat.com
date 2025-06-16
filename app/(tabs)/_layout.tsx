@@ -2,11 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { Image, Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SwipeTabNavigator } from "../../src/components/SwipeTabNavigator";
 import TabBarBackground from "../../src/components/ui/TabBarBackground";
 import {
-  headerSizes,
-  isVerySmallDevice,
-  tabBarSizes,
+    headerSizes,
+    isVerySmallDevice,
+    tabBarSizes,
 } from "../../src/utils/responsive";
 
 export default function TabLayout() {
@@ -22,13 +23,14 @@ export default function TabLayout() {
   const headerIconSize = headerSizes.iconSize;
 
   return (
-    <View
-      style={{ flex: 1 }}
-      accessible={true}
-      accessibilityRole="tablist"
-      accessibilityLabel="Main navigation"
-    >
-      <Tabs
+    <SwipeTabNavigator>
+      <View
+        style={{ flex: 1 }}
+        accessible={true}
+        accessibilityRole="tablist"
+        accessibilityLabel="Main navigation"
+      >
+        <Tabs
         screenOptions={{
           // OPTIMIZED FOR PERFORMANCE - Reduced animations and faster loading
           tabBarActiveTintColor: "#667eea", // Sky blue from welcome page
@@ -218,7 +220,8 @@ export default function TabLayout() {
             headerTitle: "Settings",
           }}
         />
-      </Tabs>
-    </View>
+        </Tabs>
+      </View>
+    </SwipeTabNavigator>
   );
 }

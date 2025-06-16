@@ -227,66 +227,113 @@ class OptimizedContactsService {
   }
 
   /**
-   * OPTIMIZED: Batch check registration with parallel processing
+   * OPTIMIZED: Batch check registration with parallel processing + DEBUG
    */
   private async batchCheckRegistration(phoneNumbers: string[]): Promise<Map<string, any>> {
     try {
+      console.log("🔍 [DEBUG] Starting batch registration check...");
+
       if (!firestore) {
-        console.log("⚠️ Firestore not available");
+        console.log("❌ [DEBUG] Firestore not available");
         return new Map();
       }
 
+      // Check authentication
+      const { auth } = await import("./firebaseSimple");
+      const currentUser = auth?.currentUser;
+      console.log("🔍 [DEBUG] Current user:", currentUser ? currentUser.uid : "NOT AUTHENTICATED");
+
+      if (!currentUser) {
+        console.log("❌ [DEBUG] User not authenticated - this might be the issue!");
+        return new Map();
+      }
+
+      console.log("🔍 [DEBUG] Checking", phoneNumbers.length, "phone numbers");
+      console.log("🔍 [DEBUG] Sample numbers:", phoneNumbers.slice(0, 3));
+
       const registeredUsers = new Map();
-      const batchSize = 30; // Larger batches for better performance
+      const batchSize = 10; // Smaller batches for debugging
       const promises = [];
 
       // Create parallel batch promises
       for (let i = 0; i < phoneNumbers.length; i += batchSize) {
         const batch = phoneNumbers.slice(i, i + batchSize);
+        console.log(`🔍 [DEBUG] Creating batch ${i / batchSize + 1} with ${batch.length} numbers`);
         promises.push(this.queryUserBatch(batch));
       }
 
+      console.log("🔍 [DEBUG] Executing", promises.length, "batch queries...");
+
       // Execute all batches in parallel
       const results = await Promise.all(promises);
-      
+
+      console.log("🔍 [DEBUG] Batch queries completed, merging results...");
+
       // Merge results
-      results.forEach(batchMap => {
+      results.forEach((batchMap, index) => {
+        console.log(`🔍 [DEBUG] Batch ${index + 1} returned ${batchMap.size} users`);
         batchMap.forEach((userData, phone) => {
           registeredUsers.set(phone, userData);
         });
       });
 
+      console.log("✅ [DEBUG] Total registered users found:", registeredUsers.size);
       return registeredUsers;
     } catch (error) {
-      console.error("❌ Error batch checking registration:", error);
+      console.error("❌ [DEBUG] Error in batchCheckRegistration:", error);
+      console.error("❌ [DEBUG] Error details:", {
+        name: error.name,
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
       return new Map();
     }
   }
 
   /**
-   * Query single batch of users
+   * Query single batch of users + DEBUG
    */
   private async queryUserBatch(phoneNumbers: string[]): Promise<Map<string, any>> {
     try {
+      console.log("🔍 [DEBUG] Querying batch with numbers:", phoneNumbers);
+
       const usersQuery = query(
         collection(firestore, "users"),
         where("phoneNumber", "in", phoneNumbers)
       );
 
+      console.log("🔍 [DEBUG] Executing Firestore query...");
       const snapshot = await getDocs(usersQuery);
+      console.log("✅ [DEBUG] Query successful! Found", snapshot.docs.length, "users");
+
       const batchUsers = new Map();
 
       snapshot.forEach(doc => {
         const userData = doc.data();
+        console.log("🔍 [DEBUG] Found user:", userData.phoneNumber, "->", doc.id);
         batchUsers.set(userData.phoneNumber, {
           userId: doc.id,
           ...userData,
         });
       });
 
+      console.log("✅ [DEBUG] Batch processing complete:", batchUsers.size, "users mapped");
       return batchUsers;
     } catch (error) {
-      console.error("❌ Error querying batch:", error);
+      console.error("❌ [DEBUG] Error in queryUserBatch:", error);
+      console.error("❌ [DEBUG] Error details:", {
+        name: error.name,
+        message: error.message,
+        code: error.code
+      });
+
+      // Check if it's a permissions error specifically
+      if (error.code === 'permission-denied') {
+        console.error("🚨 [DEBUG] PERMISSION DENIED - Check Firestore rules!");
+        console.error("🚨 [DEBUG] Make sure user is authenticated and rules allow reading 'users' collection");
+      }
+
       return new Map();
     }
   }

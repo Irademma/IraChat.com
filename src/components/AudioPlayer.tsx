@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { Audio } from "expo-audio";
+import { useState } from "react";
 import { Text, TouchableOpacity } from "react-native";
-import { Audio } from "expo-av";
 
 export default function AudioPlayer({ uri }: { uri: string }) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);

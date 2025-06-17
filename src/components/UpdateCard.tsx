@@ -1,18 +1,17 @@
 // Individual update card component for vertical media updates
 import { Ionicons } from "@expo/vector-icons";
-import { Video } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
-  Animated,
-  BackHandler,
-  Dimensions,
-  Image,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Animated,
+    BackHandler,
+    Dimensions,
+    Image,
+    Platform,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { Markdown } from "react-native-markdown-display";
 import { useAccessibility } from "../hooks/useAccessibility";
@@ -23,17 +22,17 @@ import { useVideoPlayer } from "../hooks/useVideoPlayer";
 import { Update } from "../types";
 import { formatNumber } from "../utils/formatNumber";
 import {
-  parseMentions,
-  replaceMentionsWithLinks,
+    parseMentions,
+    replaceMentionsWithLinks,
 } from "../utils/parseMentions";
 import {
-  fontSize,
-  hp,
-  isMediumDevice,
-  isSmallDevice,
-  platformSpecific,
-  spacing,
-  wp,
+    fontSize,
+    hp,
+    isMediumDevice,
+    isSmallDevice,
+    platformSpecific,
+    spacing,
+    wp,
 } from "../utils/responsive";
 
 interface UpdateCardProps {
@@ -172,14 +171,17 @@ export const UpdateCard: React.FC<UpdateCardProps> = ({
         {...handleDoubleTap}
         style={styles.mediaContainer}
       >
-        <Video
+        <VideoView
           ref={videoRef}
           style={styles.media}
-          resizeMode={"cover" as any}
-          isLooping
-          shouldPlay={isActive && settings.autoplayVideos}
-          isMuted={isMuted}
-          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+          player={{
+            source: update.mediaUrl,
+            loop: true,
+            muted: isMuted,
+          }}
+          contentFit="cover"
+          allowsFullscreen={false}
+          allowsPictureInPicture={false}
         />
 
         {/* Loading state removed since useVideoPlayer.ts doesn't provide isLoading */}

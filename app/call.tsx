@@ -2,14 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  Alert,
-  Animated,
-  Dimensions,
-  Image,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Animated,
+    Dimensions,
+    Image,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -268,7 +268,6 @@ export default function CallScreen() {
     <View className="flex-1 bg-gradient-to-b from-gray-800 to-gray-900">
       <StatusBar
         barStyle="light-content"
-        backgroundColor="transparent"
         translucent
       />
 

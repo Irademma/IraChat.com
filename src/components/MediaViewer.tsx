@@ -1,16 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Video } from "expo-av";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Animated,
-  Dimensions,
-  Image,
-  PanResponder,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Animated,
+    Dimensions,
+    Image,
+    PanResponder,
+    Platform,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useResponsive } from "../hooks/useResponsive";
 import { colors } from "../theme/colors";
@@ -141,14 +140,17 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
             onPress={handleVideoPress}
             activeOpacity={1}
           >
-            <Video
+            <VideoView
               ref={videoRef}
-              source={{ uri: currentMedia.url }}
               style={styles.mediaContent}
-              resizeMode={"contain" as any}
-              isLooping
-              shouldPlay={isPlaying}
-              isMuted={!isPlaying}
+              player={{
+                source: currentMedia.url,
+                loop: true,
+                muted: !isPlaying,
+              }}
+              contentFit="contain"
+              allowsFullscreen={true}
+              allowsPictureInPicture={false}
             />
             {!isPlaying && (
               <View style={styles.playButton}>

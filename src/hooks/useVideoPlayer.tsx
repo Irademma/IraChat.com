@@ -1,4 +1,3 @@
-import { Video } from "expo-av";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
 import { useAnalytics } from "./useAnalytics";

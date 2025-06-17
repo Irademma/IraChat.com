@@ -1,0 +1,29 @@
+// IMMEDIATE FIX FOR FIRESTORE PERMISSIONS ERROR
+// Copy these rules to Firebase Console → Firestore → Rules → Publish
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // TEMPORARY: Allow all authenticated users to read/write everything
+    // This fixes the immediate permissions error
+    match /{document=**} {
+      allow read, write, create, update, delete: if request.auth != null;
+    }
+  }
+}
+
+// INSTRUCTIONS:
+// 1. Go to Firebase Console
+// 2. Select your project (irachat-5c2bf or irachat-c172f)
+// 3. Go to Firestore Database
+// 4. Click "Rules" tab
+// 5. Replace ALL existing rules with the rules above
+// 6. Click "Publish"
+// 7. Wait 1-2 minutes for rules to propagate
+
+// This will immediately fix:
+// ❌ [FirebaseError: Missing or insufficient permissions.]
+// ❌ Error checking IraChat contacts
+// ❌ Firestore listener error
+
+// After this works, we can implement more secure rules later

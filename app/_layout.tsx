@@ -52,7 +52,19 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
-        <StatusBar style="light" translucent backgroundColor="#667eea" />
+        <StatusBar style="light" translucent />
+        {/* Status bar background view for edge-to-edge */}
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 50, // Covers status bar area
+            backgroundColor: '#667eea',
+            zIndex: -1,
+          }}
+        />
         {/* Removed absolute positioned status bar background that was hiding the logo */}
         <GestureHandlerRootView
           style={{ flex: 1 }}

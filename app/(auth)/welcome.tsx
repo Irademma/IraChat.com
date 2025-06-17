@@ -6,10 +6,10 @@ export default function WelcomeScreen() {
   const router = useRouter();
 
   const handleCreateAccount = async () => {
-    console.log("Create Account button clicked");
+    console.log("Phone Registration button clicked");
     // Mark that the user has interacted with the app (no longer a first-time user)
     await markAppLaunched();
-    router.push("/register");
+    router.push("/(auth)/phone-register");
   };
 
   return (
@@ -103,7 +103,7 @@ export default function WelcomeScreen() {
             letterSpacing: 0.5,
           }}
         >
-          Create Account
+          Continue with Phone Number
         </Text>
       </TouchableOpacity>
 

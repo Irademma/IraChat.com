@@ -1,16 +1,16 @@
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Animated,
-    FlatList,
-    Image,
-    RefreshControl,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  FlatList,
+  Image,
+  RefreshControl,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { db } from "../../src/services/firebaseSimple";
 
@@ -145,24 +145,9 @@ const NewUserWelcome: React.FC<NewUserWelcomeProps> = ({
         </View>
       </TouchableOpacity>
 
-      {/* Scroll Demo Button */}
-      <TouchableOpacity
-        onPress={() => router.push("/scroll-demo")}
-        className="px-6 py-2 rounded-full items-center justify-center mt-4"
-        style={{
-          backgroundColor: "#10b981",
-          elevation: 4,
-          shadowColor: "#10b981",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-        }}
-        activeOpacity={0.8}
-      >
-        <Text className="text-white text-sm" style={{ fontWeight: "600" }}>
-          🚀 Test Scroll UI
-        </Text>
-      </TouchableOpacity>
+
+
+
 
       {/* Subtle hint */}
       <Text className="text-gray-400 text-xs text-center mt-6">

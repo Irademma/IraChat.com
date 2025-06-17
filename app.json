@@ -3,17 +3,32 @@
     "name": "IraChat",
     "slug": "irachat",
     "version": "1.0.0",
+    "scheme": "irachat",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#667eea"
+    },
 
     "assetBundlePatterns": ["**/*"],
     "platforms": ["ios", "android"],
-
-
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.irachat.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#667eea"
+      },
+      "package": "com.irachat.mobile"
+    },
     "experiments": {
       "typedRoutes": true
     },
-
-    "web": {
-      "bundler": "metro"
-    }
+    "plugins": ["expo-router"]
   }
 }

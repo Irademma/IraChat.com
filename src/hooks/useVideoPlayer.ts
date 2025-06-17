@@ -1,4 +1,4 @@
-import { Video } from "expo-av";
+import { VideoView } from "expo-video";
 import { useEffect, useRef, useState } from "react";
 import { ViewToken } from "react-native";
 
@@ -20,7 +20,7 @@ export const useVideoPlayer = ({
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
-  const videoRef = useRef<Video>(null);
+  const videoRef = useRef<VideoView>(null);
   const lastPlaybackStatus = useRef<any>(null);
 
   useEffect(() => {

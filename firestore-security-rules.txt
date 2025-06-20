@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // DEVELOPMENT RULES - Allow authenticated users access to everything
+    // This fixes the permissions error while maintaining basic security
+
+    // Helper function
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Allow all operations for authenticated users (development mode)
+    match /{document=**} {
+      allow read, write, create, update, delete: if isAuthenticated();
+    }
+
+    // Fallback: Allow unauthenticated read for public content discovery
+    // This helps with contact discovery and public profiles
+    match /users/{userId} {
+      allow read: if true;
+    }
+
+    match /userProfiles/{userId} {
+      allow read: if true;
+    }
+
+    match /updates/{updateId} {
+      allow read: if true;
+    }
+  }
+}

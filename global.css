@@ -1,0 +1,105 @@
+/* stylelint-disable */
+/* Import responsive CSS for web platform */
+@import "./src/styles/responsive.css";
+
+/* Tailwind CSS directives - CSS validation disabled for this file */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for React Native components */
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+/* Custom component styles */
+.chat-input {
+  @apply border border-gray-300 px-4 py-3 rounded-lg text-base bg-white;
+}
+
+.chat-input:focus {
+  @apply border-primary-500 ring-2 ring-primary-100;
+}
+
+.btn-primary {
+  @apply bg-primary-500 py-3 px-6 rounded-lg;
+}
+
+.btn-primary:active {
+  @apply bg-primary-600;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 py-3 px-6 rounded-lg;
+}
+
+.btn-secondary:active {
+  @apply bg-gray-200;
+}
+
+.message-bubble-own {
+  @apply bg-primary-500 rounded-2xl rounded-br-md px-4 py-2 max-w-xs ml-auto;
+}
+
+.message-bubble-other {
+  @apply bg-gray-100 rounded-2xl rounded-bl-md px-4 py-2 max-w-xs mr-auto;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-100 p-4;
+}
+
+.card-header {
+  @apply border-b border-gray-100 pb-3 mb-3;
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-bounce-gentle {
+  animation: bounceGentle 0.6s ease-in-out;
+}
+
+/* Prevent text cursor globally */
+* {
+  cursor: default;
+  user-select: none;
+}
+
+button,
+[role="button"] {
+  cursor: pointer !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .chat-input {
+    @apply bg-gray-800 border-gray-600 text-white;
+  }
+
+  .card {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .card-header {
+    @apply border-gray-700;
+  }
+
+  .message-bubble-other {
+    @apply bg-gray-700;
+  }
+}

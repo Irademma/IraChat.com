@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
+<<<<<<< HEAD
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     signInWithEmailAndPassword,
@@ -22,6 +23,30 @@ import {
 } from "react-native";
 import FirebaseSetupChecker from "../src/components/FirebaseSetupChecker";
 import { auth, db } from "../src/services/firebaseSimple";
+=======
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  serverTimestamp,
+} from "firebase/firestore";
+import { useState } from "react";
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import FirebaseSetupChecker from "../src/components/FirebaseSetupChecker";
+import { auth } from "../src/config/firebaseAuth";
+import { db } from "../src/services/firebaseSimple";
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
 
 export default function FirebaseTestScreen() {
   const router = useRouter();
@@ -40,12 +65,15 @@ export default function FirebaseTestScreen() {
   const testFirebaseAuth = async () => {
     setLoading(true);
     try {
+<<<<<<< HEAD
       // Check if auth is available
       if (!auth) {
         addResult("❌ Firebase Auth is not available", false);
         return;
       }
 
+=======
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
       // Test user creation
       addResult("Testing user creation...");
       const userCredential = await createUserWithEmailAndPassword(
@@ -95,12 +123,15 @@ export default function FirebaseTestScreen() {
   const testFirestore = async () => {
     setLoading(true);
     try {
+<<<<<<< HEAD
       // Check if db is available
       if (!db) {
         addResult("❌ Firestore is not available", false);
         return;
       }
 
+=======
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
       // Test writing to Firestore
       addResult("Testing Firestore write...");
       const docRef = await addDoc(collection(db, "test_messages"), {
@@ -122,11 +153,14 @@ export default function FirebaseTestScreen() {
   };
 
   const testAuthStateListener = () => {
+<<<<<<< HEAD
     if (!auth) {
       addResult("❌ Firebase Auth is not available for listener", false);
       return;
     }
 
+=======
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
     addResult("Setting up auth state listener...");
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {

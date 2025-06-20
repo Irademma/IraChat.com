@@ -10,7 +10,11 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
+<<<<<<< HEAD
       "backgroundColor": "#87CEEB"
+=======
+      "backgroundColor": "#667eea"
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
     },
 
     "assetBundlePatterns": ["**/*"],
@@ -22,7 +26,11 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
+<<<<<<< HEAD
         "backgroundColor": "#87CEEB"
+=======
+        "backgroundColor": "#667eea"
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
       },
       "package": "com.irachat.mobile"
     },

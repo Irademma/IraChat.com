@@ -1,7 +1,11 @@
 import { useRouter, useSegments } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
+<<<<<<< HEAD
 import { auth } from "../services/firebaseSimple";
+=======
+import { auth } from "../config/firebaseAuth";
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
 
 export function AuthNavigator() {
   const segments = useSegments();

@@ -1,5 +1,6 @@
 // Phone Authentication Service
 import {
+<<<<<<< HEAD
     ConfirmationResult,
     RecaptchaVerifier,
     signInWithPhoneNumber,
@@ -7,6 +8,16 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "./firebaseSimple";
+=======
+  ConfirmationResult,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  updateProfile,
+} from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth } from "../config/firebaseAuth";
+import { db } from "./firebaseSimple";
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
 
 // Global variables for reCAPTCHA
 let recaptchaVerifier: RecaptchaVerifier | null = null;

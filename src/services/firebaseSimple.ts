@@ -1,6 +1,10 @@
 // Simple Firebase Configuration - Web SDK for All Platforms
 import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
+<<<<<<< HEAD
 import { Auth, onAuthStateChanged } from "firebase/auth";
+=======
+import { Auth, getAuth, onAuthStateChanged } from "firebase/auth";
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { Platform } from "react-native";
@@ -52,6 +56,7 @@ try {
     firestore = null;
   }
 
+<<<<<<< HEAD
   // Initialize Firebase Auth with AsyncStorage persistence
   try {
     console.log("🔄 Initializing Firebase Auth...");
@@ -71,6 +76,13 @@ try {
       });
       console.log("✅ Firebase Auth initialized with AsyncStorage persistence");
     }
+=======
+  // Initialize Firebase Auth directly
+  try {
+    console.log("🔄 Initializing Firebase Auth...");
+    authInstance = getAuth(firebaseApp);
+    console.log("✅ Firebase Auth initialized successfully");
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
 
     // Test auth state listener with proper cleanup
     if (authInstance) {
@@ -223,7 +235,11 @@ export const waitForAuth = async (
     );
 
     let attempts = 0;
+<<<<<<< HEAD
     const maxAttempts = Math.floor(timeoutMs / 50); // Check more frequently
+=======
+    const maxAttempts = Math.floor(timeoutMs / 100);
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
 
     // Set up a timeout
     const timeout = setTimeout(() => {
@@ -231,7 +247,11 @@ export const waitForAuth = async (
       console.log(
         "🔄 App will continue with stored auth only - this is normal for offline mode",
       );
+<<<<<<< HEAD
       resolve(authInstance); // Return the auth instance even if it might be null
+=======
+      resolve(null);
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
     }, timeoutMs);
 
     // Check for auth instance periodically with retry logic
@@ -241,7 +261,11 @@ export const waitForAuth = async (
       if (authInstance) {
         clearTimeout(timeout);
         console.log(
+<<<<<<< HEAD
           `✅ Auth instance became available after ${attempts * 50}ms`,
+=======
+          `✅ Auth instance became available after ${attempts * 100}ms`,
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
         );
         resolve(authInstance);
         return;
@@ -249,6 +273,7 @@ export const waitForAuth = async (
 
       if (attempts >= maxAttempts) {
         clearTimeout(timeout);
+<<<<<<< HEAD
         console.log("⏰ Max attempts reached, resolving with current auth instance");
         resolve(authInstance); // Return whatever we have, even if null
         return;
@@ -256,6 +281,15 @@ export const waitForAuth = async (
 
       // Check again in 50ms (more frequent checks)
       setTimeout(checkAuth, 50);
+=======
+        console.log("⏰ Max attempts reached, resolving with null");
+        resolve(null);
+        return;
+      }
+
+      // Check again in 100ms
+      setTimeout(checkAuth, 100);
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
     };
 
     checkAuth();
@@ -270,7 +304,10 @@ export const initializeAuthStateListener = () => {
     console.warn(
       "⚠️ Cannot initialize auth state listener: auth instance not available",
     );
+<<<<<<< HEAD
     console.log("🔄 App will continue with stored auth data only");
+=======
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
     return null;
   }
 
@@ -281,6 +318,7 @@ export const initializeAuthStateListener = () => {
 
   console.log("🎯 Initializing Firebase auth state listener...");
 
+<<<<<<< HEAD
   try {
     authStateUnsubscribe = onAuthStateChanged(authInstance, (user) => {
       if (user) {
@@ -294,6 +332,15 @@ export const initializeAuthStateListener = () => {
     console.error("❌ Failed to initialize auth state listener:", error);
     return null;
   }
+=======
+  authStateUnsubscribe = onAuthStateChanged(authInstance, (user) => {
+    if (user) {
+      console.log("✅ User signed in:", user.uid);
+    } else {
+      console.log("👤 User signed out");
+    }
+  });
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
 
   return authStateUnsubscribe;
 };

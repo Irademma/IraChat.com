@@ -1,7 +1,12 @@
 // Test Firebase connection
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
+<<<<<<< HEAD
 import { auth, db } from "../services/firebaseSimple";
+=======
+import { auth } from "../config/firebaseAuth";
+import { db } from "../services/firebaseSimple";
+>>>>>>> 0ea9978a491748beb593b9ca0ca18c2f10a53438
 
 export const testFirebaseConnection = async () => {
   try {

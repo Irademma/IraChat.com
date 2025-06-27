@@ -1,0 +1,45 @@
+# Development files
+*.md
+README*
+docs/
+.git/
+.expo/
+.vscode/
+.idea/
+node_modules/
+
+# Build artifacts
+android/app/build/
+ios/build/
+dist/
+web-build/
+build/
+
+# Scripts and tools
+optimize-*.js
+analyze-*.js
+remove-*.js
+compress-*.js
+bundle-*.js
+safe-*.js
+implement-*.js
+
+# Configuration files
+tsconfig.json
+.gitignore
+.npmignore
+yarn.lock
+package-lock.json
+postcss.config.js
+tailwind.config.js
+
+# Backup files
+*.backup
+backup/
+assets/images/backup/
+
+# Temporary files
+*.tmp
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,305 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===== HELPER FUNCTIONS =====
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isValidUser() {
+      return isAuthenticated() && 
+             request.auth.uid != null && 
+             request.auth.uid.size() > 0;
+    }
+    
+    function isChatParticipant(chatId) {
+      return isAuthenticated() && 
+             request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+    }
+    
+    function isGroupMember(groupId) {
+      return isAuthenticated() && 
+             request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+    }
+    
+    function isGroupAdmin(groupId) {
+      return isAuthenticated() && 
+             request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.admins;
+    }
+    
+    // ===== CORE USER MANAGEMENT =====
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (
+        isOwner(userId) || 
+        resource.data.keys().hasAny(['displayName', 'avatar', 'status', 'isOnline', 'name', 'username'])
+      );
+      allow write: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUser();
+    }
+    
+    // Contacts collection
+    match /contacts/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Blocked users collection
+    match /blocks/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // ===== MESSAGING SYSTEM =====
+    
+    // Chats collection
+    match /chats/{chatId} {
+      allow read: if isAuthenticated() && 
+                     request.auth.uid in resource.data.participants;
+      allow write: if isAuthenticated() && 
+                      request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated() && 
+                       request.auth.uid in request.resource.data.participants;
+    }
+    
+    // Messages subcollection within chats
+    match /chats/{chatId}/messages/{messageId} {
+      allow read: if isAuthenticated() && isChatParticipant(chatId);
+      allow create: if isAuthenticated() && 
+                       isOwner(request.resource.data.senderId) &&
+                       isChatParticipant(chatId);
+      allow update: if isAuthenticated() && 
+                       isOwner(resource.data.senderId) &&
+                       request.resource.data.senderId == resource.data.senderId;
+      allow delete: if isAuthenticated() && isOwner(resource.data.senderId);
+    }
+    
+    // Typing indicators subcollection
+    match /chats/{chatId}/typing/{userId} {
+      allow read: if isAuthenticated() && isChatParticipant(chatId);
+      allow write: if isAuthenticated() && isOwner(userId) && isChatParticipant(chatId);
+    }
+    
+    // Message reactions
+    match /messageReactions/{reactionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow delete: if isAuthenticated() && isOwner(resource.data.userId);
+    }
+    
+    // ===== GROUP MANAGEMENT =====
+    
+    // Groups collection
+    match /groups/{groupId} {
+      allow read: if isAuthenticated() && isGroupMember(groupId);
+      allow create: if isAuthenticated() && 
+                       isOwner(request.resource.data.createdBy) &&
+                       request.auth.uid in request.resource.data.members;
+      allow update: if isAuthenticated() && isGroupAdmin(groupId);
+      allow delete: if isAuthenticated() && isOwner(resource.data.createdBy);
+    }
+    
+    // Group messages subcollection
+    match /groups/{groupId}/messages/{messageId} {
+      allow read: if isAuthenticated() && isGroupMember(groupId);
+      allow create: if isAuthenticated() && 
+                       isOwner(request.resource.data.senderId) &&
+                       isGroupMember(groupId);
+      allow update: if isAuthenticated() && isOwner(resource.data.senderId);
+      allow delete: if isAuthenticated() && (
+        isOwner(resource.data.senderId) || 
+        isGroupAdmin(groupId)
+      );
+    }
+    
+    // ===== MEDIA & FILES =====
+    
+    // Media collection
+    match /media/{mediaId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.uploadedBy);
+      allow update: if isAuthenticated() && isOwner(resource.data.uploadedBy);
+      allow delete: if isAuthenticated() && isOwner(resource.data.uploadedBy);
+    }
+    
+    // Documents collection
+    match /documents/{documentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.uploadedBy);
+      allow update: if isAuthenticated() && isOwner(resource.data.uploadedBy);
+      allow delete: if isAuthenticated() && isOwner(resource.data.uploadedBy);
+    }
+    
+    // Voice messages collection
+    match /voiceMessages/{voiceId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.senderId);
+      allow update: if isAuthenticated() && isOwner(resource.data.senderId);
+      allow delete: if isAuthenticated() && isOwner(resource.data.senderId);
+    }
+    
+    // ===== SOCIAL FEATURES (UPDATES/STORIES) =====
+    
+    // Updates collection
+    match /updates/{updateId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                       isOwner(request.resource.data.userId) &&
+                       isValidUser();
+      allow update: if isAuthenticated() && isOwner(resource.data.userId);
+      allow delete: if isAuthenticated() && isOwner(resource.data.userId);
+    }
+    
+    // Update comments subcollection
+    match /updates/{updateId}/comments/{commentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                       isOwner(request.resource.data.userId) &&
+                       isValidUser();
+      allow update: if isAuthenticated() && isOwner(resource.data.userId);
+      allow delete: if isAuthenticated() && (
+        isOwner(resource.data.userId) || 
+        isOwner(get(/databases/$(database)/documents/updates/$(updateId)).data.userId)
+      );
+    }
+    
+    // Update views tracking
+    match /updateViews/{viewId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow delete: if isAuthenticated() && isOwner(resource.data.userId);
+    }
+    
+    // Update likes tracking
+    match /updateLikes/{likeId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow delete: if isAuthenticated() && isOwner(resource.data.userId);
+    }
+    
+    // ===== CALLING SYSTEM =====
+    
+    // Calls collection
+    match /calls/{callId} {
+      allow read, write: if isAuthenticated() && (
+        isOwner(resource.data.callerId) || 
+        isOwner(resource.data.receiverId) ||
+        request.auth.uid in resource.data.participants
+      );
+      allow create: if isAuthenticated() && (
+        isOwner(request.resource.data.callerId) || 
+        request.auth.uid in request.resource.data.participants
+      );
+    }
+    
+    // Group calls collection
+    match /groupCalls/{callId} {
+      allow read, write: if isAuthenticated() && 
+                            request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated() && 
+                       request.auth.uid in request.resource.data.participants;
+    }
+    
+    // Call logs
+    match /callLogs/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // ===== STATUS & PRESENCE =====
+    
+    // Online status
+    match /onlineStatus/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Last seen
+    match /lastSeen/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // ===== NOTIFICATIONS =====
+    
+    // Notifications collection
+    match /notifications/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // ===== SETTINGS & PREFERENCES =====
+    
+    // User settings
+    match /settings/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // ===== ADDITIONAL COLLECTIONS =====
+    
+    // Downloads tracking
+    match /downloads/{downloadId} {
+      allow read, write: if isAuthenticated() && isOwner(resource.data.userId);
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+    }
+    
+    // User profiles extended
+    match /userProfiles/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Stories collection
+    match /stories/{storyId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow update: if isAuthenticated() && isOwner(resource.data.userId);
+      allow delete: if isAuthenticated() && isOwner(resource.data.userId);
+    }
+    
+    // Channels (broadcast)
+    match /channels/{channelId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.createdBy);
+      allow update: if isAuthenticated() && isOwner(resource.data.createdBy);
+      allow delete: if isAuthenticated() && isOwner(resource.data.createdBy);
+    }
+    
+    // Business profiles
+    match /businessProfiles/{businessId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isOwner(resource.data.ownerId);
+    }
+    
+    // Payments
+    match /payments/{paymentId} {
+      allow read, write: if isAuthenticated() && (
+        isOwner(resource.data.senderId) || 
+        isOwner(resource.data.receiverId)
+      );
+    }
+    
+    // Locations
+    match /locations/{locationId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.sharedBy);
+      allow update: if isAuthenticated() && isOwner(resource.data.sharedBy);
+      allow delete: if isAuthenticated() && isOwner(resource.data.sharedBy);
+    }
+    
+    // ===== FALLBACK RULES =====
+    
+    // Allow authenticated users to access any collection not explicitly denied
+    match /{collection}/{document} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Default deny rule for any other documents
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

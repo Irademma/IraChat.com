@@ -1,0 +1,13 @@
+# AUDIO FILE IMPLEMENTATION GUIDE
+#
+# To complete the audio implementation:
+# 1. Replace this file with: ringtone.mp3
+# 2. Use a professional ringtone (3-5 seconds, looping)
+# 3. Format: MP3, 44.1kHz, 16-bit, normalized volume
+# 4. Recommended sources:
+#    - Telegram's default ringtone
+#    - iOS/Android system ringtones
+#    - Custom professional ringtones
+#
+# The audio service is ready and will automatically use this file
+# when placed in: assets/sounds/ringtone.mp3

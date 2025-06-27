@@ -1,0 +1,608 @@
+{
+  "users": {
+    "user123": {
+      "uid": "user123",
+      "phoneNumber": "+1234567890",
+      "displayName": "Alice Johnson",
+      "avatar": "https://via.placeholder.com/150/FF6B6B/FFFFFF?text=A",
+      "isOnline": true,
+      "lastSeen": "2024-01-15T10:30:00Z",
+      "createdAt": "2024-01-10T09:00:00Z",
+      "status": "Available",
+      "bio": "Love chatting with friends! 💬",
+      "profilePicture": "https://example.com/avatars/alice.jpg"
+    },
+    "user456": {
+      "uid": "user456",
+      "phoneNumber": "+1234567891",
+      "displayName": "Bob Smith",
+      "avatar": "https://via.placeholder.com/150/4ECDC4/FFFFFF?text=B",
+      "isOnline": false,
+      "lastSeen": "2024-01-15T08:45:00Z",
+      "createdAt": "2024-01-12T14:20:00Z",
+      "status": "Busy",
+      "bio": "Working hard, chatting harder! 🚀"
+    },
+    "user789": {
+      "uid": "user789",
+      "phoneNumber": "+1234567892",
+      "displayName": "Charlie Brown",
+      "avatar": "https://via.placeholder.com/150/45B7D1/FFFFFF?text=C",
+      "isOnline": true,
+      "lastSeen": "2024-01-15T10:25:00Z",
+      "createdAt": "2024-01-08T11:15:00Z",
+      "status": "Available",
+      "bio": "IraChat enthusiast! 🎉"
+    }
+  },
+
+  "chats": {
+    "chat001": {
+      "participants": ["user123", "user456"],
+      "name": "Alice & Bob",
+      "isGroup": false,
+      "lastMessage": "Hey! How are you doing?",
+      "lastMessageAt": "2024-01-15T10:30:00Z",
+      "lastMessageSender": "user123",
+      "createdAt": "2024-01-10T15:30:00Z",
+      "unreadCount": {
+        "user123": 0,
+        "user456": 2
+      },
+      "chatType": "individual"
+    },
+    "chat002": {
+      "participants": ["user123", "user789"],
+      "name": "Alice & Charlie",
+      "isGroup": false,
+      "lastMessage": "See you tomorrow! 👋",
+      "lastMessageAt": "2024-01-15T09:15:00Z",
+      "lastMessageSender": "user789",
+      "createdAt": "2024-01-11T12:00:00Z",
+      "unreadCount": {
+        "user123": 1,
+        "user789": 0
+      },
+      "chatType": "individual"
+    }
+  },
+
+  "groups": {
+    "group001": {
+      "name": "Family Group",
+      "description": "Our awesome family chat! 👨‍👩‍👧‍👦",
+      "participants": ["user123", "user456", "user789"],
+      "admins": ["user123"],
+      "createdAt": "2024-01-10T16:00:00Z",
+      "createdBy": "user123",
+      "maxMembers": 1024,
+      "groupPicture": "https://example.com/groups/family.jpg",
+      "lastMessage": "Planning dinner for Sunday!",
+      "lastMessageAt": "2024-01-15T10:00:00Z",
+      "lastMessageSender": "user123",
+      "unreadCount": {
+        "user123": 0,
+        "user456": 3,
+        "user789": 1
+      },
+      "settings": {
+        "allowMembersToAddOthers": false,
+        "allowMembersToEditGroupInfo": false,
+        "sendMessagesPermission": "all"
+      }
+    }
+  },
+
+  "contacts": {
+    "contact001": {
+      "userId": "user123",
+      "phoneNumber": "+1234567891",
+      "displayName": "Bob Smith",
+      "isIraChatUser": true,
+      "createdAt": "2024-01-10T09:30:00Z",
+      "avatar": "https://via.placeholder.com/150/4ECDC4/FFFFFF?text=B",
+      "contactId": "user456"
+    },
+    "contact002": {
+      "userId": "user123",
+      "phoneNumber": "+1234567892",
+      "displayName": "Charlie Brown",
+      "isIraChatUser": true,
+      "createdAt": "2024-01-10T09:35:00Z",
+      "avatar": "https://via.placeholder.com/150/45B7D1/FFFFFF?text=C",
+      "contactId": "user789"
+    },
+    "contact003": {
+      "userId": "user123",
+      "phoneNumber": "+1234567893",
+      "displayName": "David Wilson",
+      "isIraChatUser": false,
+      "createdAt": "2024-01-10T09:40:00Z",
+      "avatar": null,
+      "contactId": null
+    }
+  },
+
+  "onlineStatus": {
+    "user123": {
+      "isOnline": true,
+      "lastSeen": "2024-01-15T10:30:00Z",
+      "status": "Available"
+    },
+    "user456": {
+      "isOnline": false,
+      "lastSeen": "2024-01-15T08:45:00Z",
+      "status": "Busy"
+    },
+    "user789": {
+      "isOnline": true,
+      "lastSeen": "2024-01-15T10:25:00Z",
+      "status": "Available"
+    }
+  },
+
+  "lastSeen": {
+    "user123": {
+      "timestamp": "2024-01-15T10:30:00Z",
+      "isVisible": true
+    },
+    "user456": {
+      "timestamp": "2024-01-15T08:45:00Z",
+      "isVisible": true
+    },
+    "user789": {
+      "timestamp": "2024-01-15T10:25:00Z",
+      "isVisible": false
+    }
+  },
+
+  "phoneVerification": {
+    "+1234567890": {
+      "verified": true,
+      "verifiedAt": "2024-01-10T09:00:00Z",
+      "userId": "user123",
+      "attempts": 1
+    },
+    "+1234567891": {
+      "verified": true,
+      "verifiedAt": "2024-01-12T14:20:00Z",
+      "userId": "user456",
+      "attempts": 1
+    }
+  },
+
+  "updates": {
+    "update001": {
+      "userId": "user123",
+      "type": "video",
+      "mediaUrl": "https://example.com/videos/alice_update1.mp4",
+      "thumbnailUrl": "https://example.com/thumbnails/alice_update1.jpg",
+      "caption": "Beautiful sunset today! 🌅",
+      "createdAt": "2024-01-15T09:00:00Z",
+      "duration": 15,
+      "viewCount": 25,
+      "likeCount": 8,
+      "commentCount": 3,
+      "isPublic": true,
+      "location": "San Francisco, CA"
+    },
+    "update002": {
+      "userId": "user456",
+      "type": "photo",
+      "mediaUrl": "https://example.com/photos/bob_update1.jpg",
+      "caption": "Coffee time! ☕",
+      "createdAt": "2024-01-15T07:30:00Z",
+      "viewCount": 12,
+      "likeCount": 5,
+      "commentCount": 1,
+      "isPublic": true
+    }
+  },
+
+  "updateViews": {
+    "view001": {
+      "updateId": "update001",
+      "viewerId": "user456",
+      "viewedAt": "2024-01-15T09:15:00Z"
+    },
+    "view002": {
+      "updateId": "update001",
+      "viewerId": "user789",
+      "viewedAt": "2024-01-15T09:30:00Z"
+    }
+  },
+
+  "updateLikes": {
+    "like001": {
+      "updateId": "update001",
+      "userId": "user456",
+      "likedAt": "2024-01-15T09:20:00Z"
+    },
+    "like002": {
+      "updateId": "update002",
+      "userId": "user123",
+      "likedAt": "2024-01-15T08:00:00Z"
+    }
+  },
+
+  "callLogs": {
+    "call001": {
+      "participants": ["user123", "user456"],
+      "type": "voice",
+      "initiator": "user123",
+      "startTime": "2024-01-14T20:00:00Z",
+      "endTime": "2024-01-14T20:15:00Z",
+      "duration": 900,
+      "status": "completed",
+      "quality": "good"
+    },
+    "call002": {
+      "participants": ["user123", "user456", "user789"],
+      "type": "video",
+      "initiator": "user456",
+      "startTime": "2024-01-13T19:30:00Z",
+      "endTime": "2024-01-13T20:00:00Z",
+      "duration": 1800,
+      "status": "completed",
+      "quality": "excellent"
+    }
+  },
+
+  "notifications": {
+    "notif001": {
+      "userId": "user123",
+      "type": "message",
+      "title": "New message from Bob",
+      "body": "Hey! How are you doing?",
+      "data": {
+        "chatId": "chat001",
+        "senderId": "user456"
+      },
+      "createdAt": "2024-01-15T10:30:00Z",
+      "read": false,
+      "delivered": true
+    },
+    "notif002": {
+      "userId": "user456",
+      "type": "call",
+      "title": "Missed call from Alice",
+      "body": "You missed a voice call",
+      "data": {
+        "callId": "call001",
+        "callerId": "user123"
+      },
+      "createdAt": "2024-01-14T20:00:00Z",
+      "read": true,
+      "delivered": true
+    }
+  },
+
+  "chats/chat001/messages": {
+    "msg001": {
+      "senderId": "user123",
+      "text": "Hey Bob! How's your day going?",
+      "type": "text",
+      "timestamp": "2024-01-15T10:00:00Z",
+      "readBy": ["user123"],
+      "deliveredTo": ["user456"],
+      "edited": false,
+      "replyTo": null
+    },
+    "msg002": {
+      "senderId": "user456",
+      "text": "Hey Alice! It's going great, thanks for asking! 😊",
+      "type": "text",
+      "timestamp": "2024-01-15T10:15:00Z",
+      "readBy": ["user456"],
+      "deliveredTo": ["user123"],
+      "edited": false,
+      "replyTo": "msg001"
+    },
+    "msg003": {
+      "senderId": "user123",
+      "text": "That's awesome! Want to grab coffee later?",
+      "type": "text",
+      "timestamp": "2024-01-15T10:30:00Z",
+      "readBy": ["user123"],
+      "deliveredTo": ["user456"],
+      "edited": false,
+      "replyTo": null
+    }
+  },
+
+  "media": {
+    "media001": {
+      "type": "image",
+      "url": "https://example.com/images/photo1.jpg",
+      "thumbnailUrl": "https://example.com/thumbnails/photo1_thumb.jpg",
+      "uploadedBy": "user123",
+      "chatId": "chat001",
+      "messageId": "msg004",
+      "uploadedAt": "2024-01-15T11:00:00Z",
+      "fileName": "sunset_beach.jpg",
+      "fileSize": 2048576,
+      "mimeType": "image/jpeg",
+      "width": 1920,
+      "height": 1080
+    },
+    "media002": {
+      "type": "video",
+      "url": "https://example.com/videos/video1.mp4",
+      "thumbnailUrl": "https://example.com/thumbnails/video1_thumb.jpg",
+      "uploadedBy": "user456",
+      "chatId": "chat001",
+      "messageId": "msg005",
+      "uploadedAt": "2024-01-15T11:30:00Z",
+      "fileName": "funny_cat.mp4",
+      "fileSize": 15728640,
+      "mimeType": "video/mp4",
+      "duration": 30,
+      "width": 1280,
+      "height": 720
+    }
+  },
+
+  "voiceMessages": {
+    "voice001": {
+      "senderId": "user123",
+      "chatId": "chat001",
+      "messageId": "msg006",
+      "audioUrl": "https://example.com/audio/voice1.m4a",
+      "duration": 15,
+      "waveform": [0.2, 0.5, 0.8, 0.3, 0.6, 0.9, 0.4, 0.7, 0.1, 0.5],
+      "createdAt": "2024-01-15T12:00:00Z",
+      "fileSize": 245760,
+      "transcription": "Hey, I'm driving right now but wanted to say hi!"
+    }
+  },
+
+  "reactions": {
+    "reaction001": {
+      "messageId": "msg002",
+      "chatId": "chat001",
+      "userId": "user123",
+      "emoji": "😊",
+      "createdAt": "2024-01-15T10:16:00Z"
+    },
+    "reaction002": {
+      "messageId": "msg003",
+      "chatId": "chat001",
+      "userId": "user456",
+      "emoji": "👍",
+      "createdAt": "2024-01-15T10:31:00Z"
+    }
+  },
+
+  "messageStatus": {
+    "status001": {
+      "messageId": "msg001",
+      "chatId": "chat001",
+      "senderId": "user123",
+      "recipientId": "user456",
+      "status": "delivered",
+      "timestamp": "2024-01-15T10:00:30Z"
+    },
+    "status002": {
+      "messageId": "msg002",
+      "chatId": "chat001",
+      "senderId": "user456",
+      "recipientId": "user123",
+      "status": "read",
+      "timestamp": "2024-01-15T10:16:00Z"
+    }
+  },
+
+  "users/user123/blockedUsers": {
+    "blocked001": {
+      "blockedUserId": "user999",
+      "blockedAt": "2024-01-10T12:00:00Z",
+      "reason": "spam"
+    }
+  },
+
+  "users/user123/archivedChats": {
+    "archived001": {
+      "chatId": "chat003",
+      "archivedAt": "2024-01-12T15:00:00Z"
+    }
+  },
+
+  "users/user123/mutedChats": {
+    "muted001": {
+      "chatId": "chat002",
+      "mutedAt": "2024-01-14T09:00:00Z",
+      "mutedUntil": "2024-01-15T09:00:00Z"
+    }
+  },
+
+  "users/user123/starredMessages": {
+    "starred001": {
+      "messageId": "msg002",
+      "chatId": "chat001",
+      "starredAt": "2024-01-15T10:20:00Z"
+    }
+  },
+
+  "users/user123/settings/preferences": {
+    "notifications": {
+      "messageNotifications": true,
+      "callNotifications": true,
+      "groupNotifications": true,
+      "soundEnabled": true,
+      "vibrationEnabled": true
+    },
+    "privacy": {
+      "lastSeenVisibility": "everyone",
+      "profilePhotoVisibility": "contacts",
+      "statusVisibility": "contacts",
+      "readReceiptsEnabled": true
+    },
+    "chat": {
+      "fontSize": "medium",
+      "wallpaper": "default",
+      "enterToSend": false,
+      "mediaAutoDownload": "wifi"
+    },
+    "calls": {
+      "lowDataMode": false,
+      "callWaiting": true
+    }
+  },
+
+  "users/user123/searchHistory": {
+    "search001": {
+      "query": "coffee",
+      "searchedAt": "2024-01-15T09:00:00Z",
+      "resultCount": 5
+    },
+    "search002": {
+      "query": "Bob",
+      "searchedAt": "2024-01-15T08:30:00Z",
+      "resultCount": 12
+    }
+  },
+
+  "users/user123/chatLocks": {
+    "lock001": {
+      "chatId": "chat001",
+      "lockedAt": "2024-01-14T20:00:00Z",
+      "lockType": "fingerprint"
+    }
+  },
+
+  "documents": {
+    "doc001": {
+      "type": "pdf",
+      "url": "https://example.com/documents/report.pdf",
+      "uploadedBy": "user123",
+      "chatId": "chat001",
+      "messageId": "msg007",
+      "uploadedAt": "2024-01-15T13:00:00Z",
+      "fileName": "project_report.pdf",
+      "fileSize": 5242880,
+      "mimeType": "application/pdf",
+      "pageCount": 25
+    }
+  },
+
+  "encryptionKeys": {
+    "key001": {
+      "userId": "user123",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...",
+      "keyId": "key_user123_2024",
+      "createdAt": "2024-01-10T09:00:00Z",
+      "algorithm": "RSA-2048"
+    }
+  },
+
+  "sharedContent": {
+    "share001": {
+      "sharedBy": "user123",
+      "sharedWith": ["user456", "user789"],
+      "contentType": "image",
+      "contentUrl": "https://example.com/shared/vacation_photo.jpg",
+      "sharedAt": "2024-01-15T14:00:00Z",
+      "expiresAt": "2024-01-22T14:00:00Z",
+      "downloadCount": 2
+    }
+  },
+
+  "downloads": {
+    "download001": {
+      "userId": "user123",
+      "mediaId": "media001",
+      "downloadedAt": "2024-01-15T11:05:00Z",
+      "fileSize": 2048576,
+      "downloadPath": "/storage/downloads/sunset_beach.jpg"
+    }
+  },
+
+  "chatExports": {
+    "export001": {
+      "userId": "user123",
+      "chatId": "chat001",
+      "exportedAt": "2024-01-15T15:00:00Z",
+      "format": "json",
+      "fileUrl": "https://example.com/exports/chat001_export.json",
+      "messageCount": 150,
+      "dateRange": {
+        "from": "2024-01-01T00:00:00Z",
+        "to": "2024-01-15T15:00:00Z"
+      }
+    }
+  },
+
+  "backups": {
+    "backup001": {
+      "userId": "user123",
+      "backupAt": "2024-01-15T02:00:00Z",
+      "backupUrl": "https://example.com/backups/user123_backup.zip",
+      "backupSize": 104857600,
+      "includesMedia": true,
+      "chatCount": 25,
+      "messageCount": 1500
+    }
+  },
+
+  "userSessions": {
+    "session001": {
+      "userId": "user123",
+      "deviceId": "device_android_123",
+      "deviceName": "Alice's Phone",
+      "platform": "android",
+      "appVersion": "1.0.0",
+      "loginAt": "2024-01-15T08:00:00Z",
+      "lastActiveAt": "2024-01-15T10:30:00Z",
+      "ipAddress": "192.168.1.100",
+      "location": "San Francisco, CA"
+    }
+  },
+
+  "navigationState": {
+    "user123": {
+      "currentTab": "chats",
+      "lastVisitedChat": "chat001",
+      "lastUpdatedAt": "2024-01-15T10:30:00Z"
+    }
+  },
+
+  "engagementMetrics": {
+    "metric001": {
+      "userId": "user123",
+      "updateId": "update001",
+      "action": "view",
+      "timestamp": "2024-01-15T09:15:00Z",
+      "duration": 10,
+      "deviceType": "mobile"
+    },
+    "metric002": {
+      "userId": "user456",
+      "updateId": "update001",
+      "action": "like",
+      "timestamp": "2024-01-15T09:20:00Z",
+      "deviceType": "mobile"
+    }
+  },
+
+  "typing/chat001/users": {
+    "user123": {
+      "isTyping": false,
+      "lastTypingAt": "2024-01-15T10:29:00Z"
+    },
+    "user456": {
+      "isTyping": true,
+      "startedTypingAt": "2024-01-15T10:30:00Z"
+    }
+  },
+
+  "activeCalls": {
+    "activeCall001": {
+      "participants": ["user123", "user456"],
+      "type": "voice",
+      "initiator": "user123",
+      "startedAt": "2024-01-15T10:35:00Z",
+      "status": "ringing",
+      "callId": "call003"
+    }
+  }
+}

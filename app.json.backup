@@ -1,0 +1,74 @@
+{
+  "expo": {
+    "name": "IraChat",
+    "slug": "irachat",
+    "version": "1.0.0",
+    "scheme": "irachat",
+    "orientation": "portrait",
+    "icon": "./assets/images/LOGO.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/images/LOGO.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#667eea"
+    },
+    "assetBundlePatterns": [
+      "assets/images/*.png",
+      "assets/fonts/*.ttf",
+      "assets/sounds/*.mp3"
+    ],
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.irachat.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "IraChat needs camera access to take photos and videos for sharing in chats.",
+        "NSMicrophoneUsageDescription": "IraChat needs microphone access for voice messages and video calls.",
+        "NSPhotoLibraryUsageDescription": "IraChat needs photo library access to share images and videos in chats.",
+        "NSContactsUsageDescription": "IraChat needs contacts access to help you find friends who are already using the app.",
+        "NSLocationWhenInUseUsageDescription": "IraChat needs location access to share your location with friends when you choose to."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/LOGO.png",
+        "backgroundColor": "#667eea"
+      },
+      "package": "com.irachat.mobile",
+      "compileSdkVersion": 34,
+      "targetSdkVersion": 34,
+      "minSdkVersion": 24,
+      "edgeToEdgeEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_CONTACTS",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.VIBRATE",
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ]
+    },
+    "experiments": {
+      "typedRoutes": true
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-dev-client",
+        {
+          "addGeneratedScheme": false
+        }
+      ]
+    ]
+  }
+}

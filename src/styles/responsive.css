@@ -1,0 +1,463 @@
+/* Enhanced Responsive CSS for Perfect Cross-Device Compatibility */
+
+/* Base responsive breakpoints */
+:root {
+  --breakpoint-xs: 0px;
+  --breakpoint-sm: 375px;
+  --breakpoint-md: 480px;
+  --breakpoint-lg: 768px;
+  --breakpoint-xl: 1024px;
+  --breakpoint-xxl: 1440px;
+  --breakpoint-xxxl: 1920px;
+
+  /* Responsive spacing scale */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-xxl: 24px;
+  --spacing-xxxl: 32px;
+
+  /* Responsive font sizes */
+  --font-xs: 10px;
+  --font-sm: 12px;
+  --font-base: 14px;
+  --font-lg: 16px;
+  --font-xl: 18px;
+  --font-2xl: 20px;
+  --font-3xl: 24px;
+  --font-4xl: 28px;
+}
+
+/* Base responsive utilities */
+.responsive-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.responsive-flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.responsive-grid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: 1fr;
+}
+
+/* Responsive text utilities */
+.text-responsive {
+  font-size: var(--font-base);
+  line-height: 1.5;
+}
+
+.text-responsive-sm {
+  font-size: var(--font-sm);
+  line-height: 1.4;
+}
+
+.text-responsive-lg {
+  font-size: var(--font-lg);
+  line-height: 1.6;
+}
+
+/* Responsive spacing utilities */
+.p-responsive {
+  padding: var(--spacing-md);
+}
+.px-responsive {
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+}
+.py-responsive {
+  padding-top: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+}
+.m-responsive {
+  margin: var(--spacing-md);
+}
+.mx-responsive {
+  margin-left: var(--spacing-md);
+  margin-right: var(--spacing-md);
+}
+.my-responsive {
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Responsive visibility utilities */
+.show-xs {
+  display: block;
+}
+.show-sm {
+  display: none;
+}
+.show-md {
+  display: none;
+}
+.show-lg {
+  display: none;
+}
+.show-xl {
+  display: none;
+}
+.show-xxl {
+  display: none;
+}
+
+.hide-xs {
+  display: none;
+}
+.hide-sm {
+  display: block;
+}
+.hide-md {
+  display: block;
+}
+.hide-lg {
+  display: block;
+}
+.hide-xl {
+  display: block;
+}
+.hide-xxl {
+  display: block;
+}
+
+/* Small phones (375px and up) */
+@media (min-width: 375px) {
+  :root {
+    --spacing-md: 16px;
+    --font-base: 15px;
+  }
+
+  .responsive-container {
+    padding: 0 var(--spacing-lg);
+  }
+
+  .responsive-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .show-xs {
+    display: none;
+  }
+  .show-sm {
+    display: block;
+  }
+  .hide-xs {
+    display: block;
+  }
+  .hide-sm {
+    display: none;
+  }
+}
+
+/* Large phones / Small tablets (480px and up) */
+@media (min-width: 480px) {
+  :root {
+    --spacing-md: 20px;
+    --font-base: 16px;
+  }
+
+  .responsive-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .show-sm {
+    display: none;
+  }
+  .show-md {
+    display: block;
+  }
+  .hide-sm {
+    display: block;
+  }
+  .hide-md {
+    display: none;
+  }
+}
+
+/* Tablets (768px and up) */
+@media (min-width: 768px) {
+  :root {
+    --spacing-md: 24px;
+    --font-base: 17px;
+  }
+
+  .responsive-container {
+    max-width: 750px;
+    padding: 0 var(--spacing-xl);
+  }
+
+  .responsive-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .show-md {
+    display: none;
+  }
+  .show-lg {
+    display: block;
+  }
+  .hide-md {
+    display: block;
+  }
+  .hide-lg {
+    display: none;
+  }
+}
+
+/* Small desktops (1024px and up) */
+@media (min-width: 1024px) {
+  :root {
+    --spacing-md: 32px;
+    --font-base: 18px;
+  }
+
+  .responsive-container {
+    max-width: 1000px;
+  }
+
+  .responsive-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .show-lg {
+    display: none;
+  }
+  .show-xl {
+    display: block;
+  }
+  .hide-lg {
+    display: block;
+  }
+  .hide-xl {
+    display: none;
+  }
+}
+
+/* Large desktops (1440px and up) */
+@media (min-width: 1440px) {
+  :root {
+    --spacing-md: 40px;
+    --font-base: 19px;
+  }
+
+  .responsive-container {
+    max-width: 1200px;
+  }
+
+  .responsive-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .show-xl {
+    display: none;
+  }
+  .show-xxl {
+    display: block;
+  }
+  .hide-xl {
+    display: block;
+  }
+  .hide-xxl {
+    display: none;
+  }
+}
+
+/* Extra large desktops (1920px and up) */
+@media (min-width: 1920px) {
+  :root {
+    --spacing-md: 48px;
+    --font-base: 20px;
+  }
+
+  .responsive-container {
+    max-width: 1400px;
+  }
+
+  .responsive-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .show-xxl {
+    display: none;
+  }
+  .show-xxxl {
+    display: block;
+  }
+  .hide-xxl {
+    display: block;
+  }
+  .hide-xxxl {
+    display: none;
+  }
+}
+
+/* Responsive image utilities */
+.img-responsive {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.img-cover {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.img-contain {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}
+
+/* Responsive aspect ratios */
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+.aspect-photo {
+  aspect-ratio: 4 / 3;
+}
+.aspect-portrait {
+  aspect-ratio: 3 / 4;
+}
+
+/* Responsive flexbox utilities */
+.flex-responsive {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .flex-responsive {
+    flex-direction: row;
+  }
+}
+
+/* Responsive button sizing */
+.btn-responsive {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-base);
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+@media (min-width: 768px) {
+  .btn-responsive {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: 10px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .btn-responsive {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-radius: 12px;
+  }
+}
+
+/* Responsive input sizing */
+.input-responsive {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-base);
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+@media (min-width: 768px) {
+  .input-responsive {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: 10px;
+  }
+}
+
+/* Responsive modal sizing */
+.modal-responsive {
+  width: 95%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+@media (min-width: 480px) {
+  .modal-responsive {
+    width: 85%;
+    max-width: 500px;
+  }
+}
+
+@media (min-width: 768px) {
+  .modal-responsive {
+    width: 75%;
+    max-width: 600px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .modal-responsive {
+    width: 65%;
+    max-width: 700px;
+  }
+}
+
+/* Responsive card layouts */
+.card-responsive {
+  background: white;
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .card-responsive {
+    border-radius: 12px;
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-responsive {
+    border-radius: 16px;
+    padding: var(--spacing-xl);
+  }
+}
+
+/* Print styles for responsive design */
+@media print {
+  .responsive-container {
+    max-width: none;
+    padding: 0;
+  }
+
+  .show-xs,
+  .show-sm,
+  .show-md,
+  .show-lg,
+  .show-xl,
+  .show-xxl {
+    display: block !important;
+  }
+
+  .hide-xs,
+  .hide-sm,
+  .hide-md,
+  .hide-lg,
+  .hide-xl,
+  .hide-xxl {
+    display: none !important;
+  }
+}

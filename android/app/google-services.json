@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1068327830364",
+    "project_id": "irachat-4ebb8",
+    "storage_bucket": "irachat-4ebb8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1068327830364:android:974f6551f046cb3f03b799",
+        "android_client_info": {
+          "package_name": "IraChat.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD47tXKiW9E7kAwMaJpAGJ8mFe-tSa5_Mw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

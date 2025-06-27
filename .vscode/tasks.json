@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Restart TS Server",
+      "command": "${command:typescript.restartTsServer}",
+      "type": "shell",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Reload Window",
+      "command": "${command:workbench.action.reloadWindow}",
+      "type": "shell",
+      "group": "build"
+    }
+  ]
+}

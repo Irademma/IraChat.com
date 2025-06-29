@@ -9,7 +9,8 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { useLogout } from "../../src/hooks/useAuthPersistence";
+
+import { performCompleteLogout } from "../../src/services/logoutService";
 import { RootState } from "../../src/redux/store";
 
 // Profile tabs configuration
@@ -45,7 +46,6 @@ export default function ProfileScreen() {
   console.log("🔍 Profile: currentUser data:", currentUser);
 
   const [activeTab, setActiveTab] = useState("chats");
-  const logoutUser = useLogout();
 
   const handleEditProfile = () => {
     router.push("/edit-profile");
@@ -59,18 +59,30 @@ export default function ProfileScreen() {
         style: "destructive",
         onPress: async () => {
           try {
-            console.log("🚪 Profile: Starting logout process...");
-            await logoutUser();
-            console.log("✅ Profile: Logout completed successfully");
+            console.log("🚪 Profile: Starting COMPLETE logout process...");
 
-            // Show success message
-            Alert.alert(
-              "Logged Out",
-              "You have been successfully logged out.",
-              [{ text: "OK" }],
-            );
+            // Use the new complete logout service
+            const result = await performCompleteLogout(dispatch, router);
+
+            if (result.success) {
+              console.log("✅ Profile: Complete logout successful");
+
+              // Show success message
+              Alert.alert(
+                "Logged Out",
+                "You have been successfully logged out.",
+                [{ text: "OK" }],
+              );
+            } else {
+              console.warn("⚠️ Profile: Logout completed with warnings");
+              Alert.alert(
+                "Logged Out",
+                "You have been logged out (with some warnings).",
+                [{ text: "OK" }],
+              );
+            }
           } catch (error) {
-            console.error("❌ Profile: Logout error:", error);
+            console.error("❌ Profile: Complete logout error:", error);
             Alert.alert("Error", "Failed to logout. Please try again.");
           }
         },

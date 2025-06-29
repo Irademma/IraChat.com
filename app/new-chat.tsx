@@ -6,6 +6,8 @@ import {
     ActivityIndicator,
     Alert,
     FlatList,
+    KeyboardAvoidingView,
+    Platform,
     RefreshControl,
     Text,
     TextInput,
@@ -207,7 +209,11 @@ export default function NewChatScreen() {
   const insets = { top: 50, bottom: 0, left: 0, right: 0 }; // Fallback safe area
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F0F9FF' }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: '#F0F9FF' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
       {/* Header with Safe Area and Gradient */}
       <View
         style={{
@@ -332,12 +338,8 @@ export default function NewChatScreen() {
         />
       )}
 
-      {/* Group Chat Option */}
+      {/* Group Chat Option - Fixed positioning to stay at bottom */}
       <View style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
         backgroundColor: '#FFFFFF',
         paddingHorizontal: 20,
         paddingVertical: 20,
@@ -445,6 +447,6 @@ export default function NewChatScreen() {
           </View>
         </View>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }

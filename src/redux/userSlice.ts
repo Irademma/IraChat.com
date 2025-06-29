@@ -38,6 +38,11 @@ const userSlice = createSlice({
 
       console.log("✅ Redux: User logged out");
     },
+    // Add action to completely reset state (for logout)
+    resetState: () => {
+      console.log("🔄 Redux: Resetting entire user state...");
+      return initialState;
+    },
     setAuthError: (state) => {
       state.isLoading = false;
       state.isAuthenticated = false;
@@ -45,6 +50,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { setLoading, setUser, updateUser, logout, setAuthError } =
+export const { setLoading, setUser, updateUser, logout, resetState, setAuthError } =
   userSlice.actions;
 export default userSlice.reducer;

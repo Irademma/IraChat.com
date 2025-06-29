@@ -11,19 +11,26 @@ import {
   ScrollView,
   Dimensions,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import * as VideoThumbnails from 'expo-video-thumbnails';
+import { useSelector } from 'react-redux';
+import { RootState } from '../src/redux/store';
+import { realUpdatesService, UpdateType, UpdatePrivacy } from '../src/services/realUpdatesService';
 
 const { width, height } = Dimensions.get('window');
 
 export default function CreateUpdateScreen() {
   const router = useRouter();
+  const currentUser = useSelector((state: RootState) => state.user.currentUser);
+
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<'photo' | 'video' | null>(null);
   const [caption, setCaption] = useState("");
   const [isPosting, setIsPosting] = useState(false);
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
+  const [privacy, setPrivacy] = useState<UpdatePrivacy>('public');
   
   // Animation values
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -164,8 +171,13 @@ export default function CreateUpdateScreen() {
       return;
     }
 
+    if (!currentUser?.id) {
+      Alert.alert("Error", "You must be logged in to post updates.");
+      return;
+    }
+
     setIsPosting(true);
-    
+
     // Animate button
     Animated.sequence([
       Animated.timing(scaleAnim, {
@@ -181,16 +193,31 @@ export default function CreateUpdateScreen() {
     ]).start();
 
     try {
-      // Simulate posting delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      Alert.alert(
-        "Success!",
-        "Your update has been posted successfully!",
-        [
-          { text: "OK", onPress: () => router.back() }
-        ]
+      const updateType: UpdateType = mediaType === 'video' ? 'video' : 'photo';
+
+      const result = await realUpdatesService.createUpdate(
+        currentUser.id,
+        currentUser.name || 'Unknown User',
+        currentUser.avatar,
+        {
+          type: updateType,
+          caption: caption.trim() || undefined,
+          mediaUri: selectedMedia,
+          privacy: privacy,
+        }
       );
+
+      if (result.success) {
+        Alert.alert(
+          "Success!",
+          "Your update has been posted successfully!",
+          [
+            { text: "OK", onPress: () => router.back() }
+          ]
+        );
+      } else {
+        Alert.alert("Error", result.error || "Failed to post update");
+      }
     } catch (error) {
       Alert.alert("Error", "Failed to post update. Please try again.");
     } finally {

@@ -11,12 +11,17 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../src/redux/store";
+import { updateUser } from "../src/redux/userSlice";
+import { realUserService } from "../src/services/realUserService";
+import * as ImagePicker from 'expo-image-picker';
 
 export default function EditProfileScreen() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
   const insets = { top: 50, bottom: 0, left: 0, right: 0 }; // Fallback safe area
 
@@ -25,24 +30,100 @@ export default function EditProfileScreen() {
   const [username, setUsername] = useState(currentUser?.username || "");
   const [bio, setBio] = useState(currentUser?.bio || "");
   const [profilePhoto, setProfilePhoto] = useState(currentUser?.avatar || null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSave = () => {
-    // TODO: Implement save functionality with Redux/Firebase
-    Alert.alert("Success", "Profile saved successfully!", [
-      { text: "OK", onPress: () => router.back() }
-    ]);
+  const handleSave = async () => {
+    if (!currentUser?.id) {
+      Alert.alert("Error", "User not found");
+      return;
+    }
+
+    if (!fullName.trim()) {
+      Alert.alert("Error", "Please enter your full name");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await realUserService.updateUserProfile(currentUser.id, {
+        name: fullName.trim(),
+        username: username.trim() || undefined,
+        bio: bio.trim() || undefined,
+        avatar: profilePhoto || undefined,
+      });
+
+      if (result.success) {
+        // Update Redux store
+        dispatch(updateUser({
+          name: fullName.trim(),
+          username: username.trim() || undefined,
+          bio: bio.trim() || undefined,
+          avatar: profilePhoto || undefined,
+        }));
+
+        Alert.alert("Success", "Profile updated successfully!", [
+          { text: "OK", onPress: () => router.back() }
+        ]);
+      } else {
+        Alert.alert("Error", result.error || "Failed to update profile");
+      }
+    } catch (error) {
+      console.error("❌ Error updating profile:", error);
+      Alert.alert("Error", "Failed to update profile");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleChangePhoto = () => {
-    Alert.alert(
-      "Change Profile Photo",
-      "Choose an option",
-      [
-        { text: "Camera", onPress: () => console.log("Open camera") },
-        { text: "Gallery", onPress: () => console.log("Open gallery") },
-        { text: "Cancel", style: "cancel" }
-      ]
-    );
+  const handleChangePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Sorry, we need camera roll permissions to change your profile photo.');
+        return;
+      }
+
+      Alert.alert(
+        "Change Profile Photo",
+        "Choose an option",
+        [
+          {
+            text: "Camera",
+            onPress: async () => {
+              const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+              });
+
+              if (!result.canceled && result.assets[0]) {
+                setProfilePhoto(result.assets[0].uri);
+              }
+            }
+          },
+          {
+            text: "Gallery",
+            onPress: async () => {
+              const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+              });
+
+              if (!result.canceled && result.assets[0]) {
+                setProfilePhoto(result.assets[0].uri);
+              }
+            }
+          },
+          { text: "Cancel", style: "cancel" }
+        ]
+      );
+    } catch (error) {
+      console.error("❌ Error changing photo:", error);
+      Alert.alert("Error", "Failed to change photo");
+    }
   };
 
   return (

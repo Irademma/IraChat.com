@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from "expo-router";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
     Alert,
@@ -10,9 +9,12 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
+    ActivityIndicator,
 } from "react-native";
-import { db } from "../src/services/firebaseSimple";
+import { useSelector } from 'react-redux';
+import { RootState } from '../src/redux/store';
+import { realGroupService } from "../src/services/realGroupService";
 import optimizedContactsService from "../src/services/optimizedContactsService";
 
 interface Contact {
@@ -35,7 +37,7 @@ export default function CreateGroupScreen() {
   const router = useRouter();
 
   // Get current user from Redux
-  const currentUser = { id: "current-user", name: "You" }; // Simplified for now
+  const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
   // Request permissions on mount
   useEffect(() => {

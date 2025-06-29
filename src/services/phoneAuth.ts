@@ -1,11 +1,14 @@
-// Phone Authentication Service
+// 🔥 FIXED Phone Authentication Service for irachat-4ebb8
+// This will ensure users appear in Firebase Auth console
+
 import {
     ConfirmationResult,
     RecaptchaVerifier,
     signInWithPhoneNumber,
     updateProfile,
+    User as FirebaseUser,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "./firebaseSimple";
 
 // Global variables for reCAPTCHA
@@ -87,7 +90,7 @@ export const sendVerificationCode = async (
   phoneNumber: string,
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    console.log("Sending verification code to:", phoneNumber);
+    console.log("🔥 Sending verification code to:", phoneNumber);
 
     // Validate phone number
     if (!validatePhoneNumber(phoneNumber)) {
@@ -96,16 +99,19 @@ export const sendVerificationCode = async (
       );
     }
 
+    // Check if Firebase Auth is available
+    if (!auth) {
+      console.error("❌ Firebase Auth is not initialized");
+      throw new Error("Firebase Auth is not available. Please check your configuration.");
+    }
+
     // Initialize reCAPTCHA if not already done
     if (!recaptchaVerifier) {
+      console.log("🔄 Initializing reCAPTCHA...");
       await initializeRecaptcha();
     }
 
-    // Send verification code
-    if (!auth) {
-      throw new Error("Firebase Auth is not available");
-    }
-
+    console.log("📱 Sending SMS via Firebase Auth...");
     confirmationResult = await signInWithPhoneNumber(
       auth,
       phoneNumber,
@@ -146,7 +152,7 @@ export const verifyOTPCode = async (
   name: string,
 ): Promise<{ success: boolean; message: string; user?: any }> => {
   try {
-    console.log("Verifying OTP code...");
+    console.log("🔐 Verifying OTP code...");
 
     if (!confirmationResult) {
       throw new Error(
@@ -158,25 +164,32 @@ export const verifyOTPCode = async (
       throw new Error("Please enter a valid 6-digit verification code.");
     }
 
-    // Verify the code
+    console.log("🔄 Confirming verification code with Firebase...");
+
+    // Verify the code with Firebase Auth
     const result = await confirmationResult.confirm(code);
-    const user = result.user;
+    const user: FirebaseUser = result.user;
 
-    console.log("Phone verification successful:", user.uid);
+    console.log("✅ Phone verification successful! User UID:", user.uid);
+    console.log("📱 Phone number:", user.phoneNumber);
 
-    // Update user profile with name
+    // Update user profile with name in Firebase Auth
     if (name.trim()) {
+      console.log("🔄 Updating user profile in Firebase Auth...");
       await updateProfile(user, {
         displayName: name.trim(),
       });
+      console.log("✅ User profile updated in Firebase Auth");
     }
 
     // Create or update user document in Firestore
+    console.log("🔄 Creating/updating user document in Firestore...");
     const userDocRef = doc(db, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
       // New user - create profile
+      console.log("👤 Creating new user profile in Firestore...");
       await setDoc(userDocRef, {
         uid: user.uid,
         phoneNumber: user.phoneNumber,
@@ -186,29 +199,43 @@ export const verifyOTPCode = async (
         status: "I Love IraChat",
         bio: "I Love IraChat",
         isOnline: true,
-        createdAt: new Date(),
-        lastLoginAt: new Date(),
+        createdAt: serverTimestamp(),
+        lastLoginAt: serverTimestamp(),
+        // Add additional fields for better user management
+        username: `user_${user.uid.substring(0, 8)}`,
+        followersCount: 0,
+        followingCount: 0,
+        likesCount: 0,
       });
-      console.log("New user profile created");
+      console.log("✅ New user profile created in Firestore");
     } else {
       // Existing user - update last login
+      console.log("🔄 Updating existing user login time...");
       await setDoc(
         userDocRef,
         {
-          lastLoginAt: new Date(),
+          lastLoginAt: serverTimestamp(),
           isOnline: true,
         },
         { merge: true },
       );
-      console.log("Existing user login updated");
+      console.log("✅ Existing user login updated");
     }
 
     // Clear verification state
     confirmationResult = null;
 
+    console.log("🎉 Phone authentication completed successfully!");
+    console.log("👤 User should now appear in Firebase Auth console");
+    console.log("📊 User details:", {
+      uid: user.uid,
+      phoneNumber: user.phoneNumber,
+      displayName: user.displayName,
+    });
+
     return {
       success: true,
-      message: "Phone number verified successfully!",
+      message: "Phone number verified successfully! User created in Firebase.",
       user: {
         uid: user.uid,
         phoneNumber: user.phoneNumber,

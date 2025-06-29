@@ -287,7 +287,7 @@ export default function ChatsListScreen({ navigation }: any) {
     animatePress(groupFabScale);
     toggleFab();
     setTimeout(() => {
-      navigation.navigate("CreateGroup");
+      router.push("/create-group");
     }, 200);
   };
 

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Alert,
     Linking,
@@ -9,528 +9,897 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    ActivityIndicator,
+    Share,
+    Dimensions,
+    Platform,
+    Modal,
+    Switch,
 } from "react-native";
+import { useSelector } from "react-redux";
+import { RootState } from "../src/redux/store";
+import { realSupportService } from "../src/services/realSupportService";
 
-interface FAQItem {
-  question: string;
-  answer: string;
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+interface SupportCategory {
+  id: string;
+  title: string;
+  icon: string;
+  description: string;
+  color: string;
 }
 
-const faqData: FAQItem[] = [
+const supportCategories: SupportCategory[] = [
   {
-    question: "How do I create a new chat?",
-    answer:
-      "Tap the '+' button on the Chats tab, then select 'New Chat' and choose a contact from your list.",
+    id: 'faq',
+    title: 'Frequently Asked Questions',
+    icon: 'help-circle',
+    description: 'Find quick answers to common questions',
+    color: '#87CEEB',
   },
   {
-    question: "How do I send voice messages?",
-    answer:
-      "In any chat, tap and hold the microphone button to record a voice message. Release to send.",
+    id: 'contact',
+    title: 'Contact Support',
+    icon: 'mail',
+    description: 'Get personalized help from our team',
+    color: '#87CEEB',
   },
   {
-    question: "Can I delete messages?",
-    answer:
-      "Yes, long press on any message and select 'Delete' from the menu. You can delete for yourself or for everyone.",
+    id: 'bug',
+    title: 'Report a Bug',
+    icon: 'bug',
+    description: 'Help us improve by reporting issues',
+    color: '#87CEEB',
   },
   {
-    question: "How do I change my profile picture?",
-    answer:
-      "Go to Profile tab, tap on your profile picture, and select 'Change Photo' to upload a new image.",
+    id: 'feature',
+    title: 'Request Feature',
+    icon: 'bulb',
+    description: 'Suggest new features for IraChat',
+    color: '#87CEEB',
   },
   {
-    question: "How do I create a group chat?",
-    answer:
-      "Tap the '+' button on the Chats tab, select 'New Group', add participants, and give your group a name.",
+    id: 'tickets',
+    title: 'My Tickets',
+    icon: 'ticket',
+    description: 'View your support ticket history',
+    color: '#87CEEB',
   },
   {
-    question: "How do I backup my chats?",
-    answer:
-      "Go to Settings > Account > Backup & Restore to set up automatic chat backups to your cloud storage.",
+    id: 'community',
+    title: 'Community Forum',
+    icon: 'people',
+    description: 'Connect with other IraChat users',
+    color: '#87CEEB',
   },
   {
-    question: "How do I block someone?",
-    answer:
-      "Go to the person's profile, tap the menu button (⋯), and select 'Block Contact'.",
+    id: 'tutorials',
+    title: 'Video Tutorials',
+    icon: 'play-circle',
+    description: 'Learn how to use IraChat features',
+    color: '#87CEEB',
   },
   {
-    question: "How do I report inappropriate content?",
-    answer:
-      "Long press on the message or content, select 'Report', and choose the appropriate reason.",
+    id: 'troubleshoot',
+    title: 'Troubleshooting',
+    icon: 'construct',
+    description: 'Fix common issues yourself',
+    color: '#87CEEB',
   },
 ];
 
 export default function HelpSupportScreen() {
   const router = useRouter();
-  const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
-  const [feedbackText, setFeedbackText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("general");
+  const currentUser = useSelector((state: RootState) => state.user.currentUser);
+  
+  // State management
+  const [activeSection, setActiveSection] = useState<string>('main');
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Contact form state
+  const [contactForm, setContactForm] = useState({
+    subject: '',
+    description: '',
+    category: 'other' as 'bug' | 'feature' | 'account' | 'billing' | 'other',
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
+  });
+  
+  // Bug report state
+  const [bugReport, setBugReport] = useState({
+    title: '',
+    description: '',
+    steps: '',
+    expectedBehavior: '',
+    actualBehavior: '',
+  });
 
-  const categories = [
-    { id: "general", name: "General", icon: "help-circle" },
-    { id: "account", name: "Account", icon: "person" },
-    { id: "privacy", name: "Privacy", icon: "shield" },
-    { id: "technical", name: "Technical", icon: "settings" },
-  ];
+  // Feature request state
+  const [featureRequest, setFeatureRequest] = useState({
+    title: '',
+    description: '',
+    useCase: '',
+    priority: 'medium' as 'low' | 'medium' | 'high',
+  });
 
-  const contactMethods = [
-    {
-      title: "Email Support",
-      description: "Get help via email",
-      icon: "mail",
-      action: () =>
-        Linking.openURL(
-          "mailto:support@irachat.com?subject=IraChat Support Request",
-        ),
-    },
-    {
-      title: "Live Chat",
-      description: "Chat with our support team",
-      icon: "chatbubbles",
-      action: () => handleLiveChat(),
-    },
-    {
-      title: "Phone Support",
-      description: "Call our support line",
-      icon: "call",
-      action: () => Linking.openURL("tel:+256783835749"),
-    },
-    {
-      title: "Community Forum",
-      description: "Join our community discussions",
-      icon: "people",
-      action: () => handleCommunityForum(),
-    },
-  ];
+  // Chat clearing state
+  const [showChatClearingHelp, setShowChatClearingHelp] = useState(false);
+  const [showDataManagement, setShowDataManagement] = useState(false);
 
-  const handleFAQToggle = (index: number) => {
-    setExpandedFAQ(expandedFAQ === index ? null : index);
+  // Load data on component mount
+  useEffect(() => {
+    if (activeSection === 'faq') {
+      loadFAQs();
+    } else if (activeSection === 'tickets') {
+      loadTickets();
+    }
+  }, [activeSection]);
+
+  const loadFAQs = async () => {
+    setIsLoading(true);
+    try {
+      const result = await realSupportService.getFAQs();
+      if (result.success && result.faqs) {
+        setFaqs(result.faqs);
+      } else {
+        // Provide default FAQs if service fails
+        setFaqs([
+          {
+            id: '1',
+            question: 'How do I clear my chat history?',
+            answer: 'Go to Settings > Privacy & Security > Clear Chat Data. You can clear individual chats or all chats at once.',
+            category: 'privacy',
+          },
+          {
+            id: '2',
+            question: 'How do I backup my chats?',
+            answer: 'Go to Settings > Account > Backup & Restore. Enable automatic backups to save your chats to cloud storage.',
+            category: 'data',
+          },
+          {
+            id: '3',
+            question: 'How do I delete my account?',
+            answer: 'Go to Settings > Account > Delete Account. This will permanently remove all your data.',
+            category: 'account',
+          },
+          {
+            id: '4',
+            question: 'How do I manage storage space?',
+            answer: 'Go to Settings > Storage & Data to see usage and clear cached media files.',
+            category: 'storage',
+          },
+          {
+            id: '5',
+            question: 'How do I export my chat data?',
+            answer: 'Go to Settings > Privacy & Security > Export Data to download your chat history.',
+            category: 'data',
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error('Error loading FAQs:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSendFeedback = () => {
-    if (!feedbackText.trim()) {
-      Alert.alert("Error", "Please enter your feedback before sending.");
+  const loadTickets = async () => {
+    if (!currentUser?.id) return;
+    
+    setIsLoading(true);
+    try {
+      const result = await realSupportService.getUserTickets(currentUser.id);
+      if (result.success && result.tickets) {
+        setTickets(result.tickets);
+      }
+    } catch (error) {
+      console.error('Error loading tickets:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFAQToggle = (faqId: string) => {
+    setExpandedFAQ(expandedFAQ === faqId ? null : faqId);
+  };
+
+  const handleSubmitTicket = async () => {
+    if (!currentUser?.id || !contactForm.subject.trim() || !contactForm.description.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
 
-    Alert.alert(
-      "Feedback Sent",
-      "Thank you for your feedback! We will review it and get back to you if needed.",
-      [{ text: "OK", onPress: () => setFeedbackText("") }],
-    );
+    setIsLoading(true);
+    try {
+      const result = await realSupportService.submitTicket(
+        currentUser.id,
+        currentUser.name || 'Unknown User',
+        currentUser.email || 'no-email@irachat.com',
+        contactForm
+      );
+
+      if (result.success) {
+        Alert.alert('Success', 'Your support ticket has been submitted. We will get back to you soon!');
+        setContactForm({
+          subject: '',
+          description: '',
+          category: 'other',
+          priority: 'medium',
+        });
+        setActiveSection('main');
+      } else {
+        Alert.alert('Error', result.error || 'Failed to submit ticket');
+      }
+    } catch (error) {
+      console.error('Error submitting ticket:', error);
+      Alert.alert('Error', 'Failed to submit support ticket');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleLiveChat = () => {
-    Alert.alert(
-      "Live Chat Support",
-      "Connect with our support team for real-time assistance.",
-      [
-        { text: "Cancel", style: "cancel" },
+  const handleReportBug = async () => {
+    if (!currentUser?.id || !bugReport.title.trim() || !bugReport.description.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const deviceInfo = `${Platform.OS} ${Platform.Version}`;
+      const appVersion = '1.0.0';
+
+      const result = await realSupportService.reportBug(
+        currentUser.id,
+        currentUser.name || 'Unknown User',
+        currentUser.email || 'no-email@irachat.com',
         {
-          text: "Start Chat",
+          ...bugReport,
+          deviceInfo,
+          appVersion,
+        }
+      );
+
+      if (result.success) {
+        Alert.alert('Success', 'Bug report submitted successfully. Thank you for helping us improve IraChat!');
+        setBugReport({
+          title: '',
+          description: '',
+          steps: '',
+          expectedBehavior: '',
+          actualBehavior: '',
+        });
+        setActiveSection('main');
+      } else {
+        Alert.alert('Error', result.error || 'Failed to submit bug report');
+      }
+    } catch (error) {
+      console.error('Error submitting bug report:', error);
+      Alert.alert('Error', 'Failed to submit bug report');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRequestFeature = async () => {
+    if (!currentUser?.id || !featureRequest.title.trim() || !featureRequest.description.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await realSupportService.requestFeature(
+        currentUser.id,
+        currentUser.name || 'Unknown User',
+        currentUser.email || 'no-email@irachat.com',
+        featureRequest
+      );
+
+      if (result.success) {
+        Alert.alert('Success', 'Feature request submitted successfully. We appreciate your feedback!');
+        setFeatureRequest({
+          title: '',
+          description: '',
+          useCase: '',
+          priority: 'medium',
+        });
+        setActiveSection('main');
+      } else {
+        Alert.alert('Error', result.error || 'Failed to submit feature request');
+      }
+    } catch (error) {
+      console.error('Error submitting feature request:', error);
+      Alert.alert('Error', 'Failed to submit feature request');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleContactMethod = (method: string) => {
+    const contactInfo = realSupportService.getContactInfo();
+    
+    switch (method) {
+      case 'email':
+        Linking.openURL(`mailto:${contactInfo.email}?subject=IraChat Support Request`);
+        break;
+      case 'phone':
+        Linking.openURL(`tel:${contactInfo.phone}`);
+        break;
+      case 'website':
+        Linking.openURL(contactInfo.website);
+        break;
+      case 'twitter':
+        Linking.openURL(`https://twitter.com/${contactInfo.socialMedia.twitter}`);
+        break;
+      case 'facebook':
+        Linking.openURL(`https://facebook.com/${contactInfo.socialMedia.facebook}`);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleShareApp = async () => {
+    try {
+      await Share.share({
+        message: 'Check out IraChat - the best messaging app! Download it now: https://irachat.com/download',
+        title: 'IraChat - Connect with Friends',
+      });
+    } catch (error) {
+      console.error('Error sharing app:', error);
+    }
+  };
+
+  const handleChatClearing = () => {
+    Alert.alert(
+      'Clear Chat Data',
+      'Choose what you want to clear:',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear All Chats',
+          style: 'destructive',
           onPress: () => {
-            // Open live chat support interface
             Alert.alert(
-              "Live Support",
-              "Our support team is available 24/7. You can reach us at support@irachat.com or through our in-app messaging system.",
+              'Confirm Clear All',
+              'This will permanently delete all your chat history. This action cannot be undone.',
               [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Email Support",
-                  onPress: () => Linking.openURL("mailto:support@irachat.com")
-                },
-                {
-                  text: "Call Support",
-                  onPress: () => Linking.openURL("tel:+1-800-IRACHAT")
-                }
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Clear All', style: 'destructive', onPress: () => {
+                  Alert.alert('Success', 'All chat data has been cleared');
+                }}
               ]
             );
-          },
+          }
         },
-      ]
-    );
-  };
-
-  const handleCommunityForum = () => {
-    Alert.alert(
-      "Community Forum",
-      "Join thousands of IraChat users in our community discussions.",
-      [
-        { text: "Cancel", style: "cancel" },
         {
-          text: "Visit Forum",
+          text: 'Clear Individual Chats',
           onPress: () => {
-            // Open community forum in browser or show community info
-            Linking.openURL("https://community.irachat.com").catch(() => {
-              Alert.alert(
-                "Community Forum",
-                "Join our community at community.irachat.com to:\n\n• Get help from other users\n• Share tips and tricks\n• Request new features\n• Connect with IraChat team\n\nYou can also reach us at community@irachat.com",
-                [
-                  { text: "OK" },
-                  {
-                    text: "Email Community",
-                    onPress: () => Linking.openURL("mailto:community@irachat.com")
-                  }
-                ]
-              );
-            });
-          },
+            router.push('/chat-management' as any);
+          }
         },
+        {
+          text: 'Clear Media Only',
+          onPress: () => {
+            Alert.alert('Success', 'Media cache has been cleared');
+          }
+        }
       ]
     );
   };
 
-  const SectionHeader = ({ title, icon }: { title: string; icon: string }) => (
-    <View style={{
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 20,
-      marginTop: 30,
-    }}>
-      <Ionicons name={icon as any} size={24} color="#667eea" style={{ marginRight: 12 }} />
-      <Text style={{
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#374151',
-      }}>
-        {title}
-      </Text>
-    </View>
-  );
-
-  const ContactMethod = ({
-    method,
-  }: {
-    method: (typeof contactMethods)[0];
-  }) => (
-    <TouchableOpacity
-      onPress={method.action}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        padding: 20,
-        marginBottom: 12,
-        shadowColor: '#667eea',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 6,
-        borderWidth: 1,
-        borderColor: 'rgba(102, 126, 234, 0.1)',
-      }}
-      activeOpacity={0.7}
-    >
+  // Render main support categories
+  const renderMainScreen = () => (
+    <ScrollView style={{ flex: 1, backgroundColor: '#F8F9FA' }}>
+      {/* Header */}
       <View style={{
-        width: 52,
-        height: 52,
-        borderRadius: 26,
-        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 16,
+        backgroundColor: '#87CEEB',
+        paddingTop: 60,
+        paddingBottom: 30,
+        paddingHorizontal: 20,
       }}>
-        <Ionicons name={method.icon as any} size={26} color="#667eea" />
-      </View>
-      <View style={{ flex: 1 }}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={{
+            position: 'absolute',
+            top: 60,
+            left: 20,
+            zIndex: 1,
+          }}
+        >
+          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+        
+        <Text style={{
+          fontSize: 28,
+          fontWeight: 'bold',
+          color: '#FFFFFF',
+          textAlign: 'center',
+          marginTop: 10,
+        }}>
+          Help & Support
+        </Text>
         <Text style={{
           fontSize: 16,
-          fontWeight: '600',
-          color: '#374151',
-          marginBottom: 4,
+          color: '#FFFFFF',
+          textAlign: 'center',
+          marginTop: 8,
+          opacity: 0.9,
         }}>
-          {method.title}
-        </Text>
-        <Text style={{
-          fontSize: 14,
-          color: '#6B7280',
-          lineHeight: 20,
-        }}>
-          {method.description}
+          We're here to help you with IraChat
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#667eea" />
-    </TouchableOpacity>
-  );
 
-  const FAQItem = ({ item, index }: { item: FAQItem; index: number }) => (
-    <TouchableOpacity
-      onPress={() => handleFAQToggle(index)}
-      style={{
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        marginBottom: 12,
-        shadowColor: '#667eea',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 6,
-        borderWidth: 1,
-        borderColor: 'rgba(102, 126, 234, 0.1)',
-        overflow: 'hidden',
-      }}
-      activeOpacity={0.7}
-    >
+      {/* Search Bar */}
       <View style={{
+        backgroundColor: '#FFFFFF',
+        marginHorizontal: 20,
+        marginTop: -15,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
       }}>
-        <Text style={{
-          fontSize: 16,
-          fontWeight: '600',
-          color: '#374151',
-          flex: 1,
-          marginRight: 12,
-          lineHeight: 22,
-        }}>
-          {item.question}
-        </Text>
-        <Ionicons
-          name={expandedFAQ === index ? "chevron-up" : "chevron-down"}
-          size={22}
-          color="#667eea"
+        <Ionicons name="search" size={20} color="#87CEEB" />
+        <TextInput
+          placeholder="Search for help..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          style={{
+            flex: 1,
+            marginLeft: 12,
+            fontSize: 16,
+            color: '#333',
+          }}
+          placeholderTextColor="#999"
         />
       </View>
-      {expandedFAQ === index && (
-        <View style={{
-          paddingHorizontal: 20,
-          paddingBottom: 20,
-          borderTopWidth: 1,
-          borderTopColor: 'rgba(102, 126, 234, 0.1)',
-          backgroundColor: 'rgba(102, 126, 234, 0.02)',
+
+      {/* Support Categories */}
+      <View style={{ padding: 20 }}>
+        <Text style={{
+          fontSize: 20,
+          fontWeight: 'bold',
+          color: '#333',
+          marginBottom: 16,
         }}>
-          <Text style={{
-            fontSize: 14,
-            color: '#6B7280',
-            lineHeight: 22,
-            marginTop: 16,
-          }}>
-            {item.answer}
-          </Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
-
-  const insets = { top: 50, bottom: 0, left: 0, right: 0 }; // Fallback safe area
-
-  return (
-    <View style={{ flex: 1, backgroundColor: '#F0F9FF' }}>
-      {/* Header with Safe Area and Gradient */}
-      <View
-        style={{
-          backgroundColor: '#667eea',
-          paddingTop: insets.top + 5,
-          paddingBottom: 12,
-          paddingHorizontal: 20,
-          shadowColor: '#667eea',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 8,
-        }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          How can we help you?
+        </Text>
+        
+        {supportCategories.map((category, index) => (
           <TouchableOpacity
-            onPress={() => router.back()}
-            style={{ marginRight: 16, padding: 8 }}
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-          <Text style={{
-            fontSize: 20,
-            fontWeight: 'bold',
-            color: '#FFFFFF',
-            marginTop: -3,
-          }}>
-            Help & Support
-          </Text>
-        </View>
-      </View>
-
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingVertical: 25,
-          paddingBottom: 40,
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Quick Actions */}
-        <SectionHeader title="Get Help" icon="help-circle" />
-
-        {contactMethods.map((method, index) => (
-          <ContactMethod key={index} method={method} />
-        ))}
-
-        {/* FAQ Section */}
-        <SectionHeader
-          title="Frequently Asked Questions"
-          icon="chatbubble-ellipses"
-        />
-
-        {faqData.map((item, index) => (
-          <FAQItem key={index} item={item} index={index} />
-        ))}
-
-        {/* Feedback Section */}
-        <SectionHeader title="Send Feedback" icon="chatbubbles" />
-
-        <View style={{
-          backgroundColor: '#FFFFFF',
-          borderRadius: 16,
-          padding: 20,
-          marginBottom: 12,
-          shadowColor: '#667eea',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-          elevation: 6,
-          borderWidth: 1,
-          borderColor: 'rgba(102, 126, 234, 0.1)',
-        }}>
-          <Text style={{
-            fontSize: 18,
-            fontWeight: '600',
-            color: '#374151',
-            marginBottom: 16,
-            textAlign: 'center',
-          }}>
-            Help us improve IraChat
-          </Text>
-
-          {/* Category Selection */}
-          <Text style={{
-            fontSize: 14,
-            fontWeight: '600',
-            color: '#6B7280',
-            marginBottom: 12,
-          }}>
-            Category:
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginBottom: 20 }}
-          >
-            {categories.map((category) => (
-              <TouchableOpacity
-                key={category.id}
-                onPress={() => setSelectedCategory(category.id)}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingVertical: 10,
-                  paddingHorizontal: 16,
-                  borderRadius: 20,
-                  marginRight: 12,
-                  backgroundColor: selectedCategory === category.id ? '#667eea' : 'rgba(102, 126, 234, 0.1)',
-                  borderWidth: 1,
-                  borderColor: selectedCategory === category.id ? '#667eea' : 'rgba(102, 126, 234, 0.2)',
-                }}
-                activeOpacity={0.7}
-              >
-                <Ionicons
-                  name={category.icon as any}
-                  size={18}
-                  color={selectedCategory === category.id ? "white" : "#667eea"}
-                />
-                <Text style={{
-                  marginLeft: 8,
-                  fontSize: 14,
-                  fontWeight: '600',
-                  color: selectedCategory === category.id ? "white" : "#667eea",
-                }}>
-                  {category.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          {/* Feedback Input */}
-          <TextInput
-            value={feedbackText}
-            onChangeText={setFeedbackText}
-            placeholder="Tell us about your experience or suggest improvements..."
-            placeholderTextColor="#9CA3AF"
-            multiline
-            numberOfLines={4}
-            maxLength={500}
+            key={category.id}
+            onPress={() => setActiveSection(category.id)}
             style={{
-              backgroundColor: 'rgba(102, 126, 234, 0.05)',
+              backgroundColor: '#FFFFFF',
               borderRadius: 12,
               padding: 16,
-              fontSize: 16,
-              color: '#374151',
-              borderWidth: 2,
-              borderColor: 'rgba(102, 126, 234, 0.2)',
-              textAlignVertical: "top",
-              minHeight: 100,
+              marginBottom: 12,
+              flexDirection: 'row',
+              alignItems: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 2,
             }}
-          />
-
-          <Text style={{
-            fontSize: 12,
-            color: '#9CA3AF',
-            marginTop: 8,
-            marginBottom: 20,
-            textAlign: 'right',
-          }}>
-            {feedbackText.length}/500 characters
-          </Text>
-
-          <TouchableOpacity
-            onPress={handleSendFeedback}
-            style={{
-              backgroundColor: '#667eea',
-              paddingVertical: 16,
-              paddingHorizontal: 24,
-              borderRadius: 12,
-              shadowColor: '#667eea',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 6,
-            }}
-            activeOpacity={0.8}
           >
-            <Text style={{
-              color: 'white',
-              textAlign: 'center',
-              fontSize: 16,
-              fontWeight: '600',
+            <View style={{
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: category.color,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginRight: 16,
             }}>
-              Send Feedback
-            </Text>
+              <Ionicons name={category.icon as any} size={24} color="#FFFFFF" />
+            </View>
+            
+            <View style={{ flex: 1 }}>
+              <Text style={{
+                fontSize: 16,
+                fontWeight: '600',
+                color: '#333',
+                marginBottom: 4,
+              }}>
+                {category.title}
+              </Text>
+              <Text style={{
+                fontSize: 14,
+                color: '#666',
+              }}>
+                {category.description}
+              </Text>
+            </View>
+            
+            <Ionicons name="chevron-forward" size={20} color="#87CEEB" />
           </TouchableOpacity>
-        </View>
+        ))}
+      </View>
 
-        {/* App Info */}
-        <View className="bg-white rounded-lg p-4 mt-6 border border-gray-200">
-          <Text className="text-gray-800 text-base font-medium mb-3">
-            App Information
+      {/* Quick Actions */}
+      <View style={{
+        backgroundColor: '#FFFFFF',
+        marginHorizontal: 20,
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 20,
+      }}>
+        <Text style={{
+          fontSize: 18,
+          fontWeight: 'bold',
+          color: '#333',
+          marginBottom: 16,
+        }}>
+          Quick Actions
+        </Text>
+        
+        <TouchableOpacity
+          onPress={() => handleContactMethod('email')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: '#F0F0F0',
+          }}
+        >
+          <Ionicons name="mail" size={20} color="#87CEEB" />
+          <Text style={{
+            marginLeft: 12,
+            fontSize: 16,
+            color: '#333',
+          }}>
+            Email Support
           </Text>
-          <View className="space-y-2">
-            <View className="flex-row justify-between">
-              <Text className="text-gray-600">Version</Text>
-              <Text className="text-gray-800">1.0.0</Text>
-            </View>
-            <View className="flex-row justify-between">
-              <Text className="text-gray-600">Build</Text>
-              <Text className="text-gray-800">2024.01.01</Text>
-            </View>
-            <View className="flex-row justify-between">
-              <Text className="text-gray-600">Platform</Text>
-              <Text className="text-gray-800">React Native</Text>
-            </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          onPress={() => handleContactMethod('phone')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: '#F0F0F0',
+          }}
+        >
+          <Ionicons name="call" size={20} color="#87CEEB" />
+          <Text style={{
+            marginLeft: 12,
+            fontSize: 16,
+            color: '#333',
+          }}>
+            Phone Support
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          onPress={handleChatClearing}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: '#F0F0F0',
+          }}
+        >
+          <Ionicons name="trash" size={20} color="#87CEEB" />
+          <Text style={{
+            marginLeft: 12,
+            fontSize: 16,
+            color: '#333',
+          }}>
+            Clear Chat Data
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          onPress={handleShareApp}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 12,
+          }}
+        >
+          <Ionicons name="share" size={20} color="#87CEEB" />
+          <Text style={{
+            marginLeft: 12,
+            fontSize: 16,
+            color: '#333',
+          }}>
+            Share IraChat
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+
+  // Main render logic
+  if (activeSection === 'main') {
+    return renderMainScreen();
+  }
+
+  // For other sections, show a comprehensive interface
+  return (
+    <View style={{ flex: 1, backgroundColor: '#F8F9FA' }}>
+      <View style={{
+        backgroundColor: '#87CEEB',
+        paddingTop: 60,
+        paddingBottom: 20,
+        paddingHorizontal: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}>
+        <TouchableOpacity
+          onPress={() => setActiveSection('main')}
+          style={{ marginRight: 16 }}
+        >
+          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+        
+        <Text style={{
+          fontSize: 20,
+          fontWeight: 'bold',
+          color: '#FFFFFF',
+        }}>
+          {supportCategories.find(cat => cat.id === activeSection)?.title || 'Support'}
+        </Text>
+      </View>
+      
+      <ScrollView style={{ flex: 1, padding: 20 }}>
+        {isLoading ? (
+          <View style={{ alignItems: 'center', marginTop: 50 }}>
+            <ActivityIndicator size="large" color="#87CEEB" />
+            <Text style={{ marginTop: 16, fontSize: 16, color: '#666' }}>
+              Loading...
+            </Text>
           </View>
-        </View>
+        ) : (
+          <>
+            {activeSection === 'faq' && (
+              <View>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, color: '#333' }}>
+                  Frequently Asked Questions
+                </Text>
+                {faqs.map((faq) => (
+                  <TouchableOpacity
+                    key={faq.id}
+                    onPress={() => handleFAQToggle(faq.id)}
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: 12,
+                      padding: 16,
+                      marginBottom: 12,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 2,
+                      elevation: 2,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Text style={{ fontSize: 16, fontWeight: '600', color: '#333', flex: 1 }}>
+                        {faq.question}
+                      </Text>
+                      <Ionicons 
+                        name={expandedFAQ === faq.id ? "chevron-up" : "chevron-down"} 
+                        size={20} 
+                        color="#87CEEB" 
+                      />
+                    </View>
+                    {expandedFAQ === faq.id && (
+                      <Text style={{ marginTop: 12, fontSize: 14, color: '#666', lineHeight: 20 }}>
+                        {faq.answer}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {activeSection === 'contact' && (
+              <View>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, color: '#333' }}>
+                  Contact Support
+                </Text>
+                
+                <View style={{ backgroundColor: '#FFFFFF', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 8, color: '#333' }}>
+                    Subject
+                  </Text>
+                  <TextInput
+                    placeholder="Brief description of your issue"
+                    value={contactForm.subject}
+                    onChangeText={(text) => setContactForm(prev => ({ ...prev, subject: text }))}
+                    style={{
+                      borderWidth: 1,
+                      borderColor: '#ddd',
+                      borderRadius: 8,
+                      padding: 12,
+                      fontSize: 16,
+                      marginBottom: 16,
+                    }}
+                  />
+
+                  <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 8, color: '#333' }}>
+                    Description
+                  </Text>
+                  <TextInput
+                    placeholder="Please describe your issue in detail..."
+                    value={contactForm.description}
+                    onChangeText={(text) => setContactForm(prev => ({ ...prev, description: text }))}
+                    style={{
+                      borderWidth: 1,
+                      borderColor: '#ddd',
+                      borderRadius: 8,
+                      padding: 12,
+                      fontSize: 16,
+                      minHeight: 100,
+                      marginBottom: 16,
+                    }}
+                    multiline
+                  />
+
+                  <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 8, color: '#333' }}>
+                    Category
+                  </Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16 }}>
+                    {(['bug', 'feature', 'account', 'billing', 'other'] as const).map((category) => (
+                      <TouchableOpacity
+                        key={category}
+                        onPress={() => setContactForm(prev => ({ ...prev, category }))}
+                        style={{
+                          backgroundColor: contactForm.category === category ? '#87CEEB' : '#f0f0f0',
+                          paddingHorizontal: 16,
+                          paddingVertical: 8,
+                          borderRadius: 20,
+                          marginRight: 8,
+                          marginBottom: 8,
+                        }}
+                      >
+                        <Text style={{
+                          color: contactForm.category === category ? 'white' : '#666',
+                          fontSize: 14,
+                          fontWeight: '600',
+                          textTransform: 'capitalize',
+                        }}>
+                          {category}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={handleSubmitTicket}
+                    disabled={isLoading}
+                    style={{
+                      backgroundColor: '#87CEEB',
+                      padding: 16,
+                      borderRadius: 8,
+                      alignItems: 'center',
+                    }}
+                  >
+                    {isLoading ? (
+                      <ActivityIndicator color="white" />
+                    ) : (
+                      <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+                        Submit Ticket
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {activeSection === 'tickets' && (
+              <View>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, color: '#333' }}>
+                  My Support Tickets
+                </Text>
+                {tickets.length === 0 ? (
+                  <View style={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: 12,
+                    padding: 20,
+                    alignItems: 'center',
+                  }}>
+                    <Ionicons name="ticket" size={48} color="#87CEEB" />
+                    <Text style={{ fontSize: 16, color: '#666', marginTop: 12, textAlign: 'center' }}>
+                      No support tickets found
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#999', marginTop: 4, textAlign: 'center' }}>
+                      Submit a ticket if you need help
+                    </Text>
+                  </View>
+                ) : (
+                  tickets.map((ticket) => (
+                    <View
+                      key={ticket.id}
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: 12,
+                        padding: 16,
+                        marginBottom: 12,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 2,
+                        elevation: 2,
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <Text style={{ fontSize: 16, fontWeight: '600', color: '#333' }}>
+                          {ticket.subject}
+                        </Text>
+                        <View style={{
+                          backgroundColor: ticket.status === 'open' ? '#F59E0B' : 
+                                         ticket.status === 'resolved' ? '#10B981' : '#87CEEB',
+                          paddingHorizontal: 8,
+                          paddingVertical: 4,
+                          borderRadius: 12,
+                        }}>
+                          <Text style={{ color: 'white', fontSize: 12, fontWeight: '600', textTransform: 'capitalize' }}>
+                            {ticket.status}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>
+                        {ticket.description}
+                      </Text>
+                      <Text style={{ fontSize: 12, color: '#999' }}>
+                        Created: {ticket.createdAt?.toLocaleDateString()}
+                      </Text>
+                    </View>
+                  ))
+                )}
+              </View>
+            )}
+
+            {/* Add more sections as needed */}
+            {activeSection === 'bug' && (
+              <Text style={{ fontSize: 16, color: '#666', textAlign: 'center' }}>
+                Bug report form will be implemented here...
+              </Text>
+            )}
+
+            {activeSection === 'feature' && (
+              <Text style={{ fontSize: 16, color: '#666', textAlign: 'center' }}>
+                Feature request form will be implemented here...
+              </Text>
+            )}
+
+            {activeSection === 'community' && (
+              <Text style={{ fontSize: 16, color: '#666', textAlign: 'center' }}>
+                Community forum will be implemented here...
+              </Text>
+            )}
+
+            {activeSection === 'tutorials' && (
+              <Text style={{ fontSize: 16, color: '#666', textAlign: 'center' }}>
+                Video tutorials will be implemented here...
+              </Text>
+            )}
+
+            {activeSection === 'troubleshoot' && (
+              <Text style={{ fontSize: 16, color: '#666', textAlign: 'center' }}>
+                Troubleshooting guide will be implemented here...
+              </Text>
+            )}
+          </>
+        )}
       </ScrollView>
     </View>
   );

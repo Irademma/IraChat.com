@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
+import * as Contacts from "expo-contacts";
 import { useRouter } from "expo-router";
 import {
     addDoc,
@@ -36,7 +38,10 @@ import {
 } from "react-native";
 import { useCallManager } from "../hooks/useCallManager";
 import { auth, db, storage } from "../services/firebaseSimple";
-import { MessageStatus } from "./MessageStatus";
+import MessageStatusIndicator from "./MessageStatusIndicator";
+import TypingIndicator from "./TypingIndicator";
+import MessageSearch from "./MessageSearch";
+import { realTimeMessagingService } from "../services/realTimeMessagingService";
 
 // Enhanced Message Interface
 interface Message {
@@ -45,7 +50,7 @@ interface Message {
   senderId: string;
   timestamp: any;
   status: "sent" | "delivered" | "read";
-  type: "text" | "image" | "video" | "audio" | "document" | "voice" | "call";
+  type: "text" | "image" | "video" | "audio" | "document" | "voice" | "call" | "location" | "contact";
   mediaUrl?: string;
   mediaThumbnail?: string;
   duration?: number; // for audio/video
@@ -72,6 +77,18 @@ interface Message {
   editedAt?: any;
   isForwarded?: boolean;
   forwardedFrom?: string;
+  // Location data
+  location?: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  // Contact data
+  contact?: {
+    name: string;
+    phoneNumbers: string[];
+    emails: string[];
+  };
 }
 
 // Reaction Interface (for future use)
@@ -99,7 +116,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [partnerTyping] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<{ userId: string; userName: string }[]>([]);
 
   // Media & Voice State
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -125,6 +142,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [showMessageActions, setShowMessageActions] = useState(false);
+  const [showMessageSearch, setShowMessageSearch] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [showImageViewer, setShowImageViewer] = useState(false);
@@ -172,24 +190,37 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
 
             setMessages(newMessages);
 
+            // Mark messages as read when chat is opened
+            if (newMessages.length > 0 && currentUser?.uid) {
+              realTimeMessagingService.markChatAsRead(chatId, currentUser.uid);
+            }
+
             // Optimize scroll timing - only scroll if messages exist
             if (newMessages.length > 0) {
               setTimeout(() => {
                 flatListRef.current?.scrollToEnd({ animated: false });
               }, 50);
             }
-
-            // Defer read marking to not block UI
-            setTimeout(() => {
-              markMessagesAsRead(newMessages);
-            }, 100);
           },
           (error) => {
-            console.error("❌ Message listener error:", error);
+            console.error("❌ Error loading messages:", error);
           }
         );
 
-        return () => unsubscribe();
+        // Subscribe to typing indicators
+        const typingUnsubscribe = realTimeMessagingService.subscribeToTypingIndicators(
+          chatId,
+          currentUser?.uid || '',
+          (users) => {
+            setTypingUsers(users);
+          }
+        );
+
+        return () => {
+          console.log("🧹 Cleaning up message and typing subscriptions");
+          unsubscribe();
+          typingUnsubscribe();
+        };
       }, 50);
 
       return () => {
@@ -469,7 +500,8 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   useEffect(() => {
     // Defer animation setup to not block initial render
     const animationTimeout = setTimeout(() => {
-      if (partnerTyping) {
+      const isPartnerTyping = typingUsers.length > 0;
+      if (isPartnerTyping) {
         Animated.loop(
           Animated.sequence([
             Animated.timing(typingAnimation, {
@@ -490,7 +522,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
     }, 100);
 
     return () => clearTimeout(animationTimeout);
-  }, [partnerTyping]);
+  }, [typingUsers]);
 
   // Reply Animation Effect - Lazy loaded
   useEffect(() => {
@@ -751,6 +783,133 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
     }
   };
   */
+
+  // Location Sharing Functions
+  const shareLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please grant location permission to share your location');
+        return;
+      }
+
+      Alert.alert(
+        'Share Location',
+        'Choose location sharing option:',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Current Location',
+            onPress: async () => {
+              try {
+                const location = await Location.getCurrentPositionAsync({
+                  accuracy: Location.Accuracy.High,
+                });
+
+                const messageData: Partial<Message> = {
+                  senderId: currentUser!.uid,
+                  timestamp: serverTimestamp(),
+                  status: "sent",
+                  type: "location",
+                  location: {
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                    address: "Current Location",
+                  },
+                };
+
+                if (replyingTo) {
+                  messageData.replyTo = {
+                    messageId: replyingTo.id,
+                    text: replyingTo.text || "Media",
+                    senderName: replyingTo.senderId === currentUser!.uid ? "You" : partnerName,
+                    type: replyingTo.type,
+                  };
+                }
+
+                await addDoc(collection(db, `chats/${chatId}/messages`), messageData);
+                setReplyingTo(null);
+                Alert.alert('Success', 'Location shared successfully!');
+              } catch (error) {
+                console.error('Error sharing location:', error);
+                Alert.alert('Error', 'Failed to share location');
+              }
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error requesting location permission:', error);
+      Alert.alert('Error', 'Failed to access location');
+    }
+  };
+
+  // Contact Sharing Functions
+  const shareContact = async () => {
+    try {
+      const { status } = await Contacts.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please grant contacts permission to share contacts');
+        return;
+      }
+
+      const { data } = await Contacts.getContactsAsync({
+        fields: [Contacts.Fields.Name, Contacts.Fields.PhoneNumbers, Contacts.Fields.Emails],
+        sort: Contacts.SortTypes.FirstName,
+      });
+
+      if (data.length > 0) {
+        const contactOptions = data.slice(0, 5).map(contact => ({
+          text: contact.name || 'Unknown',
+          onPress: async () => {
+            try {
+              const messageData: Partial<Message> = {
+                senderId: currentUser!.uid,
+                timestamp: serverTimestamp(),
+                status: "sent",
+                type: "contact",
+                contact: {
+                  name: contact.name || 'Unknown',
+                  phoneNumbers: contact.phoneNumbers?.map(p => p.number).filter((num): num is string => Boolean(num)) || [],
+                  emails: contact.emails?.map(e => e.email).filter((email): email is string => Boolean(email)) || [],
+                },
+              };
+
+              if (replyingTo) {
+                messageData.replyTo = {
+                  messageId: replyingTo.id,
+                  text: replyingTo.text || "Media",
+                  senderName: replyingTo.senderId === currentUser!.uid ? "You" : partnerName,
+                  type: replyingTo.type,
+                };
+              }
+
+              await addDoc(collection(db, `chats/${chatId}/messages`), messageData);
+              setReplyingTo(null);
+              Alert.alert('Success', 'Contact shared successfully!');
+            } catch (error) {
+              console.error('Error sharing contact:', error);
+              Alert.alert('Error', 'Failed to share contact');
+            }
+          }
+        }));
+
+        Alert.alert(
+          'Share Contact',
+          'Select a contact to share:',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            ...contactOptions,
+          ]
+        );
+      } else {
+        Alert.alert('No Contacts', 'No contacts found on your device');
+      }
+    } catch (error) {
+      console.error('Error accessing contacts:', error);
+      Alert.alert('Error', 'Failed to access contacts');
+    }
+  };
 
   // Voice Recording Functions
   const startRecording = async () => {
@@ -1312,9 +1471,27 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
     setNewMessage(text);
     setIsTyping(true);
 
+    // Send typing indicator to other users
+    if (currentUser && chatId) {
+      realTimeMessagingService.setTypingStatus(
+        chatId,
+        currentUser.uid,
+        currentUser.displayName || currentUser.email || 'User',
+        text.length > 0
+      );
+    }
+
     // Clear typing indicator after 2 seconds of no typing
     setTimeout(() => {
       setIsTyping(false);
+      if (currentUser && chatId) {
+        realTimeMessagingService.setTypingStatus(
+          chatId,
+          currentUser.uid,
+          currentUser.displayName || currentUser.email || 'User',
+          false
+        );
+      }
     }, 2000);
   };
 
@@ -1720,6 +1897,166 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
                 </View>
               )}
 
+              {message.type === "location" && message.location && (
+                <View style={{ marginVertical: 8 }}>
+                  <View
+                    style={{
+                      backgroundColor: isMyMessage ? "rgba(255,255,255,0.1)" : "#f0f0f0",
+                      borderRadius: 12,
+                      padding: 12,
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        backgroundColor: "#87CEEB",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginRight: 12,
+                      }}
+                    >
+                      <Ionicons name="location" size={20} color="white" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          color: isMyMessage ? "#fff" : "#333",
+                          fontSize: 14,
+                          fontWeight: "600",
+                        }}
+                      >
+                        Location Shared
+                      </Text>
+                      <Text
+                        style={{
+                          color: isMyMessage ? "rgba(255,255,255,0.8)" : "#666",
+                          fontSize: 12,
+                        }}
+                      >
+                        {message.location.address}
+                      </Text>
+                      <Text
+                        style={{
+                          color: isMyMessage ? "rgba(255,255,255,0.6)" : "#999",
+                          fontSize: 10,
+                          marginTop: 2,
+                        }}
+                      >
+                        Lat: {message.location.latitude.toFixed(6)}, Lng: {message.location.longitude.toFixed(6)}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        const url = `https://maps.google.com/?q=${message.location!.latitude},${message.location!.longitude}`;
+                        Alert.alert(
+                          "Open Location",
+                          "Open this location in maps?",
+                          [
+                            { text: "Cancel", style: "cancel" },
+                            { text: "Open", onPress: () => console.log("Opening maps:", url) }
+                          ]
+                        );
+                      }}
+                      style={{
+                        backgroundColor: "#87CEEB",
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                        borderRadius: 6,
+                      }}
+                    >
+                      <Text style={{ color: "white", fontSize: 12, fontWeight: "600" }}>
+                        View
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {message.type === "contact" && message.contact && (
+                <View style={{ marginVertical: 8 }}>
+                  <View
+                    style={{
+                      backgroundColor: isMyMessage ? "rgba(255,255,255,0.1)" : "#f0f0f0",
+                      borderRadius: 12,
+                      padding: 12,
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        backgroundColor: "#87CEEB",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginRight: 12,
+                      }}
+                    >
+                      <Ionicons name="person" size={20} color="white" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          color: isMyMessage ? "#fff" : "#333",
+                          fontSize: 14,
+                          fontWeight: "600",
+                        }}
+                      >
+                        {message.contact.name}
+                      </Text>
+                      {message.contact.phoneNumbers.length > 0 && (
+                        <Text
+                          style={{
+                            color: isMyMessage ? "rgba(255,255,255,0.8)" : "#666",
+                            fontSize: 12,
+                          }}
+                        >
+                          📞 {message.contact.phoneNumbers[0]}
+                        </Text>
+                      )}
+                      {message.contact.emails.length > 0 && (
+                        <Text
+                          style={{
+                            color: isMyMessage ? "rgba(255,255,255,0.8)" : "#666",
+                            fontSize: 12,
+                          }}
+                        >
+                          ✉️ {message.contact.emails[0]}
+                        </Text>
+                      )}
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        Alert.alert(
+                          "Add Contact",
+                          `Add ${message.contact!.name} to your contacts?`,
+                          [
+                            { text: "Cancel", style: "cancel" },
+                            { text: "Add", onPress: () => Alert.alert("Success", "Contact added!") }
+                          ]
+                        );
+                      }}
+                      style={{
+                        backgroundColor: "#87CEEB",
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                        borderRadius: 6,
+                      }}
+                    >
+                      <Text style={{ color: "white", fontSize: 12, fontWeight: "600" }}>
+                        Add
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
               {/* Message Info */}
               <View
                 style={{
@@ -1744,7 +2081,13 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
                   {message.isEdited && " • edited"}
                 </Text>
 
-                {isMyMessage && <MessageStatus status={message.status} />}
+                {isMyMessage && (
+                  <MessageStatusIndicator
+                    status={message.status as any}
+                    isMyMessage={isMyMessage}
+                    size={14}
+                  />
+                )}
               </View>
             </View>
 
@@ -1844,7 +2187,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
             {partnerName}
           </Text>
           <Text style={{ fontSize: 14, color: "#666" }}>
-            {partnerTyping
+            {typingUsers.length > 0
               ? "typing..."
               : isIraChatUser
                 ? (isOnline
@@ -1880,6 +2223,12 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
           }}
         >
           <Ionicons name="videocam" size={24} color="#667eea" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ padding: 8 }}
+          onPress={() => setShowMessageSearch(true)}
+        >
+          <Ionicons name="search" size={24} color="#667eea" />
         </TouchableOpacity>
         <TouchableOpacity
           style={{ padding: 8, marginRight: 8 }}
@@ -1975,62 +2324,10 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       />
 
       {/* Typing Indicator */}
-      {partnerTyping && (
-        <Animated.View
-          style={{
-            opacity: typingAnimation,
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#f0f0f0",
-              borderRadius: 16,
-              padding: 12,
-              alignSelf: "flex-start",
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "#666", fontSize: 14 }}>
-              {partnerName} is typing
-            </Text>
-            <View style={{ marginLeft: 8, flexDirection: "row" }}>
-              <Animated.View
-                style={{
-                  width: 4,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: "#666",
-                  marginHorizontal: 1,
-                  transform: [{ scale: typingAnimation }],
-                }}
-              />
-              <Animated.View
-                style={{
-                  width: 4,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: "#666",
-                  marginHorizontal: 1,
-                  transform: [{ scale: typingAnimation }],
-                }}
-              />
-              <Animated.View
-                style={{
-                  width: 4,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: "#666",
-                  marginHorizontal: 1,
-                  transform: [{ scale: typingAnimation }],
-                }}
-              />
-            </View>
-          </View>
-        </Animated.View>
-      )}
+      <TypingIndicator
+        typingUsers={typingUsers}
+        isVisible={typingUsers.length > 0}
+      />
 
       {/* Input Bar */}
       <View
@@ -2302,6 +2599,93 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
                 <Text style={{ fontSize: 12, color: "#666" }}>Document</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Second Row */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+                paddingVertical: 20,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  setShowAttachmentMenu(false);
+                  shareLocation();
+                }}
+                style={{
+                  alignItems: "center",
+                  padding: 16,
+                }}
+              >
+                <View
+                  style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 30,
+                    backgroundColor: "#87CEEB",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <Ionicons name="location" size={30} color="white" />
+                </View>
+                <Text style={{ fontSize: 12, color: "#666" }}>Location</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setShowAttachmentMenu(false);
+                  shareContact();
+                }}
+                style={{
+                  alignItems: "center",
+                  padding: 16,
+                }}
+              >
+                <View
+                  style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 30,
+                    backgroundColor: "#87CEEB",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <Ionicons name="person" size={30} color="white" />
+                </View>
+                <Text style={{ fontSize: 12, color: "#666" }}>Contact</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setShowAttachmentMenu(false);
+                  Alert.alert('Coming Soon', 'Poll feature will be available in the next update');
+                }}
+                style={{
+                  alignItems: "center",
+                  padding: 16,
+                }}
+              >
+                <View
+                  style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 30,
+                    backgroundColor: "#87CEEB",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <Ionicons name="bar-chart" size={30} color="white" />
+                </View>
+                <Text style={{ fontSize: 12, color: "#666" }}>Poll</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </Pressable>
       </Modal>
@@ -2537,6 +2921,25 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
           )}
         </Pressable>
       </Modal>
+
+      {/* Message Search Modal */}
+      <MessageSearch
+        isVisible={showMessageSearch}
+        onClose={() => setShowMessageSearch(false)}
+        messages={messages}
+        onMessageSelect={(messageId) => {
+          // Scroll to selected message
+          const messageIndex = messages.findIndex(msg => msg.id === messageId);
+          if (messageIndex !== -1 && flatListRef.current) {
+            flatListRef.current.scrollToIndex({
+              index: messageIndex,
+              animated: true,
+              viewPosition: 0.5, // Center the message
+            });
+          }
+          setShowMessageSearch(false);
+        }}
+      />
         </KeyboardAvoidingView>
       </IraChatWallpaper>
     </View>

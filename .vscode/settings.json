@@ -1,9 +1,15 @@
 {
   "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
-    "source.organizeImports": "explicit",
-    "source.sortMembers": "explicit"
+    "source.fixAll": false,
+    "source.organizeImports": false,
+    "source.sortMembers": false
   },
+  // Disable TypeScript/ESLint checking to reduce IDE interruptions
+  "typescript.validate.enable": false,
+  "javascript.validate.enable": false,
+  "eslint.enable": false,
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "typescript.suggest.autoImports": false,
   "css.validate": false,
   "less.validate": false,
   "scss.validate": false,

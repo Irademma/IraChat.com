@@ -1,7 +1,8 @@
+// 📞 REAL CALLS TAB - Fully functional calling with WebRTC
+// Real call history, contact integration, and actual calling functionality
+
 import { Ionicons } from "@expo/vector-icons";
-import * as Contacts from "expo-contacts";
 import { useRouter } from "expo-router";
-import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -11,862 +12,683 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  StyleSheet,
+  RefreshControl,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { RootState } from "../../src/redux/store";
-import { Call, callsService } from "../../src/services/callsService";
-import { db, getAuthInstance } from "../../src/services/firebaseSimple";
-
-interface Contact {
-  id: string;
-  name: string;
-  phoneNumber: string;
-  avatar?: string;
-  isOnline?: boolean;
-  lastSeen?: Date;
-  hasIraChat?: boolean;
-}
-
-interface CallHistoryItem {
-  id: string;
-  contactName: string;
-  contactPhone: string;
-  type: "incoming" | "outgoing" | "missed";
-  callType: "voice" | "video";
-  timestamp: Date;
-  duration?: number;
-  avatar?: string;
-}
+import { realCallService, CallLog, CallType } from "../../src/services/realCallService";
+import { contactService, IraChatContact } from "../../src/services/contactService";
+import { formatCallTime, formatCallDuration } from "../../src/utils/dateUtils";
 
 export default function CallsScreen() {
   const router = useRouter();
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [callHistory, setCallHistory] = useState<CallHistoryItem[]>([]);
-  const [filteredContacts, setFilteredContacts] = useState<Contact[]>([]);
+  const [contacts, setContacts] = useState<IraChatContact[]>([]);
+  const [callHistory, setCallHistory] = useState<CallLog[]>([]);
+  const [filteredContacts, setFilteredContacts] = useState<IraChatContact[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Mock data for testing (additive, doesn't replace live functionality)
-  const { mockCalls, shouldUseMockData } = require("../../src/hooks/useMockData").useMockCalls();
-
-  // Sample contacts to demonstrate implementation
-  const sampleContacts: Contact[] = [
-    {
-      id: "sample1",
-      name: "Alice Johnson",
-      phoneNumber: "+1 (555) 123-4567",
-      avatar: "",
-      isOnline: true,
-      hasIraChat: true,
-    },
-    {
-      id: "sample2",
-      name: "Bob Smith",
-      phoneNumber: "+1 (555) 987-6543",
-      avatar: "",
-      isOnline: false,
-      hasIraChat: false,
-    }
-  ];
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"contacts" | "history">("contacts");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<"contacts" | "history">("history");
 
-  const filterContacts = useCallback(() => {
+  // Load data on component mount
+  useEffect(() => {
+    if (currentUser?.id) {
+      loadCallHistory();
+      loadContacts();
+    }
+  }, [currentUser?.id]);
+
+  // Filter contacts based on search
+  useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredContacts(contacts);
-      return;
-    }
-
-    const filtered = contacts.filter(
-      (contact) =>
+    } else {
+      const filtered = contacts.filter(contact =>
         contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        contact.phoneNumber.includes(searchQuery),
-    );
-    setFilteredContacts(filtered);
+        contact.phoneNumber.includes(searchQuery)
+      );
+      setFilteredContacts(filtered);
+    }
   }, [searchQuery, contacts]);
 
-  const loadRealContacts = useCallback(async () => {
+  // Load call history
+  const loadCallHistory = useCallback(async () => {
+    if (!currentUser?.id) return;
+    
     try {
-      const { status } = await Contacts.requestPermissionsAsync();
-      if (status !== "granted") {
-        console.log("❌ Contacts permission denied");
-        return;
-      }
-
-      const { data } = await Contacts.getContactsAsync({
-        fields: [Contacts.Fields.Name, Contacts.Fields.PhoneNumbers],
-      });
-
-      const transformedContacts: Contact[] = data
-        .filter((contact) => contact.phoneNumbers && contact.phoneNumbers.length > 0)
-        .map((contact, index) => ({
-          id: contact.id || `contact-${index}`,
-          name: contact.name || "Unknown Contact",
-          phoneNumber: contact.phoneNumbers![0].number || "",
-          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-            contact.name || "Unknown"
-          )}&background=667eea&color=fff`,
-          isOnline: false, // Will be updated with real status from onlineStatusService
-          lastSeen: new Date(), // Real last seen will be fetched from Firebase
-          hasIraChat: false, // Will be updated with real status from Firebase users collection
-        }));
-
-      // Add sample contacts for demonstration
-      const allContacts = [...sampleContacts, ...transformedContacts];
-      setContacts(allContacts);
-      setFilteredContacts(allContacts);
-      console.log(`✅ Loaded ${allContacts.length} contacts (${sampleContacts.length} samples + ${transformedContacts.length} real)`);
+      setIsLoading(true);
+      const history = await realCallService.getCallHistory(currentUser.id);
+      setCallHistory(history);
+      console.log('✅ Loaded call history:', history.length);
     } catch (error) {
-      console.error("❌ Error loading real contacts:", error);
-      setContacts([]);
-      setFilteredContacts([]);
+      console.error('❌ Error loading call history:', error);
     } finally {
       setIsLoading(false);
     }
-  }, []);
-
-  const loadCallHistory = useCallback(async () => {
-    try {
-      let allCalls: CallHistoryItem[] = [];
-
-      // Load real call history from Firebase
-      try {
-        if (db) {
-          const callsRef = collection(db, "callLogs");
-          const q = query(
-            callsRef,
-            where("userId", "==", currentUser?.phoneNumber || "unknown"),
-            orderBy("timestamp", "desc"),
-            limit(50)
-          );
-
-          const snapshot = await getDocs(q);
-          const calls: CallHistoryItem[] = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-              id: doc.id,
-              contactName: data.contactName || "Unknown",
-              contactPhone: data.contactPhone || "",
-              type: data.type || "outgoing",
-              callType: data.callType || "voice",
-              timestamp: data.timestamp?.toDate() || new Date(),
-              duration: data.duration || 0,
-              avatar: data.avatar,
-            };
-          });
-
-          allCalls = [...calls];
-          console.log(`✅ Loaded ${calls.length} call history items from Firebase`);
-        }
-      } catch (firebaseError) {
-        console.log("📭 Firebase call history not available, using mock data if enabled");
-      }
-
-      // Add mock data if enabled and available (only when no real calls exist)
-      if (shouldUseMockData && mockCalls && mockCalls.length > 0 && allCalls.length === 0) {
-        const convertedMockCalls: CallHistoryItem[] = mockCalls.map((mockCall: any) => ({
-          id: `mock_${mockCall.id}`,
-          contactName: mockCall.participantName,
-          contactPhone: `+1555${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`,
-          type: mockCall.direction,
-          callType: mockCall.type,
-          timestamp: mockCall.timestamp,
-          duration: mockCall.duration,
-          avatar: mockCall.participantAvatar,
-        }));
-
-        // Only add mock calls when no real calls exist (not overriding)
-        allCalls = [...convertedMockCalls];
-        console.log(`📊 Added ${convertedMockCalls.length} mock calls for testing (no real calls found)`);
-      }
-
-      setCallHistory(allCalls);
-    } catch (error) {
-      console.error("❌ Error loading call history:", error);
-      setCallHistory([]);
-    }
-  }, [currentUser?.phoneNumber, shouldUseMockData, mockCalls]);
-
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    await Promise.all([loadRealContacts(), loadCallHistory()]);
-    setIsLoading(false);
-  }, [loadRealContacts, loadCallHistory]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  useEffect(() => {
-    filterContacts();
-  }, [filterContacts]);
-
-  // Initialize calls service with proper error handling
-  useEffect(() => {
-    console.log('🔄 Initializing calls service...');
-
-    const handleCallsUpdate = (calls: Call[]) => {
-      console.log(`📞 Received ${calls.length} calls from service`);
-      // Convert calls to CallHistoryItem format
-      const historyItems: CallHistoryItem[] = calls.map(call => ({
-        id: call.id,
-        contactName: call.callerName || 'Unknown',
-        contactPhone: call.participants.find((p: string) => p !== currentUser?.id) || '',
-        type: call.status as "incoming" | "outgoing" | "missed",
-        callType: call.type,
-        timestamp: call.timestamp,
-        duration: call.duration,
-        avatar: call.callerAvatar,
-      }));
-      setCallHistory(historyItems);
-    };
-
-    const handleError = (error: string) => {
-      console.warn('⚠️ Calls service error:', error);
-      // Fallback to empty calls list on error
-      handleCallsUpdate([]);
-    };
-
-    // Try to use real call data, fallback to empty list if auth fails
-    console.log('📞 Attempting to load real calls data...');
-
-    const authInstance = getAuthInstance();
-    if (authInstance && authInstance.currentUser) {
-      console.log('✅ Auth available, loading real calls');
-      callsService.startListening(handleCallsUpdate, handleError);
-    } else if (currentUser?.id) {
-      console.log('✅ User available, loading real calls');
-      callsService.startListening(handleCallsUpdate, handleError);
-    } else {
-      console.warn('⚠️ No authentication available, showing empty calls list');
-      // Show empty state instead of mock data for production readiness
-      handleCallsUpdate([]);
-    }
-
-    return () => {
-      callsService.stopListening();
-    };
   }, [currentUser?.id]);
 
-  const formatCallTime = (timestamp: Date) => {
+  // Load contacts
+  const loadContacts = useCallback(async () => {
+    if (!currentUser?.id) return;
+    
     try {
-      const now = new Date();
-      const diffInMinutes = Math.floor((now.getTime() - timestamp.getTime()) / (1000 * 60));
+      const userContacts = await contactService.getUserContacts(currentUser.id);
+      setContacts(userContacts);
+      setFilteredContacts(userContacts);
+      console.log('✅ Loaded contacts:', userContacts.length);
+    } catch (error) {
+      console.error('❌ Error loading contacts:', error);
+    }
+  }, [currentUser?.id]);
 
-      if (diffInMinutes < 1) return "Just now";
-      if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-      if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+  // Refresh data
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await Promise.all([loadCallHistory(), loadContacts()]);
+    setIsRefreshing(false);
+  }, [loadCallHistory, loadContacts]);
 
-      const diffInDays = Math.floor(diffInMinutes / 1440);
-      if (diffInDays === 1) return "Yesterday";
-      if (diffInDays < 7) return `${diffInDays} days ago`;
-
-      return timestamp.toLocaleDateString();
-    } catch {
-      return "Unknown";
+  // Handle voice call
+  const handleVoiceCall = async (contact: IraChatContact) => {
+    if (!currentUser?.id) return;
+    
+    try {
+      console.log('📞 Starting voice call with:', contact.name);
+      
+      const result = await realCallService.startCall(
+        currentUser.id,
+        currentUser.name || 'Unknown',
+        contact.userId || contact.id,
+        contact.name,
+        'voice'
+      );
+      
+      if (result.success) {
+        router.push({
+          pathname: '/voice-call',
+          params: {
+            callId: result.callId,
+            contactName: contact.name,
+            contactAvatar: contact.avatar || '',
+            isOutgoing: 'true',
+          },
+        });
+      } else {
+        Alert.alert('Call Failed', result.error || 'Unable to start call');
+      }
+    } catch (error) {
+      console.error('❌ Error starting voice call:', error);
+      Alert.alert('Call Failed', 'Unable to start call');
     }
   };
 
-  const formatCallDuration = (seconds: number) => {
-    if (seconds === 0) return "Missed";
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-  };
-
-  const handleVoiceCall = (contact: Contact) => {
-    console.log(`📞 Starting voice call with ${contact.name}`);
-
-    // Navigate to voice call screen
-    router.push({
-      pathname: "/voice-call",
-      params: {
-        contactId: contact.id,
-        contactName: contact.name,
-        contactAvatar: contact.avatar || "",
-      }
-    });
-  };
-
-  const handleVideoCall = (contact: Contact) => {
-    console.log(`📹 Starting video call with ${contact.name}`);
-
-    // Navigate to call screen with video type
-    router.push({
-      pathname: "/call",
-      params: {
-        type: "video",
-        contactId: contact.id,
-        contactName: contact.name,
-        contactAvatar: contact.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.name)}&background=667eea&color=fff`,
-        contactPhoneNumber: contact.phoneNumber,
-        callId: `video_${Date.now()}_${contact.id}`,
-        isOutgoing: "true",
-        isIncoming: "false",
-      }
-    });
-  };
-
-  const handleCallBack = (call: CallHistoryItem) => {
-    Alert.alert(
-      "Call Back",
-      `Call ${call.contactName}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Voice Call",
-          onPress: () => {
-            console.log(`📞 Calling back ${call.contactName}`);
-            router.push({
-              pathname: "/call",
-              params: {
-                type: "voice",
-                contactName: call.contactName,
-                contactAvatar: call.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(call.contactName)}&background=10B981&color=fff`,
-                contactPhoneNumber: call.contactPhone,
-                callId: `callback_voice_${Date.now()}`,
-                isOutgoing: "true",
-                isIncoming: "false",
-              },
-            });
+  // Handle video call
+  const handleVideoCall = async (contact: IraChatContact) => {
+    if (!currentUser?.id) return;
+    
+    try {
+      console.log('📹 Starting video call with:', contact.name);
+      
+      const result = await realCallService.startCall(
+        currentUser.id,
+        currentUser.name || 'Unknown',
+        contact.userId || contact.id,
+        contact.name,
+        'video'
+      );
+      
+      if (result.success) {
+        router.push({
+          pathname: '/video-call',
+          params: {
+            callId: result.callId,
+            contactName: contact.name,
+            contactAvatar: contact.avatar || '',
+            isOutgoing: 'true',
           },
-        },
-        {
-          text: "Video Call",
-          onPress: () => {
-            console.log(`📹 Video calling back ${call.contactName}`);
-            router.push({
-              pathname: "/call",
-              params: {
-                type: "video",
-                contactName: call.contactName,
-                contactAvatar: call.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(call.contactName)}&background=3B82F6&color=fff`,
-                contactPhoneNumber: call.contactPhone,
-                callId: `callback_video_${Date.now()}`,
-                isOutgoing: "true",
-                isIncoming: "false",
-              },
-            });
-          },
-        },
-      ],
-    );
-  };
-
-  const renderContact = ({ item }: { item: Contact }) => (
-    <View style={{
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: '#FFFFFF',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: '#87CEEB',
-    }}>
-      {/* Avatar with Online Indicator */}
-      <View style={{ position: 'relative', marginRight: 12 }}>
-        <View style={{
-          width: 48,
-          height: 48,
-          borderRadius: 24,
-          backgroundColor: item.avatar ? 'transparent' : '#667eea',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          {item.avatar ? (
-            <Image
-              source={{ uri: item.avatar }}
-              style={{ width: 48, height: 48, borderRadius: 24 }}
-              resizeMode="cover"
-            />
-          ) : (
-            <Text style={{
-              color: '#FFFFFF',
-              fontSize: 18,
-              fontWeight: 'bold',
-            }}>
-              {item.name.charAt(0).toUpperCase()}
-            </Text>
-          )}
-        </View>
-
-        {/* Beautiful Online Indicator for IraChat users */}
-        {item.hasIraChat && item.isOnline && (
-          <View style={{
-            position: 'absolute',
-            bottom: 2,
-            right: 2,
-            width: 14,
-            height: 14,
-            borderRadius: 7,
-            backgroundColor: '#10B981',
-            borderWidth: 2,
-            borderColor: '#FFFFFF',
-            shadowColor: '#10B981',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.3,
-            shadowRadius: 3,
-            elevation: 3,
-          }} />
-        )}
-      </View>
-
-      {/* Contact Info */}
-      <View style={{ flex: 1 }}>
-        <TouchableOpacity
-          onPress={() => {
-            if (item.hasIraChat) {
-              router.push({
-                pathname: "/individual-chat",
-                params: {
-                  contactId: item.id,
-                  contactName: item.name,
-                  contactAvatar: item.avatar || "",
-                }
-              });
-            }
-          }}
-          disabled={!item.hasIraChat}
-        >
-          <Text style={{
-            fontSize: 16,
-            fontWeight: '600',
-            color: item.hasIraChat ? '#667eea' : '#374151',
-            marginBottom: 2,
-          }}>
-            {item.name}
-          </Text>
-        </TouchableOpacity>
-
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={{
-            fontSize: 14,
-            color: '#6B7280',
-            marginRight: 8,
-          }}>
-            {item.phoneNumber}
-          </Text>
-          {item.hasIraChat && (
-            <View style={{
-              backgroundColor: 'rgba(102, 126, 234, 0.1)',
-              paddingHorizontal: 6,
-              paddingVertical: 2,
-              borderRadius: 8,
-            }}>
-              <Text style={{
-                fontSize: 9,
-                color: '#667eea',
-                fontWeight: '600',
-              }}>
-                IRACHAT
-              </Text>
-            </View>
-          )}
-        </View>
-      </View>
-
-      {/* Call Actions */}
-      {item.hasIraChat ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity
-            onPress={() => handleVoiceCall(item)}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: 8,
-            }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="call" size={18} color="#10B981" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleVideoCall(item)}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              backgroundColor: 'rgba(102, 126, 234, 0.1)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="videocam" size={18} color="#667eea" />
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <TouchableOpacity
-          onPress={() => {
-            // Send invite silently
-            console.log("Invite sent to", item.name);
-            // No dialog - just silent action
-          }}
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            backgroundColor: 'rgba(14, 165, 233, 0.1)',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="person-add" size={18} color="#0ea5e9" />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-
-  const renderSectionHeader = ({ item }: { item: any }) => (
-    <View style={{
-      backgroundColor: '#F0F9FF',
-      paddingHorizontal: 20,
-      paddingVertical: 12,
-      marginTop: 8,
-    }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Ionicons
-          name={item.callType === 'video' ? 'videocam' : 'call'}
-          size={16}
-          color="#667eea"
-          style={{ marginRight: 8 }}
-        />
-        <Text style={{
-          fontSize: 14,
-          fontWeight: '600',
-          color: '#667eea',
-        }}>
-          {item.title}
-        </Text>
-      </View>
-    </View>
-  );
-
-  const renderCallHistory = ({ item }: { item: any }) => {
-    if (item.type === 'header') {
-      return renderSectionHeader({ item });
+        });
+      } else {
+        Alert.alert('Call Failed', result.error || 'Unable to start call');
+      }
+    } catch (error) {
+      console.error('❌ Error starting video call:', error);
+      Alert.alert('Call Failed', 'Unable to start call');
     }
+  };
 
-    return (
+  // Render call history item - IRACHAT MODERN STYLE
+  const renderCallHistoryItem = ({ item }: { item: CallLog }) => (
     <TouchableOpacity
-      onPress={() => handleCallBack(item)}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        marginHorizontal: 12,
-        marginVertical: 3,
-        padding: 10,
-        borderRadius: 12,
-        shadowColor: '#667eea',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 3,
-        borderWidth: 1,
-        borderColor: 'rgba(102, 126, 234, 0.1)',
+      style={styles.modernCallItem}
+      activeOpacity={0.7}
+      onPress={() => {
+        const contact = contacts.find(c => c.id === item.contactId);
+        if (contact) {
+          handleVoiceCall(contact);
+        }
       }}
     >
-      <View style={{ position: 'relative' }}>
-        {(() => {
-          const Avatar = require("../../src/components/Avatar").Avatar;
-          return (
-            <Avatar
-              name={item.contactName}
-              imageUrl={item.avatar}
-              size="medium"
-              showOnlineStatus={false}
-            />
-          );
-        })()}
-      </View>
-
-      <View className="flex-1 ml-3">
-        <Text className="text-gray-900 font-semibold text-base">
-          {item.contactName}
-        </Text>
-        <View className="flex-row items-center mt-1">
-          <Ionicons
-            name={
-              item.type === "incoming"
-                ? "call-outline"
-                : item.type === "outgoing"
-                ? "call"
-                : "call-outline"
-            }
-            size={14}
-            color={
-              item.type === "missed" ? "#EF4444" :
-              item.type === "incoming" ? "#10B981" : "#6B7280"
-            }
+      {/* Avatar with status indicator */}
+      <View style={styles.modernAvatarContainer}>
+        <TouchableOpacity onPress={() => {
+          // Navigate to contact profile
+          console.log('Navigate to profile:', item.contactName);
+        }}>
+          <Image
+            source={{
+              uri: item.contactAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.contactName)}&background=87CEEB&color=fff`
+            }}
+            style={styles.modernAvatar}
           />
-          <Text className="text-gray-500 text-sm ml-1">
-            {item.type === "missed" ? "Missed" :
-             item.type === "incoming" ? "Incoming" : "Outgoing"}
-          </Text>
-          <Text className="text-gray-400 mx-1">•</Text>
-          <Text className="text-gray-500 text-sm">
-            {formatCallTime(item.timestamp)}
-          </Text>
+        </TouchableOpacity>
+        {/* Call type indicator */}
+        <View style={[
+          styles.callTypeIndicator,
+          { backgroundColor: item.type === 'video' ? '#87CEEB' : '#87CEEB' }
+        ]}>
+          <Ionicons
+            name={item.type === 'video' ? 'videocam' : 'call'}
+            size={12}
+            color="#FFFFFF"
+          />
         </View>
       </View>
 
-      <View className="items-end">
-        <Ionicons
-          name={item.callType === "video" ? "videocam" : "call"}
-          size={16}
-          color="#6B7280"
-        />
-        <Text className="text-gray-500 text-xs mt-1">
-          {formatCallDuration(item.duration || 0)}
-        </Text>
-      </View>
-    </TouchableOpacity>
-    );
-  };
+      {/* Call info - IraChat modern layout */}
+      <View style={styles.modernCallInfo}>
+        <View style={styles.modernCallHeader}>
+          <TouchableOpacity onPress={() => {
+            // Navigate to contact profile
+            console.log('Navigate to profile:', item.contactName);
+          }}>
+            <Text style={styles.modernContactName}>{item.contactName}</Text>
+          </TouchableOpacity>
+          <Text style={styles.modernCallTime}>{formatCallTime(item.timestamp)}</Text>
+        </View>
 
-  const insets = { top: 50, bottom: 0, left: 0, right: 0 }; // Fallback safe area
-
-  // Group call history by type
-  const groupedCallHistory = React.useMemo(() => {
-    const voiceCalls = callHistory.filter(call => call.callType === 'voice');
-    const videoCalls = callHistory.filter(call => call.callType === 'video');
-
-    const grouped = [];
-    if (videoCalls.length > 0) {
-      grouped.push({ type: 'header', title: `Video Calls (${videoCalls.length})`, callType: 'video' });
-      grouped.push(...videoCalls.map(call => ({ ...call, type: 'call' })));
-    }
-    if (voiceCalls.length > 0) {
-      grouped.push({ type: 'header', title: `Voice Calls (${voiceCalls.length})`, callType: 'voice' });
-      grouped.push(...voiceCalls.map(call => ({ ...call, type: 'call' })));
-    }
-
-    return grouped;
-  }, [callHistory]);
-
-  return (
-    <View style={{ flex: 1, backgroundColor: '#F0F9FF' }}>
-      {/* Beautiful Header */}
-      <View
-        style={{
-          backgroundColor: '#667eea',
-          paddingTop: insets.top + 1,
-          paddingBottom: 4,
-          paddingHorizontal: 16,
-          shadowColor: '#667eea',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 8,
-        }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-          <View style={{ flex: 1 }}>
-            <Text style={{
-              fontSize: 18,
-              fontWeight: 'bold',
-              color: '#FFFFFF',
-            }}>
-              Calls
-            </Text>
-            <Text style={{
-              fontSize: 11,
-              color: 'rgba(255, 255, 255, 0.8)',
-              marginTop: 1,
-            }}>
-              {activeTab === "contacts"
-                ? `${filteredContacts.length} contacts available`
-                : `${callHistory.length} recent calls`
+        <View style={styles.modernCallDetails}>
+          <View style={styles.modernCallStatus}>
+            <Ionicons
+              name={
+                item.direction === 'outgoing' ? 'arrow-up' :
+                item.status === 'missed' ? 'arrow-down' : 'arrow-down'
               }
+              size={14}
+              color={
+                item.status === 'missed' ? '#FF4444' :
+                item.direction === 'outgoing' ? '#87CEEB' : '#87CEEB'
+              }
+              style={[
+                styles.modernCallIcon,
+                item.direction === 'outgoing' && { transform: [{ rotate: '45deg' }] },
+                item.direction === 'incoming' && { transform: [{ rotate: '-45deg' }] }
+              ]}
+            />
+            <Text style={[
+              styles.modernCallStatusText,
+              item.status === 'missed' && { color: '#FF4444' }
+            ]}>
+              {item.status === 'missed' ? 'Missed' :
+               item.direction === 'outgoing' ? 'Outgoing' : 'Incoming'}
             </Text>
           </View>
-        </View>
 
-        {/* Enhanced Search Bar */}
-        <View style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: 'rgba(255, 255, 255, 0.15)',
-          borderRadius: 6,
-          paddingHorizontal: 6,
-          paddingVertical: 2,
-          borderWidth: 1,
-          borderColor: 'rgba(255, 255, 255, 0.2)',
-        }}>
-          <Ionicons name="search" size={18} color="rgba(255, 255, 255, 0.8)" style={{ marginRight: 10 }} />
-          <TextInput
-            placeholder="Search contacts and calls..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            style={{ flex: 1, fontSize: 14, color: '#FFFFFF' }}
-            placeholderTextColor="rgba(255, 255, 255, 0.7)"
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <Ionicons name="close-circle" size={18} color="rgba(255, 255, 255, 0.8)" />
-            </TouchableOpacity>
+          {item.duration && item.duration > 0 && (
+            <Text style={styles.modernDuration}>
+              {formatCallDuration(item.duration)}
+            </Text>
           )}
         </View>
       </View>
 
-      {/* Beautiful Tab Selector */}
-      <View style={{
-        flexDirection: 'row',
-        backgroundColor: '#FFFFFF',
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        shadowColor: '#667eea',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 4,
-      }}>
+      {/* Action buttons - IraChat modern style */}
+      <View style={styles.modernCallActions}>
         <TouchableOpacity
-          onPress={() => setActiveTab("contacts")}
-          style={{
-            flex: 1,
-            paddingVertical: 8,
-            paddingHorizontal: 12,
-            borderRadius: 12,
-            backgroundColor: activeTab === "contacts" ? 'rgba(102, 126, 234, 0.1)' : 'transparent',
-            borderWidth: 1,
-            borderColor: activeTab === "contacts" ? 'rgba(102, 126, 234, 0.3)' : 'transparent',
-            marginRight: 6,
-            alignItems: 'center',
+          style={styles.modernCallButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            const contact = contacts.find(c => c.id === item.contactId);
+            if (contact) {
+              handleVoiceCall(contact);
+            }
           }}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Ionicons
-              name="people"
-              size={18}
-              color={activeTab === "contacts" ? "#667eea" : "#9CA3AF"}
-              style={{ marginRight: 8 }}
-            />
-            <Text style={{
-              fontSize: 16,
-              fontWeight: '600',
-              color: activeTab === "contacts" ? "#667eea" : "#9CA3AF",
-            }}>
-              Contacts ({filteredContacts.length})
-            </Text>
-          </View>
+          <Ionicons name="call" size={22} color="#87CEEB" />
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => setActiveTab("history")}
-          style={{
-            flex: 1,
-            paddingVertical: 8,
-            paddingHorizontal: 12,
-            borderRadius: 12,
-            backgroundColor: activeTab === "history" ? 'rgba(102, 126, 234, 0.1)' : 'transparent',
-            borderWidth: 1,
-            borderColor: activeTab === "history" ? 'rgba(102, 126, 234, 0.3)' : 'transparent',
-            marginLeft: 6,
-            alignItems: 'center',
+          style={styles.modernVideoButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            const contact = contacts.find(c => c.id === item.contactId);
+            if (contact) {
+              handleVideoCall(contact);
+            }
           }}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Ionicons
-              name="time"
-              size={18}
-              color={activeTab === "history" ? "#667eea" : "#9CA3AF"}
-              style={{ marginRight: 8 }}
-            />
-            <Text style={{
-              fontSize: 16,
-              fontWeight: '600',
-              color: activeTab === "history" ? "#667eea" : "#9CA3AF",
-            }}>
-              Recent ({callHistory.length})
-            </Text>
-          </View>
+          <Ionicons name="videocam" size={22} color="#87CEEB" />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+
+  // Render contact item
+  const renderContactItem = ({ item }: { item: IraChatContact }) => (
+    <TouchableOpacity style={styles.contactItem}>
+      <Image
+        source={{
+          uri: item.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&background=667eea&color=fff`
+        }}
+        style={styles.avatar}
+      />
+      
+      <View style={styles.contactInfo}>
+        <Text style={styles.contactName}>{item.name}</Text>
+        <Text style={styles.phoneNumber}>{item.phoneNumber}</Text>
+        {item.isIraChatUser && (
+          <Text style={styles.iraChatLabel}>IraChat User</Text>
+        )}
+      </View>
+      
+      <View style={styles.contactActions}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => handleVoiceCall(item)}
+        >
+          <Ionicons name="call" size={20} color="#667eea" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => handleVideoCall(item)}
+        >
+          <Ionicons name="videocam" size={20} color="#667eea" />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+
+  // Render empty state
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <Ionicons 
+        name={activeTab === 'history' ? 'call-outline' : 'people-outline'} 
+        size={64} 
+        color="#E5E7EB" 
+      />
+      <Text style={styles.emptyTitle}>
+        {activeTab === 'history' ? 'No Call History' : 'No Contacts'}
+      </Text>
+      <Text style={styles.emptySubtitle}>
+        {activeTab === 'history' 
+          ? 'Your call history will appear here'
+          : 'Add contacts to start making calls'
+        }
+      </Text>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Calls</Text>
+      </View>
+
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchInputContainer}>
+          <Ionicons name="search" size={20} color="#9CA3AF" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder={`Search ${activeTab === 'history' ? 'call history' : 'contacts'}...`}
+            placeholderTextColor="#9CA3AF"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      </View>
+
+      {/* Tab Selector */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'history' && styles.activeTab]}
+          onPress={() => setActiveTab('history')}
+        >
+          <Text style={[styles.tabText, activeTab === 'history' && styles.activeTabText]}>
+            Recent
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'contacts' && styles.activeTab]}
+          onPress={() => setActiveTab('contacts')}
+        >
+          <Text style={[styles.tabText, activeTab === 'contacts' && styles.activeTabText]}>
+            Contacts
+          </Text>
         </TouchableOpacity>
       </View>
 
       {/* Content */}
       {isLoading ? (
-        <View className="flex-1 items-center justify-center">
+        <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#667eea" />
-          <Text className="text-gray-500 mt-2">Loading...</Text>
+          <Text style={styles.loadingText}>Loading...</Text>
         </View>
-      ) : activeTab === "contacts" ? (
-        filteredContacts.length > 0 ? (
-          <FlatList
-            data={filteredContacts}
-            renderItem={renderContact}
-            keyExtractor={(item) => item.id}
-            getItemLayout={(_data, index) => ({
-              length: 72, // Height for border-separated design
-              offset: 72 * index,
-              index,
-            })}
-            style={{ flex: 1, backgroundColor: '#F0F9FF' }}
-            contentContainerStyle={{
-              paddingTop: 8,
-              paddingBottom: 20,
-            }}
-            showsVerticalScrollIndicator={false}
-            removeClippedSubviews={true}
-            maxToRenderPerBatch={10}
-            windowSize={10}
-          />
-        ) : (
-          (() => {
-            if (searchQuery) {
-              const { SearchEmptyState } = require("../../src/components/EmptyStateImproved");
-              return (
-                <SearchEmptyState
-                  title="No contacts found"
-                  subtitle={`No contacts match "${searchQuery}"`}
-                  actionText="Clear Search"
-                  onActionPress={() => setSearchQuery("")}
-                />
-              );
-            } else {
-              const { ContactsEmptyState } = require("../../src/components/EmptyStateImproved");
-              return (
-                <ContactsEmptyState
-                  onActionPress={loadData}
-                />
-              );
-            }
-          })()
-        )
       ) : (
-        groupedCallHistory.length > 0 ? (
-          <FlatList
-            data={groupedCallHistory}
-            renderItem={renderCallHistory}
-            keyExtractor={(item, index) => (item as any).id || `header-${index}`}
-            style={{ flex: 1, backgroundColor: '#F0F9FF' }}
-            contentContainerStyle={{
-              paddingTop: 8,
-              paddingBottom: 20,
-            }}
+        activeTab === 'history' ? (
+          <FlatList<CallLog>
+            data={callHistory}
+            renderItem={renderCallHistoryItem}
+            keyExtractor={(item) => item.id}
+            style={styles.list}
+            contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
-            removeClippedSubviews={true}
-            maxToRenderPerBatch={10}
-            windowSize={10}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={handleRefresh}
+                colors={['#87CEEB']}
+              />
+            }
+            ListEmptyComponent={renderEmptyState}
           />
         ) : (
-          (() => {
-            const { CallsEmptyState } = require("../../src/components/EmptyStateImproved");
-            return (
-              <CallsEmptyState
-                onActionPress={() => setActiveTab("contacts")}
+          <FlatList<IraChatContact>
+            data={filteredContacts}
+            renderItem={renderContactItem}
+            keyExtractor={(item) => item.id}
+            style={styles.list}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={handleRefresh}
+                colors={['#87CEEB']}
               />
-            );
-          })()
+            }
+            ListEmptyComponent={renderEmptyState}
+          />
         )
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    paddingTop: 60,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#374151',
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 10,
+    fontSize: 16,
+    color: '#374151',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#667eea',
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  activeTabText: {
+    color: '#667eea',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#6B7280',
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    paddingVertical: 8,
+  },
+  // IRACHAT MODERN CALL ITEMS
+  modernCallItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#E1E5E9',
+    marginHorizontal: 0,
+  },
+  modernAvatarContainer: {
+    position: 'relative',
+    marginRight: 12,
+  },
+  modernAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  callTypeIndicator: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  modernCallInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  modernCallHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  modernContactName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+    flex: 1,
+  },
+  modernCallTime: {
+    fontSize: 13,
+    color: '#8E8E93',
+    fontWeight: '400',
+  },
+  modernCallDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modernCallStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  modernCallIcon: {
+    marginRight: 4,
+  },
+  modernCallStatusText: {
+    fontSize: 14,
+    color: '#8E8E93',
+    fontWeight: '400',
+  },
+  modernDuration: {
+    fontSize: 13,
+    color: '#8E8E93',
+    fontWeight: '400',
+  },
+  modernCallActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  modernCallButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F0F0F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  modernVideoButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F0F0F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  callItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  contactItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  callInfo: {
+    flex: 1,
+  },
+  contactInfo: {
+    flex: 1,
+  },
+  contactName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 4,
+  },
+  phoneNumber: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  iraChatLabel: {
+    fontSize: 12,
+    color: '#667eea',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  callDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  callIcon: {
+    marginRight: 4,
+  },
+  callTime: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  callActions: {
+    alignItems: 'flex-end',
+  },
+  contactActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  duration: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  callButton: {
+    padding: 8,
+  },
+  actionButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 64,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#374151',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+});
